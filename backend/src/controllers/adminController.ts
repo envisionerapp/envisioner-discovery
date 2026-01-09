@@ -4,6 +4,7 @@ import { db, logger } from '../utils/database';
 import { seedFromCsvIfEmpty } from '../utils/seedFromCsv';
 import { replaceAllStreamersWithLocal } from '../utils/replaceAllStreamers';
 import { tagScrapingService } from '../services/tagScrapingService';
+import { StreamerService } from '../services/streamerService';
 
 // Removed AuthRequest interface - using basic Request for now
 
@@ -325,6 +326,56 @@ export class AdminController {
       res.status(500).json({
         success: false,
         message: 'Failed to replace production data with local data',
+        error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
+      });
+    }
+  });
+
+  /**
+   * Backfill avatars for streamers without profile pictures
+   */
+  backfillAvatars = asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const platform = (req.query.platform as string)?.toUpperCase() || 'ALL';
+
+      logger.info(`🖼️ ADMIN: Starting avatar backfill`, { platform, limit });
+
+      const streamerService = new StreamerService();
+      const results: { platform: string; updated: number; errors: number }[] = [];
+
+      if (platform === 'ALL' || platform === 'TWITCH') {
+        const twitchResult = await streamerService.backfillTwitchAvatars(limit);
+        results.push({ platform: 'TWITCH', ...twitchResult });
+      }
+
+      if (platform === 'ALL' || platform === 'KICK') {
+        const kickResult = await streamerService.backfillKickAvatars(limit);
+        results.push({ platform: 'KICK', ...kickResult });
+      }
+
+      const totalUpdated = results.reduce((sum, r) => sum + r.updated, 0);
+      const totalErrors = results.reduce((sum, r) => sum + r.errors, 0);
+
+      const streamersWithAvatars = await db.streamer.count({ where: { avatarUrl: { not: null } } });
+
+      logger.info(`🖼️ ADMIN: Avatar backfill complete`, { totalUpdated, totalErrors, streamersWithAvatars });
+
+      res.status(200).json({
+        success: true,
+        message: 'Avatar backfill completed',
+        data: {
+          results,
+          totalUpdated,
+          totalErrors,
+          streamersWithAvatars,
+        }
+      });
+    } catch (error) {
+      logger.error('🖼️ ADMIN: Avatar backfill failed', { error });
+      res.status(500).json({
+        success: false,
+        message: 'Avatar backfill failed',
         error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
       });
     }

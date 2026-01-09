@@ -45,6 +45,8 @@ import { twitchSyncJob } from './jobs/twitchSync';
 import { kickSyncJob } from './jobs/kickSync';
 import { performanceSyncRoutes } from './routes/performanceSync';
 import { discoveryRoutes } from './routes/discovery';
+import { favoritesRoutes } from './routes/favorites';
+import { accessRoutes } from './routes/access';
 
 // Define allowed origins before creating server/socket
 const allowedOrigins = new Set([
@@ -204,6 +206,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/enrichment', enrichmentRoutes);
 app.use('/api/performance-sync', performanceSyncRoutes);
 app.use('/api/discovery', discoveryRoutes);
+app.use('/api/favorites', favoritesRoutes);
+app.use('/api/access', accessRoutes);
 app.use('/dbviewer', dbViewerRoutes);
 app.use('/admin-panel', adminPanelRoutes);
 

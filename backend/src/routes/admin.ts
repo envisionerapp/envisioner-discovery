@@ -21,5 +21,6 @@ router.post('/import-csv', adminController.importCsvData);
 router.post('/bulk-import', adminController.bulkImportStreamers);
 router.post('/sync/replace-all-streamers', adminController.replaceAllStreamersWithLocal);
 router.post('/scrape-tags', adminController.scrapeStreamerTags);
+router.post('/backfill-avatars', adminController.backfillAvatars);
 
 export { router as adminRoutes };

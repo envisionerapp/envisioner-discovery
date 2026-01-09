@@ -53,6 +53,23 @@ model Streamer {
   updatedAt     DateTime  @updatedAt
   lastScrapedAt DateTime?
 
+  // Social Metrics (Instagram/TikTok/FB/X/LinkedIn)
+  totalViews    BigInt    @default(0) @map("total_views")
+  totalLikes    BigInt    @default(0) @map("total_likes")
+  totalComments BigInt    @default(0) @map("total_comments")
+  totalShares   BigInt    @default(0) @map("total_shares")
+
+  // Streaming Metrics (Twitch/Kick/YouTube)
+  durationMinutes Int     @default(0) @map("duration_minutes")
+  avgViewers      Int     @default(0) @map("avg_viewers")
+  minutesWatched  BigInt  @default(0) @map("minutes_watched")
+
+  // Calculated Fields
+  engagementRate  Float   @default(0) @map("engagement_rate")
+
+  // Content Category
+  primaryCategory String? @map("primary_category")
+
   // iGaming Intelligence Fields
   igamingIntelligence   Json? @map("igaming_intelligence")
   igamingScore          Int   @default(0) @map("igaming_score")
@@ -88,6 +105,8 @@ model Streamer {
   campaignAssignments StreamerCampaign[]
   chatMessages ChatMessage[] @relation("ChatMessageStreamers")
   campaignPerformances CampaignPerformance[]
+  favorites DiscoveryFavorite[]
+  viewerPolls DiscoveryViewerPoll[]
 
   @@unique([platform, username])
   @@index([isLive])
@@ -99,6 +118,11 @@ model Streamer {
   @@index([displayName])
   @@index([isLive, platform])
   @@index([isLive, currentViewers(sort: Desc)])
+  @@index([avgViewers(sort: Desc)])
+  @@index([totalViews(sort: Desc)])
+  @@index([engagementRate(sort: Desc)])
+  @@index([primaryCategory])
+  @@index([lastScrapedAt(sort: Desc)])
   @@map("discovery_creators")
 }
 
@@ -229,6 +253,36 @@ model DiscoverySearch {
   createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("discovery_searches")
+}
+
+// Favorites for bookmarking creators
+model DiscoveryFavorite {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  streamerId String   @map("streamer_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  streamer Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, streamerId])
+  @@index([userId])
+  @@index([streamerId])
+  @@map("discovery_favorites")
+}
+
+// Viewer polls for calculating avg_viewers
+model DiscoveryViewerPoll {
+  id          String   @id @default(cuid())
+  streamerId  String   @map("streamer_id")
+  viewerCount Int      @map("viewer_count")
+  polledAt    DateTime @default(now()) @map("polled_at")
+
+  // Relations
+  streamer Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+
+  @@index([streamerId, polledAt(sort: Desc)])
+  @@map("discovery_viewer_polls")
 }
 
 enum Platform {

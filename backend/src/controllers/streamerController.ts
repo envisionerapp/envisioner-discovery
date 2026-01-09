@@ -8,121 +8,208 @@ import { seedFromCsvIfEmpty } from '../utils/seedFromCsv';
 export class StreamerController {
   getStreamers = asyncHandler(async (req: Request, res: Response) => {
     try {
-      // Ensure DB has baseline data in dev if empty
-      try {
-        const existing = await db.streamer.count();
-        if (existing === 0) {
-          await seedFromCsvIfEmpty();
-        }
-      } catch {}
-
       const page = Math.max(parseInt((req.query.page as string) || '1', 10), 1);
-      // Ultra-fast initial load: 15 items per page
-      const limit = Math.min(Math.max(parseInt((req.query.limit as string) || '15', 10), 1), 50);
+      const limit = Math.min(Math.max(parseInt((req.query.limit as string) || '20', 10), 1), 100);
       const skip = (page - 1) * limit;
 
       const sort = (String(req.query.sort || '').toLowerCase());
       const dir = (String(req.query.dir || 'desc').toLowerCase() === 'asc' ? 'asc' : 'desc') as 'asc' | 'desc';
-      const search = (req.query.search as string | undefined)?.trim();
-      const region = (req.query.region as string | undefined)?.trim();
-      const platform = (req.query.platform as string | undefined)?.trim();
 
+      // Search filter
+      const search = (req.query.search as string | undefined)?.trim();
+
+      // Multi-select filters (comma-separated)
+      const platforms = (req.query.platforms as string | undefined)?.split(',').map(p => p.trim().toUpperCase()).filter(Boolean);
+      const regions = (req.query.regions as string | undefined)?.split(',').map(r => r.trim().toUpperCase()).filter(Boolean);
+      const categories = (req.query.categories as string | undefined)?.split(',').map(c => c.trim()).filter(Boolean);
+
+      // Range filters
+      const minFollowers = parseInt(req.query.minFollowers as string) || 0;
+      const maxFollowers = parseInt(req.query.maxFollowers as string) || undefined;
+      const minViews = parseInt(req.query.minViews as string) || 0;
+      const maxViews = parseInt(req.query.maxViews as string) || undefined;
+      const minEngagement = parseFloat(req.query.minEngagement as string) || 0;
+      const minAvgViewers = parseInt(req.query.minAvgViewers as string) || 0;
+      const maxLastActive = parseInt(req.query.maxLastActive as string) || undefined; // days
+
+      // Favorites filter
+      const userId = req.query.userId as string | undefined;
+      const favoritesOnly = req.query.favoritesOnly === 'true';
+
+      // Build where clause
       const where: any = {};
+
+      // Search by name/username
       if (search) {
         where.OR = [
           { displayName: { contains: search, mode: 'insensitive' } },
           { username: { contains: search, mode: 'insensitive' } },
-          { currentGame: { contains: search, mode: 'insensitive' } },
-          { tags: { has: search.toUpperCase() } }, // Exact tag match (tags are uppercase)
-          { tags: { hasSome: [search.toUpperCase()] } }, // Alternative syntax
         ];
       }
-      if (region) {
-        try { where.region = (region as any).toUpperCase(); } catch {}
-      }
-      if (platform) {
-        try { where.platform = (platform as any).toUpperCase(); } catch {}
+
+      // Multi-platform filter
+      if (platforms && platforms.length > 0) {
+        where.platform = { in: platforms };
       }
 
+      // Multi-region filter
+      if (regions && regions.length > 0) {
+        where.region = { in: regions };
+      }
+
+      // Multi-category filter (primaryCategory or currentGame)
+      if (categories && categories.length > 0) {
+        where.OR = [
+          ...(where.OR || []),
+          { primaryCategory: { in: categories, mode: 'insensitive' } },
+          { currentGame: { in: categories, mode: 'insensitive' } },
+        ];
+      }
+
+      // Followers range
+      if (minFollowers > 0 || maxFollowers) {
+        where.followers = {};
+        if (minFollowers > 0) where.followers.gte = minFollowers;
+        if (maxFollowers) where.followers.lte = maxFollowers;
+      }
+
+      // Views range
+      if (minViews > 0 || maxViews) {
+        where.totalViews = {};
+        if (minViews > 0) where.totalViews.gte = BigInt(minViews);
+        if (maxViews) where.totalViews.lte = BigInt(maxViews);
+      }
+
+      // Engagement filter
+      if (minEngagement > 0) {
+        where.engagementRate = { gte: minEngagement };
+      }
+
+      // Avg viewers filter
+      if (minAvgViewers > 0) {
+        where.avgViewers = { gte: minAvgViewers };
+      }
+
+      // Last active filter (days)
+      if (maxLastActive && maxLastActive < 365) {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - maxLastActive);
+        where.OR = [
+          ...(where.OR || []),
+          { lastScrapedAt: { gte: cutoffDate } },
+          { isLive: true }, // Live creators are always "active"
+        ];
+      }
+
+      // Favorites only filter
+      let favoriteIds: string[] = [];
+      if (favoritesOnly && userId) {
+        const favorites = await db.discoveryFavorite.findMany({
+          where: { userId },
+          select: { streamerId: true },
+        });
+        favoriteIds = favorites.map(f => f.streamerId);
+        if (favoriteIds.length === 0) {
+          // No favorites = no results
+          return res.status(200).json({
+            success: true,
+            data: [],
+            pagination: { page: 1, limit, total: 0, totalPages: 0 },
+          });
+        }
+        where.id = { in: favoriteIds };
+      }
+
+      // Build orderBy
       const orderBy: any[] = [];
       switch (sort) {
-        case 'displayname':
         case 'name':
-        case 'streamer':
           orderBy.push({ displayName: dir });
           break;
         case 'followers':
-          // Sort by followers, then by currentViewers as tiebreaker
-          orderBy.push({ followers: dir }, { currentViewers: dir });
+          orderBy.push({ followers: dir });
           break;
         case 'viewers':
-          // Sort by: live status (live first), then currentViewers, then peak viewers, then followers
-          if (dir === 'desc') {
-            orderBy.push(
-              { isLive: 'desc' },
-              { currentViewers: 'desc' },
-              { highestViewers: 'desc' },
-              { followers: 'desc' }
-            );
-          } else {
-            orderBy.push(
-              { isLive: 'asc' },
-              { currentViewers: 'asc' },
-              { highestViewers: 'asc' },
-              { followers: 'asc' }
-            );
-          }
+          orderBy.push({ isLive: 'desc' }, { currentViewers: dir });
           break;
-        case 'peak':
-          // Sort by peak viewers, then by followers as tiebreaker
-          orderBy.push({ highestViewers: dir }, { followers: dir });
+        case 'avgviewers':
+          orderBy.push({ avgViewers: dir });
           break;
-        case 'region':
-          orderBy.push({ region: dir });
+        case 'engagement':
+          orderBy.push({ engagementRate: dir });
           break;
-        case 'lastlive':
-        case 'laststreamed':
-          if (dir === 'desc') {
-            // Most recent first: live streamers at top (they are "now"), then by lastStreamed desc
-            orderBy.push({ isLive: 'desc' }, { lastStreamed: { sort: 'desc', nulls: 'last' } });
-          } else {
-            // Oldest first: by lastStreamed asc, live streamers at bottom (they are "now" = newest)
-            orderBy.push({ isLive: 'asc' }, { lastStreamed: { sort: 'asc', nulls: 'last' } });
-          }
+        case 'views':
+          orderBy.push({ totalViews: dir });
+          break;
+        case 'lastactive':
+          orderBy.push({ lastScrapedAt: { sort: dir, nulls: 'last' } });
           break;
         default:
-          orderBy.push({ isLive: 'desc' }, { currentViewers: 'desc' }, { followers: 'desc' });
+          orderBy.push({ followers: 'desc' });
       }
 
-      // Always query database for accurate sorting
-      const items = await db.streamer.findMany({
-        skip,
-        take: limit,
-        where,
-        orderBy,
-      });
+      // Query database
+      const [items, total] = await Promise.all([
+        db.streamer.findMany({
+          skip,
+          take: limit,
+          where,
+          orderBy,
+          select: {
+            id: true,
+            platform: true,
+            username: true,
+            displayName: true,
+            profileUrl: true,
+            avatarUrl: true,
+            followers: true,
+            currentViewers: true,
+            highestViewers: true,
+            isLive: true,
+            currentGame: true,
+            primaryCategory: true,
+            tags: true,
+            region: true,
+            language: true,
+            totalViews: true,
+            totalLikes: true,
+            totalComments: true,
+            totalShares: true,
+            avgViewers: true,
+            minutesWatched: true,
+            durationMinutes: true,
+            engagementRate: true,
+            lastScrapedAt: true,
+            lastStreamed: true,
+          },
+        }),
+        db.streamer.count({ where }),
+      ]);
 
-      // Only count on filtered queries or pagination for speed
-      const shouldCount = page > 1 || search || region || platform;
-      const total = shouldCount
-        ? await db.streamer.count({ where })
-        : (items.length < limit ? items.length : 10000);
+      // Convert BigInt to Number for JSON serialization
+      const serializedItems = items.map(item => ({
+        ...item,
+        totalViews: Number(item.totalViews),
+        totalLikes: Number(item.totalLikes),
+        totalComments: Number(item.totalComments),
+        totalShares: Number(item.totalShares),
+        minutesWatched: Number(item.minutesWatched),
+      }));
 
       const totalPages = Math.max(Math.ceil(total / limit), 1);
 
-      // Aggressive caching for maximum speed (60 seconds cache, 2 min stale-while-revalidate)
       res.set({
-        'Cache-Control': 'public, max-age=60, stale-while-revalidate=120',
+        'Cache-Control': 'public, max-age=30, stale-while-revalidate=60',
         'X-Total-Count': total.toString(),
       });
 
       res.status(200).json({
         success: true,
-        data: items,
+        data: serializedItems,
         pagination: { page, limit, total, totalPages },
       });
     } catch (e) {
-      // Fallback gracefully for dev when DB is unavailable
+      console.error('getStreamers error:', e);
       res.status(200).json({
         success: true,
         data: [],
