@@ -18,7 +18,7 @@ export const RegionsOverview: React.FC<{ onRegionClick?: (region: string) => voi
 
   return (
     <div className="card">
-      <div className="px-4 sm:px-6 py-3 border-b border-gray-800/30 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(253, 198, 0, 0.10) 0%, rgba(0, 0, 0, 0) 100%)' }}>
+      <div className="px-4 sm:px-6 py-3 border-b border-gray-800/30 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(255, 107, 53, 0.10) 0%, rgba(255, 255, 255, 0) 100%)' }}>
         <h3 className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wide">Regions</h3>
       </div>
 
@@ -34,8 +34,8 @@ export const RegionsOverview: React.FC<{ onRegionClick?: (region: string) => voi
                 key={region}
                 className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all hover:scale-[1.02]"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)',
-                  border: '0.5px solid rgba(253, 198, 0, 0.15)'
+                  background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)',
+                  border: '0.5px solid rgba(255, 107, 53, 0.15)'
                 }}
                 onClick={() => onRegionClick?.(region)}
               >

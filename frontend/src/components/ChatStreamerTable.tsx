@@ -186,7 +186,7 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
 
   return (
     <div className="card">
-      <div className="card-header rounded-t-xl" style={{ paddingTop: '12px', paddingBottom: '12px', background: 'linear-gradient(90deg, rgba(253, 198, 0, 0.10) 0%, rgba(0, 0, 0, 0) 100%)' }}>
+      <div className="card-header rounded-t-xl" style={{ paddingTop: '12px', paddingBottom: '12px', background: 'linear-gradient(90deg, rgba(255, 107, 53, 0.10) 0%, rgba(255, 255, 255, 0) 100%)' }}>
         <div className="flex flex-col md:flex-row md:items-start md:justify-between w-full gap-3">
           <div className="text-center md:text-left">
             <h3 className="text-base md:text-lg font-semibold text-gray-100">Search Results</h3>

@@ -193,7 +193,7 @@ const DashboardPage: React.FC = () => {
 
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" style={{ opacity: isHidden ? 0 : 1, transition: 'opacity 0.15s ease' }}>
-        <div className="card p-4 sm:p-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.12) 0%, rgba(202, 138, 4, 0.06) 100%)', border: '1px solid rgba(253, 198, 0, 0.25)' }}>
+        <div className="card p-4 sm:p-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.12) 0%, rgba(255, 107, 53, 0.06) 100%)', border: '1px solid rgba(255, 107, 53, 0.25)' }}>
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary-600/10 rounded-full blur-3xl" />
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
@@ -233,7 +233,7 @@ const DashboardPage: React.FC = () => {
       {/* Top lists */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6" style={{ opacity: isHidden ? 0 : 1, transition: 'opacity 0.15s ease' }}>
         <div className="card overflow-hidden">
-          <div className="px-4 sm:px-6 py-3 border-b border-gray-800/30 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(253, 198, 0, 0.10) 0%, rgba(0, 0, 0, 0) 100%)' }}>
+          <div className="px-4 sm:px-6 py-3 border-b border-gray-800/30 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(255, 107, 53, 0.10) 0%, rgba(255, 255, 255, 0) 100%)' }}>
             <div className="flex items-center gap-2">
               <TrophyIcon className="h-4 w-4 sm:h-4 sm:w-4 text-primary-500 flex-shrink-0" />
               <h3 className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wide">Top Streamers</h3>
@@ -339,7 +339,7 @@ const DashboardPage: React.FC = () => {
         </div>
 
         <div className="card overflow-hidden">
-          <div className="px-4 sm:px-6 py-3 border-b border-gray-800/30 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(253, 198, 0, 0.10) 0%, rgba(0, 0, 0, 0) 100%)' }}>
+          <div className="px-4 sm:px-6 py-3 border-b border-gray-800/30 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(255, 107, 53, 0.10) 0%, rgba(255, 255, 255, 0) 100%)' }}>
             <div className="flex items-center gap-2">
               <HashtagIcon className="h-4 w-4 sm:h-4 sm:w-4 text-primary-500 flex-shrink-0" />
               <h3 className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wide">Top Categories</h3>
@@ -411,7 +411,7 @@ const DashboardPage: React.FC = () => {
       {/* Live Streamers (full width) */}
       <div className="grid grid-cols-1 gap-4" id="live-streamers-table">
         <div className="card">
-          <div className="px-4 sm:px-6 py-3 border-b border-gray-800/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(253, 198, 0, 0.10) 0%, rgba(0, 0, 0, 0) 100%)' }}>
+          <div className="px-4 sm:px-6 py-3 border-b border-gray-800/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(255, 107, 53, 0.10) 0%, rgba(255, 255, 255, 0) 100%)' }}>
             <h3 className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wide text-center sm:text-left">Live Streamers</h3>
             <div className="rounded-xl p-1.5 mx-auto sm:mx-0" style={{ border: '0.5px solid rgba(255,255,255,0.12)', background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(10px)' }}>
               <div className="flex items-center gap-2">
@@ -869,7 +869,7 @@ const DashboardPage: React.FC = () => {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDetails(false)} />
           <div className="absolute inset-y-0 right-0 w-full sm:w-[580px] card overflow-y-auto" style={{ boxShadow: '-4px 0 24px rgba(0,0,0,0.5)' }}>
             {/* Header with Avatar */}
-            <div className="sticky top-0 z-10 backdrop-blur-md border-b p-5 rounded-t-xl" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.12) 0%, rgba(0, 0, 0, 0.6) 100%)', borderColor: 'rgba(253, 198, 0, 0.25)' }}>
+            <div className="sticky top-0 z-10 backdrop-blur-md border-b p-5 rounded-t-xl" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.12) 0%, rgba(255, 255, 255, 0.9) 100%)', borderColor: 'rgba(255, 107, 53, 0.25)' }}>
               <div className="flex items-start gap-4">
                 <div className="relative">
                   <img
@@ -944,28 +944,28 @@ const DashboardPage: React.FC = () => {
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                     <UsersIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" />
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">Followers</p>
                   </div>
                   <p className="text-lg sm:text-2xl font-bold text-gray-100">{selectedStreamer.followers?.toLocaleString?.() || '-'}</p>
                 </div>
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                     <TrophyIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#FF6B35]" />
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">Peak Viewers</p>
                   </div>
                   <p className="text-lg sm:text-2xl font-bold text-[#FF6B35]">{selectedStreamer.highestViewers?.toLocaleString?.() || '-'}</p>
                 </div>
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                     <EyeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" />
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">Current Viewers</p>
                   </div>
                   <p className="text-lg sm:text-2xl font-bold text-gray-100">{selectedStreamer.currentViewers?.toLocaleString?.() || '-'}</p>
                 </div>
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                     <ClockIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500" />
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">Last Streamed</p>
@@ -987,7 +987,7 @@ const DashboardPage: React.FC = () => {
 
               {/* Tags */}
               {selectedStreamer.tags && selectedStreamer.tags.length > 0 && (
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">
                     <HashtagIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" />
                     <p className="text-xs sm:text-sm text-gray-400 uppercase tracking-wide font-semibold">Tags</p>
@@ -1004,14 +1004,14 @@ const DashboardPage: React.FC = () => {
 
               {/* Stream History */}
               {selectedStreamer.streamTitles && selectedStreamer.streamTitles.length > 0 && (
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">
                     <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                     <p className="text-xs sm:text-sm text-gray-400 uppercase tracking-wide font-semibold">Stream History</p>
                   </div>
-                  <div className="max-h-48 overflow-y-auto space-y-2 pr-1" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(253, 198, 0, 0.3) transparent' }}>
+                  <div className="max-h-48 overflow-y-auto space-y-2 pr-1" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255, 107, 53, 0.3) transparent' }}>
                     {selectedStreamer.streamTitles.map((stream: { title: string; date: string }, idx: number) => (
                       <div key={idx} className="p-2 sm:p-2.5 rounded-lg bg-gray-900/60 border border-gray-700/50 hover:border-gray-600/50 transition-colors">
                         <p className="text-xs sm:text-sm text-gray-200 mb-1 line-clamp-2">{stream.title}</p>
@@ -1025,7 +1025,7 @@ const DashboardPage: React.FC = () => {
               )}
 
               {/* Notes Section */}
-              <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+              <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                 <div className="flex items-center gap-2 mb-2 sm:mb-3">
                   <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -1041,7 +1041,7 @@ const DashboardPage: React.FC = () => {
               </div>
 
               {/* Assignments Section */}
-              <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+              <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <div className="flex items-center gap-2">
                     <ChartBarIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" />

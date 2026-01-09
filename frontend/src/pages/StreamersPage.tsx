@@ -170,7 +170,7 @@ const StreamersPage: React.FC = () => {
       <StatsCards />
 
       <div className="card">
-        <div className="card-header rounded-t-xl" style={{ paddingTop: '16px', paddingBottom: '16px', paddingLeft: '16px', paddingRight: '16px', background: 'linear-gradient(90deg, rgba(253, 198, 0, 0.10) 0%, rgba(0, 0, 0, 0) 100%)' }}>
+        <div className="card-header rounded-t-xl" style={{ paddingTop: '16px', paddingBottom: '16px', paddingLeft: '16px', paddingRight: '16px', background: 'linear-gradient(90deg, rgba(255, 107, 53, 0.10) 0%, rgba(255, 255, 255, 0) 100%)' }}>
           <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-3">
             <div className="flex flex-col sm:flex-row items-center justify-end gap-3 w-full md:w-auto">
               <div className="rounded-xl p-1.5" style={{ border: '0.5px solid rgba(255,255,255,0.12)', background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(10px)' }}>
@@ -492,7 +492,7 @@ const StreamersPage: React.FC = () => {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDetails(false)} />
           <div className="absolute inset-y-0 right-0 w-full sm:w-[580px] card overflow-y-auto" style={{ boxShadow: '-4px 0 24px rgba(0,0,0,0.5)' }}>
             {/* Header with Avatar */}
-            <div className="sticky top-0 z-10 backdrop-blur-md border-b p-5 rounded-t-xl" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.12) 0%, rgba(0, 0, 0, 0.6) 100%)', borderColor: 'rgba(253, 198, 0, 0.25)' }}>
+            <div className="sticky top-0 z-10 backdrop-blur-md border-b p-5 rounded-t-xl" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.12) 0%, rgba(255, 255, 255, 0.9) 100%)', borderColor: 'rgba(255, 107, 53, 0.25)' }}>
               <div className="flex items-start gap-4">
                 <div className="relative">
                   <img
@@ -567,28 +567,28 @@ const StreamersPage: React.FC = () => {
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                     <UsersIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" />
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">Followers</p>
                   </div>
                   <p className="text-lg sm:text-2xl font-bold text-gray-100">{selected.followers?.toLocaleString?.() || '-'}</p>
                 </div>
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                     <TrophyIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#FF6B35]" />
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">Peak Viewers</p>
                   </div>
                   <p className="text-lg sm:text-2xl font-bold text-[#FF6B35]">{selected.highestViewers?.toLocaleString?.() || '-'}</p>
                 </div>
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                     <EyeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" />
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">Current Viewers</p>
                   </div>
                   <p className="text-lg sm:text-2xl font-bold text-gray-100">{selected.currentViewers?.toLocaleString?.() || '-'}</p>
                 </div>
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                     <ClockIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500" />
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">Last Streamed</p>
@@ -610,7 +610,7 @@ const StreamersPage: React.FC = () => {
 
               {/* Bio / Description */}
               {selected.profileDescription && (
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">
                     <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -623,7 +623,7 @@ const StreamersPage: React.FC = () => {
 
               {/* Social Links */}
               {selected.externalLinks && Object.keys(selected.externalLinks).length > 0 && (
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">
                     <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -716,7 +716,7 @@ const StreamersPage: React.FC = () => {
 
               {/* Tags */}
               {selected.tags && selected.tags.length > 0 && (
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">
                     <HashtagIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" />
                     <p className="text-xs sm:text-sm text-gray-400 uppercase tracking-wide">Tags</p>
@@ -733,7 +733,7 @@ const StreamersPage: React.FC = () => {
 
               {/* Panel Images */}
               {selected.panelImages && selected.panelImages.length > 0 && (
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">
                     <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -773,14 +773,14 @@ const StreamersPage: React.FC = () => {
 
               {/* Stream History */}
               {selected.streamTitles && selected.streamTitles.length > 0 && (
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">
                     <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                     <p className="text-xs sm:text-sm text-gray-400 uppercase tracking-wide">Stream History</p>
                   </div>
-                  <div className="max-h-48 overflow-y-auto space-y-2 pr-1" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(253, 198, 0, 0.3) transparent' }}>
+                  <div className="max-h-48 overflow-y-auto space-y-2 pr-1" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255, 107, 53, 0.3) transparent' }}>
                     {selected.streamTitles.map((stream: { title: string; date: string }, idx: number) => (
                       <div key={idx} className="p-2 sm:p-2.5 rounded-lg bg-gray-900/60 border border-gray-700/50 hover:border-gray-600/50 transition-colors">
                         <p className="text-xs sm:text-sm text-gray-200 mb-1 line-clamp-2">{stream.title}</p>
@@ -794,7 +794,7 @@ const StreamersPage: React.FC = () => {
               )}
 
               {/* Notes Section */}
-              <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+              <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                 <div className="flex items-center gap-2 mb-2 sm:mb-3">
                   <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -810,7 +810,7 @@ const StreamersPage: React.FC = () => {
               </div>
 
               {/* Assignments Section */}
-              <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
+              <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 255, 255, 0.95) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <div className="flex items-center gap-2">
                     <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -844,7 +844,7 @@ const StatsCards: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-      <div className="card p-4 sm:p-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.12) 0%, rgba(202, 138, 4, 0.06) 100%)', border: '1px solid rgba(253, 198, 0, 0.25)' }}>
+      <div className="card p-4 sm:p-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.12) 0%, rgba(255, 107, 53, 0.06) 100%)', border: '1px solid rgba(255, 107, 53, 0.25)' }}>
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary-600/10 rounded-full blur-3xl" />
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2 sm:mb-3">

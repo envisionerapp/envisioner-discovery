@@ -51,7 +51,7 @@ export const getUserAvatar = (seed: string): string => {
   const encodedName = encodeURIComponent(name);
 
   // UI Avatars with yellow background and black text
-  return `https://ui-avatars.com/api/?name=${encodedName}&background=fdc600&color=000&size=128&bold=true&format=svg`;
+  return `https://ui-avatars.com/api/?name=${encodedName}&background=FF6B35&color=fff&size=128&bold=true&format=svg`;
 };
 
 // Simple SVG gradient avatar placeholders as data URIs
