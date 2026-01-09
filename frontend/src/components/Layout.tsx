@@ -19,7 +19,7 @@ export const Layout: React.FC = () => {
     <div className="min-h-screen bg-white">
       {/* Tab navigation */}
       <nav className="sticky top-0 z-10 border-b border-secondary/10 bg-white">
-        <div className="flex items-center justify-between px-4 py-2.5">
+        <div className="flex items-center justify-between py-2.5">
           {/* Tab items */}
           <div className="flex items-center gap-1">
             {navItems.map((item) => {
@@ -47,7 +47,7 @@ export const Layout: React.FC = () => {
           </div>
 
           {/* Stats on the right */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 pr-4">
             {/* Total Streamers */}
             <div className="flex items-center gap-1.5">
               <div className="h-6 w-6 rounded-md bg-secondary/5 flex items-center justify-center">
