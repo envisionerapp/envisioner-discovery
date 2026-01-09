@@ -41,9 +41,9 @@ router.post('/validate', async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    // 3. Check if user exists in main users table
-    const mainUser = await db.$queryRaw<{ email: string; firstName: string | null }[]>`
-      SELECT email, "firstName" FROM users WHERE LOWER(email) = ${normalizedEmail}
+    // 3. Check if user exists in main users table (envisioner app users)
+    const mainUser = await db.$queryRaw<{ email: string }[]>`
+      SELECT email FROM users WHERE LOWER(email) = ${normalizedEmail}
       LIMIT 1
     `;
 
@@ -68,7 +68,6 @@ router.post('/validate', async (req, res) => {
       discoveryUser = await db.user.create({
         data: {
           email: normalizedEmail,
-          firstName: mainUser[0].firstName,
           password: 'synced-from-users',
         },
         select: { id: true, email: true, firstName: true }
