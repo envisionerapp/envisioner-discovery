@@ -5,9 +5,7 @@ import { Layout } from './components/Layout';
 import { LoadingSpinner } from './components/LoadingSpinner';
 
 // Pages
-import ChatPage from './pages/ChatPage';
 import StreamersPage from './pages/StreamersPage';
-import CampaignsPage from './pages/CampaignsPage';
 import AdminPage from './pages/AdminPage';
 import NotFoundPage from './pages/NotFoundPage';
 import DashboardPage from './pages/DashboardPage';
@@ -55,12 +53,10 @@ function App() {
         {/* Root redirect to dashboard */}
         <Route index element={<Navigate to="/dashboard" replace />} />
 
-        {/* Main routes - no login required (Softr handles auth) */}
+        {/* Main routes - Overview and Streamers only */}
         <Route path="/" element={<Layout />}>
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="chat" element={<ChatPage />} />
           <Route path="streamers" element={<StreamersPage />} />
-          <Route path="campaigns" element={<CampaignsPage />} />
         </Route>
 
         {/* Admin routes - restricted to admin emails */}
