@@ -31,31 +31,31 @@ const LastLiveChip: React.FC<{ minutes: number; isLive?: boolean; mode: 'simple'
   const baseClass = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px]';
   if (isLive) {
     return (
-      <span className="inline-flex items-center px-3 py-0 rounded-full text-[9px] animate-pulse" style={{ background: '#dc2626', backdropFilter: 'blur(12px)', border: '1px solid #ff0000', color: '#ffffff', fontWeight: '900', animationDuration: '2s' }}>
+      <span className="inline-flex items-center px-3 py-0 rounded-full text-[9px] animate-pulse" style={{ background: '#FF6B35', backdropFilter: 'blur(12px)', border: '1px solid #FF6B35', color: '#ffffff', fontWeight: '900', animationDuration: '2s' }}>
         <span style={{ fontSize: '7.56px', letterSpacing: '1.5px', fontWeight: '900' }}>{(label || 'Live').toUpperCase()}</span>
       </span>
     );
   }
   type Pal = { bg: string; border: string; dot: string; text: string };
   const pickPaletteSimple = (m: number): Pal => {
-    if (m < 60) return { bg: 'rgba(239,68,68,0.14)', border: 'rgba(239,68,68,0.35)', dot: '#ef4444', text: '#fca5a5' };
-    if (m < 1440) return { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.30)', dot: '#f59e0b', text: '#fde68a' };
-    return { bg: 'rgba(156,163,175,0.12)', border: 'rgba(156,163,175,0.30)', dot: '#9ca3af', text: '#e5e7eb' };
+    if (m < 60) return { bg: 'rgba(255,107,53,0.14)', border: 'rgba(255,107,53,0.35)', dot: '#FF6B35', text: '#FF6B35' };
+    if (m < 1440) return { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' };
+    return { bg: 'rgba(20,28,46,0.12)', border: 'rgba(20,28,46,0.30)', dot: '#141C2E', text: '#FFFFFF' };
   };
   const pickPaletteExtended = (m: number): Pal => {
-    if (m < 15) return { bg: 'rgba(239,68,68,0.14)', border: 'rgba(239,68,68,0.35)', dot: '#ef4444', text: '#fca5a5' };
-    if (m < 60) return { bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.30)', dot: '#22c55e', text: '#bbf7d0' };
-    if (m < 360) return { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.30)', dot: '#f59e0b', text: '#fde68a' };
-    if (m < 1440) return { bg: 'rgba(251,146,60,0.12)', border: 'rgba(251,146,60,0.30)', dot: '#fb923c', text: '#fed7aa' };
-    if (m < 4320) return { bg: 'rgba(253,198,0,0.12)', border: 'rgba(253,198,0,0.30)', dot: '#fdc600', text: '#fef3c7' };
-    if (m < 10080) return { bg: 'rgba(167,139,250,0.12)', border: 'rgba(167,139,250,0.30)', dot: '#a78bfa', text: '#ddd6fe' };
-    return { bg: 'rgba(156,163,175,0.12)', border: 'rgba(156,163,175,0.30)', dot: '#9ca3af', text: '#e5e7eb' };
+    if (m < 15) return { bg: 'rgba(255,107,53,0.14)', border: 'rgba(255,107,53,0.35)', dot: '#FF6B35', text: '#FF6B35' };
+    if (m < 60) return { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' };
+    if (m < 360) return { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' };
+    if (m < 1440) return { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' };
+    if (m < 4320) return { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' };
+    if (m < 10080) return { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' };
+    return { bg: 'rgba(20,28,46,0.12)', border: 'rgba(20,28,46,0.30)', dot: '#141C2E', text: '#FFFFFF' };
   };
   const pickPaletteContrast = (m: number): Pal => {
-    if (m < 60) return { bg: 'rgba(239,68,68,0.25)', border: 'rgba(239,68,68,0.50)', dot: '#ef4444', text: '#fecaca' };
-    if (m < 1440) return { bg: 'rgba(234,179,8,0.25)', border: 'rgba(234,179,8,0.50)', dot: '#eab308', text: '#171717' };
-    if (m < 4320) return { bg: 'rgba(253,198,0,0.25)', border: 'rgba(253,198,0,0.50)', dot: '#fdc600', text: '#0f172a' };
-    return { bg: 'rgba(75,85,99,0.30)', border: 'rgba(75,85,99,0.55)', dot: '#6b7280', text: '#e5e7eb' };
+    if (m < 60) return { bg: 'rgba(255,107,53,0.25)', border: 'rgba(255,107,53,0.50)', dot: '#FF6B35', text: '#FF6B35' };
+    if (m < 1440) return { bg: 'rgba(255,107,53,0.25)', border: 'rgba(255,107,53,0.50)', dot: '#FF6B35', text: '#141C2E' };
+    if (m < 4320) return { bg: 'rgba(255,107,53,0.25)', border: 'rgba(255,107,53,0.50)', dot: '#FF6B35', text: '#141C2E' };
+    return { bg: 'rgba(75,85,99,0.30)', border: 'rgba(75,85,99,0.55)', dot: '#141C2E', text: '#FFFFFF' };
   };
   const palette = mode === 'simple' ? pickPaletteSimple(minutes) : mode === 'contrast' ? pickPaletteContrast(minutes) : pickPaletteExtended(minutes);
   return (
@@ -217,7 +217,7 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                           <button
                             key={opt.key || 'all'}
                             className={`${common}`}
-                            style={{ backgroundColor: '#fdc600', color: '#000000' }}
+                            style={{ backgroundColor: '#FF6B35', color: '#141C2E' }}
                             title="All"
                             aria-label="All platforms"
                             onClick={() => handlePlatformFilterChange(opt.key as any)}
@@ -228,9 +228,9 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                       }
                       let bg = 'rgba(255,255,255,0.08)';
                       let color = '#ffffff';
-                      if (opt.key === 'twitch') { bg = '#9146FF'; color = '#ffffff'; }
-                      else if (opt.key === 'youtube') { bg = '#FF0000'; color = '#ffffff'; }
-                      else if (opt.key === 'kick') { bg = '#52FF00'; color = '#000000'; }
+                      if (opt.key === 'twitch') { bg = '#FF6B35'; color = '#ffffff'; }
+                      else if (opt.key === 'youtube') { bg = '#FF6B35'; color = '#ffffff'; }
+                      else if (opt.key === 'kick') { bg = '#FF6B35'; color = '#141C2E'; }
                       return (
                         <button
                           key={opt.key}
@@ -257,7 +257,7 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                         {opt.key === '' ? (
                           <UsersIcon className="h-3.5 w-3.5 text-gray-400" />
                         ) : (
-                          <PlatformIcon name={opt.key as any} className="h-3.5 w-3.5" style={{ color: '#9ca3af' }} />
+                          <PlatformIcon name={opt.key as any} className="h-3.5 w-3.5" style={{ color: '#141C2E' }} />
                         )}
                       </button>
                     );
@@ -364,7 +364,7 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                   </div>
                   <div className="chip-glass px-2 py-1.5 rounded-lg text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
-                      <TrophyIcon className="h-3.5 w-3.5 text-amber-500" />
+                      <TrophyIcon className="h-3.5 w-3.5 text-[#FF6B35]" />
                       <span className="text-[11px] text-gray-400 uppercase font-medium tracking-wide">Peak</span>
                     </div>
                     <div className="text-sm font-bold text-gray-100" style={{ fontVariantNumeric: 'tabular-nums' }}>{peak ? formatCount(peak) : '-'}</div>
@@ -385,7 +385,7 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                   <button
                     onClick={() => onViewDetails?.(s)}
                     className="inline-flex items-center justify-center gap-1.5 rounded-lg text-xs font-bold"
-                    style={{ backgroundColor: '#fdc600', color: '#000000', flex: '1 1 0', minHeight: '36px', padding: '8px 12px' }}
+                    style={{ backgroundColor: '#FF6B35', color: '#141C2E', flex: '1 1 0', minHeight: '36px', padding: '8px 12px' }}
                   >
                     <span>View</span>
                   </button>
@@ -395,7 +395,7 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center gap-1.5 rounded-lg text-xs font-bold"
-                      style={{ backgroundColor: platform === 'twitch' ? '#9146FF' : platform === 'youtube' ? '#FF0000' : platform === 'kick' ? '#52FF00' : 'rgba(255,255,255,0.08)', color: platform === 'kick' ? '#000000' : '#ffffff', flex: '1 1 0', minHeight: '36px', padding: '8px 12px' }}
+                      style={{ backgroundColor: platform === 'twitch' ? '#FF6B35' : platform === 'youtube' ? '#FF6B35' : platform === 'kick' ? '#FF6B35' : 'rgba(255,255,255,0.08)', color: platform === 'kick' ? '#141C2E' : '#ffffff', flex: '1 1 0', minHeight: '36px', padding: '8px 12px' }}
                     >
                       {platform && <PlatformIcon name={platform as any} className="h-3 w-3" />}
                       <span>Visit</span>
@@ -513,20 +513,20 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                   const baseClass = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px]';
                   if (isLive) {
                     return (
-                      <span className="inline-flex items-center px-3 py-0 rounded-full text-[9px] animate-pulse" style={{ background: '#dc2626', backdropFilter: 'blur(12px)', border: '1px solid #ff0000', color: '#ffffff', fontWeight: '900', animationDuration: '2s' }} title="Currently live">
+                      <span className="inline-flex items-center px-3 py-0 rounded-full text-[9px] animate-pulse" style={{ background: '#FF6B35', backdropFilter: 'blur(12px)', border: '1px solid #FF6B35', color: '#ffffff', fontWeight: '900', animationDuration: '2s' }} title="Currently live">
                         <span style={{ fontSize: '7.56px', letterSpacing: '1.5px', fontWeight: '900' }}>LIVE</span>
                       </span>
                     );
                   }
                   type Pal = { bg: string; border: string; dot: string; text: string };
                   const pickPaletteExtended = (m: number): Pal => {
-                    if (m < 15) return { bg: 'rgba(239,68,68,0.14)', border: 'rgba(239,68,68,0.35)', dot: '#ef4444', text: '#fca5a5' };
-                    if (m < 60) return { bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.30)', dot: '#22c55e', text: '#bbf7d0' };
-                    if (m < 360) return { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.30)', dot: '#f59e0b', text: '#fde68a' };
-                    if (m < 1440) return { bg: 'rgba(251,146,60,0.12)', border: 'rgba(251,146,60,0.30)', dot: '#fb923c', text: '#fed7aa' };
-                    if (m < 4320) return { bg: 'rgba(253,198,0,0.12)', border: 'rgba(253,198,0,0.30)', dot: '#fdc600', text: '#fef3c7' };
-                    if (m < 10080) return { bg: 'rgba(167,139,250,0.12)', border: 'rgba(167,139,250,0.30)', dot: '#a78bfa', text: '#ddd6fe' };
-                    return { bg: 'rgba(156,163,175,0.12)', border: 'rgba(156,163,175,0.30)', dot: '#9ca3af', text: '#e5e7eb' };
+                    if (m < 15) return { bg: 'rgba(255,107,53,0.14)', border: 'rgba(255,107,53,0.35)', dot: '#FF6B35', text: '#FF6B35' };
+                    if (m < 60) return { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' };
+                    if (m < 360) return { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' };
+                    if (m < 1440) return { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' };
+                    if (m < 4320) return { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' };
+                    if (m < 10080) return { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' };
+                    return { bg: 'rgba(20,28,46,0.12)', border: 'rgba(20,28,46,0.30)', dot: '#141C2E', text: '#FFFFFF' };
                   };
                   const palette = pickPaletteExtended(minutes);
                   const title = refDate ? `Last live: ${refDate.toLocaleString()}` : 'Last live: unknown';
@@ -592,10 +592,10 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                     <td className="text-left text-gray-300 align-middle">
                       {(() => {
                         const followers = (s as any).followers || 0;
-                        const followersColor = followers >= 1000000 ? '#8b5cf6'
-                          : followers >= 100000 ? '#3b82f6'
-                          : followers >= 10000 ? '#06b6d4'
-                          : '#6b7280';
+                        const followersColor = followers >= 1000000 ? '#FF6B35'
+                          : followers >= 100000 ? '#FF6B35'
+                          : followers >= 10000 ? '#FF6B35'
+                          : '#141C2E';
                         const followersBg = followers >= 1000000 ? 'rgba(139,92,246,0.12)'
                           : followers >= 100000 ? 'rgba(59,130,246,0.12)'
                           : followers >= 10000 ? 'rgba(6,182,212,0.12)'
@@ -621,14 +621,14 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                       {(() => {
                         const viewers = (s as any).currentViewers || 0;
                         const viewersColor = isLive
-                          ? viewers >= 10000 ? '#10b981'
-                          : viewers >= 1000 ? '#f59e0b'
-                          : '#ef4444'
-                          : '#6b7280';
+                          ? viewers >= 10000 ? '#FF6B35'
+                          : viewers >= 1000 ? '#FF6B35'
+                          : '#FF6B35'
+                          : '#141C2E';
                         const viewersBg = isLive
                           ? viewers >= 10000 ? 'rgba(16,185,129,0.12)'
-                          : viewers >= 1000 ? 'rgba(245,158,11,0.12)'
-                          : 'rgba(239,68,68,0.12)'
+                          : viewers >= 1000 ? 'rgba(255,107,53,0.12)'
+                          : 'rgba(255,107,53,0.12)'
                           : 'rgba(75,85,99,0.08)';
                         return (
                           <span
@@ -647,7 +647,7 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                       })()}
                     </td>
                     <td className="text-left text-gray-300 align-middle">
-                      <span className="chip-glass inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold text-amber-400">
+                      <span className="chip-glass inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold text-[#FF6B35]">
                         <TrophyIcon className="h-3.5 w-3.5 opacity-90" />
                         <span style={{ fontVariantNumeric: 'tabular-nums' }}>{peak ? formatCount(peak) : '-'}</span>
                       </span>
@@ -657,7 +657,7 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                         <button
                           onClick={() => onViewDetails?.(s)}
                           className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-lg text-[11px] font-bold align-middle"
-                          style={{ backgroundColor: '#fdc600', color: '#000000' }}
+                          style={{ backgroundColor: '#FF6B35', color: '#141C2E' }}
                         >
                           <span>View</span>
                         </button>
@@ -673,8 +673,8 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                           return (
                             href ? (
                               (() => {
-                                const bg = plat === 'twitch' ? '#9146FF' : plat === 'youtube' ? '#FF0000' : plat === 'kick' ? '#52FF00' : 'rgba(255,255,255,0.08)';
-                                const color = plat === 'kick' ? '#000000' : '#ffffff';
+                                const bg = plat === 'twitch' ? '#FF6B35' : plat === 'youtube' ? '#FF6B35' : plat === 'kick' ? '#FF6B35' : 'rgba(255,255,255,0.08)';
+                                const color = plat === 'kick' ? '#141C2E' : '#ffffff';
                                 return (
                                   <a
                                     href={href}

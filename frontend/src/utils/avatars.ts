@@ -46,7 +46,7 @@ const getLocalAvatar = (seed: string): string => {
 export const getUserAvatar = (seed: string): string => {
   if (!seed) return getLocalAvatar('User');
 
-  // Use UI Avatars API with yellow background (#fdc600)
+  // Use UI Avatars API with yellow background (#FF6B35)
   const name = seed.split('@')[0].replace(/[._-]/g, ' ');
   const encodedName = encodeURIComponent(name);
 
@@ -72,12 +72,12 @@ const svg = (g1: string, g2: string) =>
   );
 
 export const AVATARS: string[] = [
-  svg('#60a5fa','#2563eb'),
-  svg('#34d399','#059669'),
-  svg('#f472b6','#db2777'),
-  svg('#fbbf24','#d97706'),
-  svg('#a78bfa','#6d28d9'),
-  svg('#f87171','#dc2626'),
+  svg('#FF6B35','#FF6B35'),
+  svg('#FF6B35','#FF6B35'),
+  svg('#FF6B35','#FF6B35'),
+  svg('#FF6B35','#FF6B35'),
+  svg('#FF6B35','#FF6B35'),
+  svg('#FF6B35','#FF6B35'),
 ];
 
 /**

@@ -15,7 +15,7 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
   const { t } = useLanguage();
 
   const getStatusColor = () => {
-    if (streamer.isLive) return 'text-red-400';
+    if (streamer.isLive) return 'text-[#FF6B35]';
     return 'text-gray-400';
   };
 
@@ -30,10 +30,10 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
 
   const getPlatformColor = (platform: string) => {
     switch (platform.toLowerCase()) {
-      case 'twitch': return 'bg-purple-600';
-      case 'youtube': return 'bg-red-600';
-      case 'kick': return 'bg-green-600';
-      case 'facebook': return 'bg-blue-600';
+      case 'twitch': return 'bg-[#FF6B35]';
+      case 'youtube': return 'bg-[#FF6B35]';
+      case 'kick': return 'bg-[#FF6B35]';
+      case 'facebook': return 'bg-[#FF6B35]';
       case 'tiktok': return 'bg-black';
       default: return 'bg-gray-600';
     }
@@ -119,7 +119,7 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
           </div>
           {streamer.currentViewers !== undefined && streamer.isLive && (
             <div className="stat-card">
-              <div className="text-2xl font-bold text-red-400">
+              <div className="text-2xl font-bold text-[#FF6B35]">
                 {streamer.currentViewers.toLocaleString()}
               </div>
               <div className="text-xs text-gray-400">{t('streamers.stats.liveViewers')}</div>
@@ -173,7 +173,7 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
                 href={streamer.externalLinks.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-gradient-to-br from-purple-600 to-pink-600 text-white hover:opacity-80 transition-opacity"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-gradient-to-br from-[#FF6B35] to-[#FF6B35] text-white hover:opacity-80 transition-opacity"
                 title="Instagram"
               >
                 <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
@@ -201,7 +201,7 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
                 href={streamer.externalLinks.youtube}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-red-600 text-white hover:opacity-80 transition-opacity"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-[#FF6B35] text-white hover:opacity-80 transition-opacity"
                 title="YouTube"
               >
                 <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
@@ -229,7 +229,7 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
                 href={`https://discord.gg/${streamer.externalLinks.discord}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-indigo-600 text-white hover:opacity-80 transition-opacity"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-[#FF6B35] text-white hover:opacity-80 transition-opacity"
                 title="Discord"
               >
                 <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
@@ -243,7 +243,7 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
                 href={streamer.externalLinks.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-blue-600 text-white hover:opacity-80 transition-opacity"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-[#FF6B35] text-white hover:opacity-80 transition-opacity"
                 title="Facebook"
               >
                 <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
@@ -279,9 +279,9 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
             <span>{streamer.language.toUpperCase()}</span>
           </div>
           {streamer.fraudCheck === 'CLEAN' ? (
-            <span className="text-green-400">✓ {t('streamers.card.verified')}</span>
+            <span className="text-[#141C2E]">✓ {t('streamers.card.verified')}</span>
           ) : (
-            <span className="text-yellow-400">⚠ {t('streamers.card.review')}</span>
+            <span className="text-[#FF6B35]">⚠ {t('streamers.card.review')}</span>
           )}
         </div>
 

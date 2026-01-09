@@ -44,8 +44,8 @@ export const StreamDurationTimer: React.FC<StreamDurationTimerProps> = ({ startT
     <span
       className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg font-mono text-xs font-bold"
       style={{
-        background: '#fdc600',
-        color: '#000000'
+        background: '#FF6B35',
+        color: '#141C2E'
       }}
     >
       {duration.hours > 0 && (

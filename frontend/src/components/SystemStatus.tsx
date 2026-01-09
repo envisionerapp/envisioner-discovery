@@ -18,7 +18,7 @@ export const SystemStatus: React.FC = () => {
     return (
       <div className="chip-glass rounded-lg p-4">
         <h4 className="text-sm font-medium text-gray-100 mb-3">System Status</h4>
-        <p className="text-xs text-red-400">Failed to load system status</p>
+        <p className="text-xs text-[#FF6B35]">Failed to load system status</p>
       </div>
     );
   }
@@ -34,18 +34,18 @@ export const SystemStatus: React.FC = () => {
 
   const getStatusColor = (status: string | boolean) => {
     if (typeof status === 'boolean') {
-      return status ? 'text-green-400' : 'text-red-400';
+      return status ? 'text-[#141C2E]' : 'text-[#FF6B35]';
     }
     switch (status?.toLowerCase()) {
       case 'completed':
       case 'success':
-        return 'text-green-400';
+        return 'text-[#141C2E]';
       case 'failed':
       case 'error':
-        return 'text-red-400';
+        return 'text-[#FF6B35]';
       case 'running':
       case 'in_progress':
-        return 'text-yellow-400';
+        return 'text-[#FF6B35]';
       default:
         return 'text-gray-400';
     }
@@ -87,7 +87,7 @@ export const SystemStatus: React.FC = () => {
                 <span
                   key={key}
                   className={`text-[9px] px-1.5 py-0.5 rounded ${
-                    value ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
+                    value ? 'bg-[#FF6B35]/10 text-[#141C2E]' : 'bg-[#FF6B35]/10 text-[#FF6B35]'
                   }`}
                 >
                   {key}

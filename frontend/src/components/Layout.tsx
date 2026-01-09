@@ -77,18 +77,18 @@ export const Layout: React.FC = () => {
               {/* Live Now */}
               <div
                 className="flex items-center gap-1.5 py-1 px-2 rounded-md"
-                style={{ background: 'rgba(220, 38, 38, 0.1)' }}
+                style={{ background: 'rgba(255, 107, 53, 0.1)' }}
               >
-                <div className="h-6 w-6 rounded-md bg-red-600/20 flex items-center justify-center">
+                <div className="h-6 w-6 rounded-md bg-[#FF6B35]/20 flex items-center justify-center">
                   <div
-                    className="h-2 w-2 rounded-full bg-red-600 animate-pulse"
+                    className="h-2 w-2 rounded-full bg-[#FF6B35] animate-pulse"
                     style={{
                       animationDuration: '1.5s',
-                      boxShadow: '0 0 6px rgba(220, 38, 38, 0.8)'
+                      boxShadow: '0 0 6px rgba(255, 107, 53, 0.8)'
                     }}
                   />
                 </div>
-                <span className="text-xs font-black text-red-500 tabular-nums">
+                <span className="text-xs font-black text-[#FF6B35] tabular-nums">
                   {liveCountLoading ? '...' : liveCount.toLocaleString()}
                 </span>
               </div>

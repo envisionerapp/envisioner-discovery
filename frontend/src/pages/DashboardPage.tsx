@@ -210,19 +210,19 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="card p-4 sm:p-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(153, 27, 27, 0.08) 100%)', border: '1px solid rgba(220, 38, 38, 0.3)' }}>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '3s' }} />
+        <div className="card p-4 sm:p-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(153, 27, 27, 0.08) 100%)', border: '1px solid rgba(255, 107, 53, 0.3)' }}>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6B35]/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '3s' }} />
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2 sm:mb-3">
-              <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-red-600 animate-pulse" style={{ animationDuration: '1.5s', boxShadow: '0 0 8px rgba(220, 38, 38, 0.8)' }} />
-              <p className="text-[10px] sm:text-xs font-semibold text-red-200 uppercase tracking-wider">Live Now</p>
+              <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-[#FF6B35] animate-pulse" style={{ animationDuration: '1.5s', boxShadow: '0 0 8px rgba(255, 107, 53, 0.8)' }} />
+              <p className="text-[10px] sm:text-xs font-semibold text-[#FF6B35] uppercase tracking-wider">Live Now</p>
             </div>
             <div className="flex items-end justify-between">
-              <span className="text-2xl sm:text-4xl font-black text-white animate-pulse" style={{ animationDuration: '2s', textShadow: '0 0 20px rgba(220, 38, 38, 0.5)' }}>
+              <span className="text-2xl sm:text-4xl font-black text-white animate-pulse" style={{ animationDuration: '2s', textShadow: '0 0 20px rgba(255, 107, 53, 0.5)' }}>
                 {liveCountLoading ? '...' : liveCount.toLocaleString()}
               </span>
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-red-600/20 backdrop-blur flex items-center justify-center border border-red-500/30">
-                <RocketLaunchIcon className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 animate-pulse" style={{ animationDuration: '2.5s' }} />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-[#FF6B35]/20 backdrop-blur flex items-center justify-center border border-[#FF6B35]/30">
+                <RocketLaunchIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[#FF6B35] animate-pulse" style={{ animationDuration: '2.5s' }} />
               </div>
             </div>
           </div>
@@ -241,7 +241,7 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
           <div className="p-2">
-            <div className="divide-y overflow-y-auto" style={{ maxHeight: '400px', scrollbarWidth: 'thin', scrollbarColor: '#4b5563 rgba(31, 41, 55, 0.3)', borderColor: 'rgba(156, 163, 175, 0.3)' }}>
+            <div className="divide-y overflow-y-auto" style={{ maxHeight: '400px', scrollbarWidth: 'thin', scrollbarColor: '#141C2E rgba(31, 41, 55, 0.3)', borderColor: 'rgba(156, 163, 175, 0.3)' }}>
             {isLoading ? (
               <div className="text-center py-4 text-gray-500">Loading...</div>
             ) : topStreamers.length === 0 ? (
@@ -291,8 +291,8 @@ const DashboardPage: React.FC = () => {
                           <span className="truncate sm:hidden">{regionLabel(streamer.region?.toLowerCase() || '').substring(0, 10)}</span>
                           <span className="hidden sm:inline">•</span>
                           <div className="flex items-center gap-0.5 sm:gap-1">
-                            <TrophyIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-amber-500" />
-                            <span className="font-semibold text-amber-400">{(streamer.highestViewers / 1000).toFixed(1)}k</span>
+                            <TrophyIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#FF6B35]" />
+                            <span className="font-semibold text-[#FF6B35]">{(streamer.highestViewers / 1000).toFixed(1)}k</span>
                           </div>
                         </div>
                       </div>
@@ -306,8 +306,8 @@ const DashboardPage: React.FC = () => {
                           }}
                           className="inline-flex items-center justify-center px-2 sm:px-2.5 py-1.5 rounded-md text-[10px] sm:text-xs font-bold transition-all hover:scale-105"
                           style={{
-                            backgroundColor: '#fdc600',
-                            color: '#000000',
+                            backgroundColor: '#FF6B35',
+                            color: '#141C2E',
                             minHeight: '28px'
                           }}
                         >
@@ -320,8 +320,8 @@ const DashboardPage: React.FC = () => {
                             rel="noopener noreferrer"
                             className="inline-flex items-center justify-center px-2 sm:px-2.5 py-1.5 rounded-md text-xs font-bold transition-all hover:scale-105"
                             style={{
-                              backgroundColor: p === 'twitch' ? '#9146FF' : p === 'youtube' ? '#FF0000' : p === 'kick' ? '#52FF00' : 'rgba(255,255,255,0.08)',
-                              color: p === 'kick' ? '#000000' : '#ffffff',
+                              backgroundColor: p === 'twitch' ? '#FF6B35' : p === 'youtube' ? '#FF6B35' : p === 'kick' ? '#FF6B35' : 'rgba(255,255,255,0.08)',
+                              color: p === 'kick' ? '#141C2E' : '#ffffff',
                               minHeight: '28px'
                             }}
                           >
@@ -352,7 +352,7 @@ const DashboardPage: React.FC = () => {
               style={{
                 maxHeight: '400px',
                 scrollbarWidth: 'thin',
-                scrollbarColor: '#4b5563 rgba(31, 41, 55, 0.3)',
+                scrollbarColor: '#141C2E rgba(31, 41, 55, 0.3)',
                 borderColor: 'rgba(156, 163, 175, 0.3)'
               }}
             >
@@ -388,7 +388,7 @@ const DashboardPage: React.FC = () => {
                       {/* Avg Viewers */}
                       <div className="flex-shrink-0 text-right hidden sm:block">
                         <p className="text-xs text-gray-400">Avg</p>
-                        <p className="text-xs font-bold text-amber-400">{(category.avgViewers / 1000).toFixed(1)}k</p>
+                        <p className="text-xs font-bold text-[#FF6B35]">{(category.avgViewers / 1000).toFixed(1)}k</p>
                       </div>
                     </div>
 
@@ -430,7 +430,7 @@ const DashboardPage: React.FC = () => {
                           <button
                             key={opt.key || 'all'}
                             className={`${common}`}
-                            style={{ backgroundColor: '#fdc600', color: '#000000' }}
+                            style={{ backgroundColor: '#FF6B35', color: '#141C2E' }}
                             title="All"
                             aria-label="All platforms"
                             onClick={() => { setPage(1); setPlatformFilter(opt.key as any); }}
@@ -441,9 +441,9 @@ const DashboardPage: React.FC = () => {
                       }
                       let bg = 'rgba(255,255,255,0.08)';
                       let color = '#ffffff';
-                      if (opt.key === 'twitch') { bg = '#9146FF'; color = '#ffffff'; }
-                      else if (opt.key === 'youtube') { bg = '#FF0000'; color = '#ffffff'; }
-                      else if (opt.key === 'kick') { bg = '#52FF00'; color = '#000000'; }
+                      if (opt.key === 'twitch') { bg = '#FF6B35'; color = '#ffffff'; }
+                      else if (opt.key === 'youtube') { bg = '#FF6B35'; color = '#ffffff'; }
+                      else if (opt.key === 'kick') { bg = '#FF6B35'; color = '#141C2E'; }
                       return (
                         <button
                           key={opt.key}
@@ -470,7 +470,7 @@ const DashboardPage: React.FC = () => {
                         {opt.key === '' ? (
                           <UsersIcon className="h-3.5 w-3.5 text-gray-400" />
                         ) : (
-                          <PlatformIcon name={opt.key as any} className="h-3.5 w-3.5" style={{ color: '#9ca3af' }} />
+                          <PlatformIcon name={opt.key as any} className="h-3.5 w-3.5" style={{ color: '#141C2E' }} />
                         )}
                       </button>
                     );
@@ -493,8 +493,8 @@ const DashboardPage: React.FC = () => {
               ) : (
                 liveStreamers.map((streamer, i) => {
                   const row = formatStreamerForDisplay(streamer, i);
-                const bg = row.p === 'twitch' ? '#9146FF' : row.p === 'youtube' ? '#FF0000' : '#52FF00';
-                const color = row.p === 'kick' ? '#000000' : '#ffffff';
+                const bg = row.p === 'twitch' ? '#FF6B35' : row.p === 'youtube' ? '#FF6B35' : '#FF6B35';
+                const color = row.p === 'kick' ? '#141C2E' : '#ffffff';
                 const slug = row.n.replace(/\s+/g,'').toLowerCase();
                 const url = row.p === 'twitch'
                   ? `https://twitch.tv/${slug}`
@@ -507,12 +507,12 @@ const DashboardPage: React.FC = () => {
                 const recent = ll.includes('h');
                 const day = ll.includes('d');
                 const style = live
-                  ? { bg: 'rgba(16,185,129,0.18)', border: 'rgba(16,185,129,0.40)', dot: '#10b981', text: '#86efac' }
+                  ? { bg: 'rgba(16,185,129,0.18)', border: 'rgba(16,185,129,0.40)', dot: '#FF6B35', text: '#FF6B35' }
                   : soon || recent
-                    ? { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.30)', dot: '#f59e0b', text: '#fde68a' }
+                    ? { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' }
                     : day
-                      ? { bg: 'rgba(253,198,0,0.12)', border: 'rgba(253,198,0,0.30)', dot: '#fdc600', text: '#fef3c7' }
-                      : { bg: 'rgba(156,163,175,0.12)', border: 'rgba(156,163,175,0.30)', dot: '#9ca3af', text: '#e5e7eb' };
+                      ? { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' }
+                      : { bg: 'rgba(20,28,46,0.12)', border: 'rgba(20,28,46,0.30)', dot: '#141C2E', text: '#FFFFFF' };
                 return (
                   <div key={i} className="p-4 rounded-xl chip-glass">
                     {/* Header: Avatar + Name + Region */}
@@ -550,7 +550,7 @@ const DashboardPage: React.FC = () => {
                         className="block w-full mb-3"
                       >
                         <button className="w-full py-2.5 px-4 rounded-lg font-bold text-sm text-black transition-all duration-200 hover:shadow-lg hover:shadow-primary-500/30 hover:scale-[1.01] active:scale-[0.99]"
-                          style={{ background: 'linear-gradient(135deg, #FDC600 0%, #FFD700 100%)' }}>
+                          style={{ background: 'linear-gradient(135deg, #FF6B35 0%, #FF6B35 100%)' }}>
                           <div className="flex items-center justify-center gap-2">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -572,7 +572,7 @@ const DashboardPage: React.FC = () => {
                       </div>
                       <div className="chip-glass px-2 py-1.5 rounded-lg text-center">
                         <div className="flex items-center justify-center gap-1 mb-1">
-                          <TrophyIcon className="h-3.5 w-3.5 text-amber-500" />
+                          <TrophyIcon className="h-3.5 w-3.5 text-[#FF6B35]" />
                           <span className="text-[11px] text-gray-400 uppercase font-medium tracking-wide">Peak</span>
                         </div>
                         <div className="text-sm font-bold text-gray-100" style={{ fontVariantNumeric: 'tabular-nums' }}>{row.peak.toLocaleString()}</div>
@@ -599,7 +599,7 @@ const DashboardPage: React.FC = () => {
                           setShowDetails(true);
                         }}
                         className="inline-flex items-center justify-center gap-1.5 rounded-lg text-xs font-bold"
-                        style={{ backgroundColor: '#fdc600', color: '#000000', flex: '1 1 0', minHeight: '36px', padding: '8px 12px' }}
+                        style={{ backgroundColor: '#FF6B35', color: '#141C2E', flex: '1 1 0', minHeight: '36px', padding: '8px 12px' }}
                       >
                         <span>View Details</span>
                       </button>
@@ -702,14 +702,14 @@ const DashboardPage: React.FC = () => {
                           const recent = ll.includes('h');
                           const day = ll.includes('d');
                           const style = live
-                            ? { bg: '#FF0000', border: 'transparent', dot: '#ffffff', text: '#ffffff' }
+                            ? { bg: '#FF6B35', border: 'transparent', dot: '#ffffff', text: '#ffffff' }
                             : soon || recent
-                              ? { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.30)', dot: '#f59e0b', text: '#fde68a' }
+                              ? { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' }
                               : day
-                                ? { bg: 'rgba(253,198,0,0.12)', border: 'rgba(253,198,0,0.30)', dot: '#fdc600', text: '#fef3c7' }
-                                : { bg: 'rgba(156,163,175,0.12)', border: 'rgba(156,163,175,0.30)', dot: '#9ca3af', text: '#e5e7eb' };
+                                ? { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.30)', dot: '#FF6B35', text: '#FF6B35' }
+                                : { bg: 'rgba(20,28,46,0.12)', border: 'rgba(20,28,46,0.30)', dot: '#141C2E', text: '#FFFFFF' };
                           return (
-                            <span className={live ? "inline-flex items-center px-3 py-0 rounded-full text-[9px] animate-pulse" : "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px]"} style={{ background: live ? '#dc2626' : style.bg, backdropFilter: live ? 'blur(12px)' : undefined, border: live ? '1px solid #ff0000' : `0.5px solid ${style.border}`, color: style.text, fontWeight: live ? '900' : 'normal', animationDuration: live ? '2s' : undefined }}>
+                            <span className={live ? "inline-flex items-center px-3 py-0 rounded-full text-[9px] animate-pulse" : "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px]"} style={{ background: live ? '#FF6B35' : style.bg, backdropFilter: live ? 'blur(12px)' : undefined, border: live ? '1px solid #FF6B35' : `0.5px solid ${style.border}`, color: style.text, fontWeight: live ? '900' : 'normal', animationDuration: live ? '2s' : undefined }}>
                               {!live && <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: style.dot }} />}
                               <span style={live ? { fontSize: '7.56px', letterSpacing: '1.5px', fontWeight: '900' } : {}}>{live ? 'LIVE' : row.ll}</span>
                             </span>
@@ -722,14 +722,14 @@ const DashboardPage: React.FC = () => {
                           const isLive = ll.includes('now') || ll.includes('live');
                           const viewers = row.v;
                           const viewersColor = isLive
-                            ? viewers >= 10000 ? '#10b981'
-                            : viewers >= 1000 ? '#f59e0b'
-                            : '#ef4444'
-                            : '#6b7280';
+                            ? viewers >= 10000 ? '#FF6B35'
+                            : viewers >= 1000 ? '#FF6B35'
+                            : '#FF6B35'
+                            : '#141C2E';
                           const viewersBg = isLive
                             ? viewers >= 10000 ? 'rgba(16,185,129,0.12)'
-                            : viewers >= 1000 ? 'rgba(245,158,11,0.12)'
-                            : 'rgba(239,68,68,0.12)'
+                            : viewers >= 1000 ? 'rgba(255,107,53,0.12)'
+                            : 'rgba(255,107,53,0.12)'
                             : 'rgba(75,85,99,0.08)';
                           return (
                             <span
@@ -748,7 +748,7 @@ const DashboardPage: React.FC = () => {
                         })()}
                       </td>
                       <td className="text-left text-gray-300 align-middle">
-                        <span className="chip-glass inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold text-amber-400">
+                        <span className="chip-glass inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold text-[#FF6B35]">
                           <TrophyIcon className="h-3.5 w-3.5 opacity-90" />
                           <span style={{ fontVariantNumeric: 'tabular-nums' }}>{row.peak.toLocaleString()}</span>
                         </span>
@@ -761,19 +761,19 @@ const DashboardPage: React.FC = () => {
                               setShowDetails(true);
                             }}
                             className="inline-flex items-center gap-1.5 rounded-lg text-[11px] font-bold align-middle"
-                            style={{ backgroundColor: '#fdc600', color: '#000000', padding: '4px 12px', minHeight: '28px' }}
+                            style={{ backgroundColor: '#FF6B35', color: '#141C2E', padding: '4px 12px', minHeight: '28px' }}
                           >
                             <span>View</span>
                           </button>
                           {(() => {
-                            const bg = row.p === 'twitch' ? '#9146FF' : row.p === 'youtube' ? '#FF0000' : '#52FF00';
+                            const bg = row.p === 'twitch' ? '#FF6B35' : row.p === 'youtube' ? '#FF6B35' : '#FF6B35';
                             const slug = row.n.replace(/\s+/g,'').toLowerCase();
                             const url = row.p === 'twitch'
                               ? `https://twitch.tv/${slug}`
                               : row.p === 'youtube'
                                 ? `https://www.youtube.com/@${slug}`
                                 : `https://kick.com/${slug}`;
-                            const color = row.p === 'kick' ? '#000000' : '#ffffff';
+                            const color = row.p === 'kick' ? '#141C2E' : '#ffffff';
                             return (
                               <a
                                 href={url}
@@ -931,7 +931,7 @@ const DashboardPage: React.FC = () => {
                   className="block w-full"
                 >
                   <button className="w-full py-3 sm:py-4 px-4 rounded-xl font-bold text-sm sm:text-base text-black transition-all duration-200 hover:shadow-lg hover:shadow-primary-500/30 hover:scale-[1.02] active:scale-[0.98]"
-                    style={{ background: 'linear-gradient(135deg, #FDC600 0%, #FFD700 100%)' }}>
+                    style={{ background: 'linear-gradient(135deg, #FF6B35 0%, #FF6B35 100%)' }}>
                     <div className="flex items-center justify-center gap-2">
                       <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -953,10 +953,10 @@ const DashboardPage: React.FC = () => {
                 </div>
                 <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
-                    <TrophyIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500" />
+                    <TrophyIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#FF6B35]" />
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">Peak Viewers</p>
                   </div>
-                  <p className="text-lg sm:text-2xl font-bold text-amber-400">{selectedStreamer.highestViewers?.toLocaleString?.() || '-'}</p>
+                  <p className="text-lg sm:text-2xl font-bold text-[#FF6B35]">{selectedStreamer.highestViewers?.toLocaleString?.() || '-'}</p>
                 </div>
                 <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(253, 198, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(253, 198, 0, 0.15)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
@@ -972,7 +972,7 @@ const DashboardPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {selectedStreamer.isLive ? (
-                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[9px] sm:text-[10px] font-black bg-red-600 border border-red-400 animate-pulse" style={{ animationDuration: '2s' }}>
+                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[9px] sm:text-[10px] font-black bg-[#FF6B35] border border-[#FF6B35] animate-pulse" style={{ animationDuration: '2s' }}>
                         <span className="w-1.5 h-1.5 rounded-full bg-white" />
                         LIVE NOW
                       </span>

@@ -130,14 +130,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
               </div>
 
               {/* Live Now */}
-              <div className="flex items-center justify-between py-2 px-2 rounded-md" style={{ background: 'rgba(220, 38, 38, 0.1)' }}>
+              <div className="flex items-center justify-between py-2 px-2 rounded-md" style={{ background: 'rgba(255, 107, 53, 0.1)' }}>
                 <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-md bg-red-600/20 flex items-center justify-center relative">
-                    <div className="relative h-2 w-2 rounded-full bg-red-600 animate-pulse" style={{ animationDuration: '1.5s', boxShadow: '0 0 6px rgba(220, 38, 38, 0.8)' }} />
+                  <div className="h-7 w-7 rounded-md bg-[#FF6B35]/20 flex items-center justify-center relative">
+                    <div className="relative h-2 w-2 rounded-full bg-[#FF6B35] animate-pulse" style={{ animationDuration: '1.5s', boxShadow: '0 0 6px rgba(255, 107, 53, 0.8)' }} />
                   </div>
-                  <span className="text-xs text-red-300 font-medium">{t('dashboard.stats.liveNow')}</span>
+                  <span className="text-xs text-[#FF6B35] font-medium">{t('dashboard.stats.liveNow')}</span>
                 </div>
-                <span className="text-sm font-black text-red-500 tabular-nums">
+                <span className="text-sm font-black text-[#FF6B35] tabular-nums">
                   {liveCountLoading ? '...' : liveCount.toLocaleString()}
                 </span>
               </div>
