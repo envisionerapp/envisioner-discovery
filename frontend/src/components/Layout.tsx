@@ -80,7 +80,7 @@ export const Layout: React.FC = () => {
         </div>
       </nav>
 
-      <main className="w-full p-4 max-w-full overflow-x-hidden">
+      <main className="w-full p-4 pl-8 max-w-full overflow-x-hidden">
         <Outlet />
       </main>
     </div>
