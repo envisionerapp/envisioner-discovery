@@ -122,7 +122,12 @@ code {
 }
 
 .btn-danger {
-  @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+  @apply font-medium py-2 px-4 rounded-lg transition-colors;
+  background: var(--accent);
+  color: white;
+}
+.btn-danger:hover {
+  background: var(--accent-hover);
 }
 
 /* Card styles */
@@ -165,38 +170,34 @@ code {
 }
 
 .form-error {
-  @apply text-sm text-red-600 mt-1;
+  @apply text-sm mt-1;
+  color: var(--accent);
 }
 
-/* Status badges */
+/* Status badges - only orange accent or grayscale */
 .badge {
   @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  background: rgba(255, 107, 53, 0.1);
+  color: var(--accent);
 }
 
-.badge-success {
-  @apply bg-green-100 text-green-800;
-}
-
-.badge-warning {
-  @apply bg-yellow-100 text-yellow-800;
-}
-
-.badge-error {
-  @apply bg-red-100 text-red-800;
-}
-
+.badge-success,
+.badge-warning,
+.badge-error,
 .badge-info {
-  @apply bg-blue-100 text-blue-800;
+  background: rgba(255, 107, 53, 0.1);
+  color: var(--accent);
 }
 
 .badge-gray {
-  @apply bg-gray-100 text-gray-800;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
 }
 
-/* Platform brand accents */
-.brand-twitch { color: #9146FF; }
-.brand-youtube { color: #FF0033; }
-.brand-kick { color: #52FF00; }
+/* Platform brand accents - using accent color */
+.brand-twitch { color: var(--accent); }
+.brand-youtube { color: var(--accent); }
+.brand-kick { color: var(--accent); }
 
 .chip { @apply inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs; }
 .chip-platform { @apply chip; background: var(--bg-secondary); }
