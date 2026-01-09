@@ -57,6 +57,7 @@ const allowedOrigins = new Set([
   'http://localhost:5173',
   'https://envisioner-discovery.vercel.app',
   'https://envisioner-discovery-frontend.vercel.app',
+  'https://discovery.envisioner.io',
   'https://envisioner-app.onrender.com',
   'https://envisioner-discovery.onrender.com',
   process.env.SOFTR_DOMAIN || '',

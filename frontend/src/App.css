@@ -7,24 +7,29 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #f5f5f5;
   color: #141C2E;
+  height: 100%;
+  margin: 0;
 }
 
 .app {
-  min-height: 100vh;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Header */
 .header {
   background: #141C2E;
   color: #fff;
-  padding: 16px 24px;
+  padding: 16px 24px 16px 0;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
+  gap: 24px;
 }
 
 .logo {
@@ -72,14 +77,15 @@ body {
 /* Search Section */
 .search-section {
   background: #fff;
-  padding: 16px 24px;
+  padding: 16px 24px 16px 0;
   display: flex;
   gap: 12px;
   border-bottom: 1px solid #e0e0e0;
+  justify-content: flex-end;
 }
 
 .search-box {
-  flex: 1;
+  width: 400px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -165,10 +171,8 @@ body {
 /* Content Layout */
 .content {
   display: flex;
-  padding: 24px;
+  padding: 24px 24px 24px 0;
   gap: 24px;
-  max-width: 1600px;
-  margin: 0 auto;
 }
 
 /* Filters Sidebar */
@@ -183,6 +187,7 @@ body {
   height: fit-content;
   position: sticky;
   top: 24px;
+  margin-left: auto;
 }
 
 .filters-header {
@@ -581,8 +586,8 @@ body {
 
 /* Results */
 .results {
-  flex: 1;
-  min-width: 0;
+  width: 932px; /* 3 cards * 300px + 2 gaps * 16px */
+  flex-shrink: 0;
 }
 
 .results-count {
@@ -595,8 +600,8 @@ body {
 /* Creator Grid */
 .creator-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(3, 300px);
+  gap: 16px;
 }
 
 /* Creator Card */
@@ -772,15 +777,27 @@ body {
   letter-spacing: 0.5px;
 }
 
+.creator-info {
+  flex: 1;
+  min-width: 0;
+  padding-right: 70px;
+}
+
 .creator-info h3 {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .creator-info p {
   font-size: 13px;
   color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .creator-meta {
@@ -1124,7 +1141,7 @@ body {
 
 @media (max-width: 640px) {
   .header {
-    padding: 12px 16px;
+    padding: 12px 16px 12px 0;
   }
 
   .logo {
@@ -1140,15 +1157,15 @@ body {
   }
 
   .search-section {
-    padding: 12px 16px;
+    padding: 12px 16px 12px 0;
   }
 
   .content {
-    padding: 16px;
+    padding: 16px 16px 16px 0;
   }
 
   .creator-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 300px);
   }
 }
 
