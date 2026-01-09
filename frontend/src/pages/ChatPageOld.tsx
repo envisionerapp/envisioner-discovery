@@ -11,7 +11,7 @@ const ChatPage: React.FC = () => {
   const [showHistoryMobile, setShowHistoryMobile] = useState(false);
   type Msg = { id: string; role: 'ai'|'user'; text: string; time: string };
   const seedMsgs: Msg[] = useMemo(() => ([
-    { id: 'm1', role: 'ai', text: 'Hi! I’m Mielo. How can I help?', time: 'now' },
+    { id: 'm1', role: 'ai', text: 'Hi! I’m Envisioner. How can I help?', time: 'now' },
     { id: 'm2', role: 'user', text: 'Show top Twitch streamers in Mexico', time: 'now' },
     { id: 'm3', role: 'ai', text: 'Placeholder results will appear here.', time: 'now' },
   ]), []);
@@ -48,7 +48,7 @@ const ChatPage: React.FC = () => {
     <div className="max-w-6xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          Chat with Mielo
+          Chat with Envisioner
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
           Ask me anything about your streamers and campaigns using natural language.
@@ -129,10 +129,10 @@ const ChatPage: React.FC = () => {
               {messages.map(m => (
                 <div key={m.id} className="flex items-start gap-3 chat-message">
                   {m.role === 'ai'
-                    ? <div className="h-8 w-8 rounded-full chip-glass flex items-center justify-center text-sm font-bold">M</div>
+                    ? <div className="h-8 w-8 rounded-full chip-glass flex items-center justify-center text-sm font-bold">E</div>
                     : <img src={AVATARS[0]} alt="you" className="h-8 w-8 rounded-full object-cover" />}
                   <div className="flex-1">
-                    <div className="text-xs text-gray-500 mb-1">{m.role === 'ai' ? 'Mielo' : 'You'} • {m.time}</div>
+                    <div className="text-xs text-gray-500 mb-1">{m.role === 'ai' ? 'Envisioner' : 'You'} • {m.time}</div>
                     {m.role === 'ai'
                       ? <div className="chat-bubble-ai">{m.text}</div>
                       : <div className="chat-bubble-user inline-block">{m.text}</div>}

@@ -54,8 +54,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
   const { liveCount, isLoading: liveCountLoading } = useLiveCount();
   const { t } = useLanguage();
 
-  // Only abiola@miela.cc is admin
-  const isAdmin = user?.email === 'abiola@miela.cc';
+  // Admin emails
+  const isAdmin = user?.email === 'abiola@miela.cc' || user?.email === 'admin@envisioner.io';
 
   const containerClasses = clsx(
     'w-64 sidebar-fixed-height',

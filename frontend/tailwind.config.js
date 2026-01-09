@@ -11,20 +11,22 @@ module.exports = {
         '2xl': '1430px',
       },
       colors: {
+        // Envisioner brand colors - Orange accent
         primary: {
-          50: '#fffbea',
-          100: '#fff3c4',
-          200: '#ffe58f',
-          300: '#ffd75a',
-          400: '#ffcb26',
-          500: '#fdc600',
-          600: '#e0b200',
-          700: '#b98f00',
-          800: '#8f6e00',
-          900: '#6b5300',
-          950: '#4a3900',
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#FF6B35',  // Main Envisioner orange
+          600: '#ea580c',
+          700: '#c2410c',
+          800: '#9a3412',
+          900: '#7c2d12',
+          950: '#431407',
         },
-        accent: '#646881',
+        accent: '#FF6B35',  // Envisioner orange
+        navy: '#141C2E',    // Envisioner primary dark
         gray: {
           50: '#f9fafb',
           100: '#f3f4f6',

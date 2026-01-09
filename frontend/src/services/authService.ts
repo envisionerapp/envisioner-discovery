@@ -64,7 +64,7 @@ class AuthService {
   }
 
   async refreshToken(): Promise<AuthTokens> {
-    const refreshToken = localStorage.getItem('mielo_refresh_token');
+    const refreshToken = localStorage.getItem('envisioner_refresh_token');
     console.log('🌐 API DEBUG: refreshToken called', {
       hasRefreshToken: !!refreshToken,
       refreshTokenLength: refreshToken?.length
@@ -86,8 +86,8 @@ class AuthService {
     });
 
     const tokens = response.data.data;
-    localStorage.setItem('mielo_access_token', tokens.accessToken);
-    localStorage.setItem('mielo_refresh_token', tokens.refreshToken);
+    localStorage.setItem('envisioner_access_token', tokens.accessToken);
+    localStorage.setItem('envisioner_refresh_token', tokens.refreshToken);
 
     console.log('🌐 API DEBUG: New tokens stored', {
       hasAccessToken: !!tokens.accessToken,
@@ -121,7 +121,7 @@ class AuthService {
   }
 
   getAuthHeader(): { Authorization: string } | {} {
-    const token = localStorage.getItem('mielo_access_token');
+    const token = localStorage.getItem('envisioner_access_token');
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 }
@@ -130,7 +130,7 @@ class AuthService {
 axios.interceptors.request.use(
   (config) => {
     // Check if in embed mode (from sessionStorage)
-    const embedState = sessionStorage.getItem('mielo_embed_mode');
+    const embedState = sessionStorage.getItem('envisioner_embed_mode');
     const isEmbedMode = embedState ? JSON.parse(embedState).isEmbedMode : false;
     const isValidReferrer = embedState ? JSON.parse(embedState).isValidReferrer : false;
 
@@ -147,7 +147,7 @@ axios.interceptors.request.use(
       config.headers['X-Embed-Referrer'] = document.referrer || '';
     } else {
       // Normal mode: send auth token
-      const token = localStorage.getItem('mielo_access_token');
+      const token = localStorage.getItem('envisioner_access_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -181,7 +181,7 @@ axios.interceptors.response.use(
     });
 
     // Check if in embed mode
-    const embedState = sessionStorage.getItem('mielo_embed_mode');
+    const embedState = sessionStorage.getItem('envisioner_embed_mode');
     const isEmbedMode = embedState ? JSON.parse(embedState).isEmbedMode : false;
 
     // Skip token refresh in embed mode
@@ -199,7 +199,7 @@ axios.interceptors.response.use(
     if (error.response?.status === 401 &&
         !originalRequest._retry &&
         !isAuthEndpoint &&
-        localStorage.getItem('mielo_refresh_token')) {
+        localStorage.getItem('envisioner_refresh_token')) {
 
       console.log('🌐 AXIOS DEBUG: 401 detected on protected endpoint, attempting token refresh...');
       originalRequest._retry = true;
@@ -209,16 +209,16 @@ axios.interceptors.response.use(
         await authService.refreshToken();
 
         // Retry the original request
-        const token = localStorage.getItem('mielo_access_token');
+        const token = localStorage.getItem('envisioner_access_token');
         originalRequest.headers.Authorization = `Bearer ${token}`;
         console.log('🌐 AXIOS DEBUG: Retrying original request with new token');
         return axios(originalRequest);
       } catch (refreshError) {
         console.log('🌐 AXIOS DEBUG: Token refresh failed, redirecting to login', refreshError);
         // Refresh failed, redirect to login
-        localStorage.removeItem('mielo_access_token');
-        localStorage.removeItem('mielo_refresh_token');
-        window.location.href = '#/login';
+        localStorage.removeItem('envisioner_access_token');
+        localStorage.removeItem('envisioner_refresh_token');
+        window.location.href = '#/dashboard';
         return Promise.reject(refreshError);
       }
     } else if (error.response?.status === 401 && isAuthEndpoint) {

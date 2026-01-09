@@ -13,7 +13,7 @@
   --glass-border: rgba(255, 255, 255, 0.10);
   --glass-bg-strong: rgba(255, 255, 255, 0.07);
   --glass-bg-heavy: rgba(255, 255, 255, 0.09);
-  --glass-ring: rgba(253, 198, 0, 0.30);
+  --glass-ring: rgba(255, 107, 53, 0.30);
 }
 
 body {
@@ -24,8 +24,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Liquid gradient background */
-  background: radial-gradient(1200px 800px at -10% -10%, rgba(253,198,0,0.18), transparent 60%),
-              radial-gradient(1000px 700px at 110% 10%, rgba(253,198,0,0.10), transparent 60%),
+  background: radial-gradient(1200px 800px at -10% -10%, rgba(255,107,53,0.18), transparent 60%),
+              radial-gradient(1000px 700px at 110% 10%, rgba(255,107,53,0.10), transparent 60%),
               radial-gradient(800px 600px at 50% 120%, rgba(100,104,129,0.14), transparent 60%),
               #080708;
   @apply text-gray-100;
@@ -94,11 +94,11 @@ code {
 /* Button variants */
 .btn-primary {
   @apply text-black font-medium py-2 px-4 rounded-lg transition-colors focus-ring;
-  background: linear-gradient(180deg, #fdc600, #e0b200);
+  background: linear-gradient(180deg, #FF6B35, #ea580c);
   box-shadow: none;
 }
 .btn-primary:hover {
-  background: linear-gradient(180deg, #e0b200, #b98f00);
+  background: linear-gradient(180deg, #ea580c, #c2410c);
 }
 
 .btn-secondary {
@@ -358,21 +358,21 @@ code {
 .bg-primary-400, .bg-primary-500, .bg-primary-600 { background-color: theme('colors.primary.500') !important; color: #000 !important; }
 
 /* Darker yellow on hover utility */
-.hover-darken-primary:hover { background-color: #e0b200 !important; }
-.hover-darken-primary:active { background-color: #b98f00 !important; }
+.hover-darken-primary:hover { background-color: #ea580c !important; }
+.hover-darken-primary:active { background-color: #c2410c !important; }
 
 /* Inputs: glass */
 .form-input {
   background: rgba(255,255,255,0.06);
   border: 0.5px solid rgba(255,255,255,0.12);
-  caret-color: #fdc600;
+  caret-color: #FF6B35;
   -webkit-appearance: none;
   appearance: none;
 }
 .form-input:focus {
   outline: none !important;
   box-shadow: none !important;
-  border-color: #fdc600 !important;
+  border-color: #FF6B35 !important;
 }
 .form-input:focus-visible {
   outline: none !important;
@@ -398,7 +398,7 @@ input:-webkit-autofill:focus {
 textarea:focus {
   outline: none !important;
   box-shadow: none !important;
-  border-color: #fdc600 !important;
+  border-color: #FF6B35 !important;
 }
 
 /* Remove default input focus rings everywhere */
@@ -428,7 +428,7 @@ input[type="password"]:focus,
 textarea:focus,
 select:focus {
   background: rgba(255,255,255,0.06) !important;
-  border-color: #fdc600 !important;
+  border-color: #FF6B35 !important;
 }
 
 /* Buttons hover refinement */
@@ -467,7 +467,7 @@ select:focus {
   --glass-border: rgba(255, 255, 255, 0.10);
   --glass-bg-strong: rgba(255, 255, 255, 0.07);
   --glass-bg-heavy: rgba(255, 255, 255, 0.09);
-  --glass-ring: rgba(253, 198, 0, 0.30);
+  --glass-ring: rgba(255, 107, 53, 0.30);
 }
 
 body {
@@ -478,8 +478,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Liquid gradient background */
-  background: radial-gradient(1200px 800px at -10% -10%, rgba(253,198,0,0.18), transparent 60%),
-              radial-gradient(1000px 700px at 110% 10%, rgba(253,198,0,0.10), transparent 60%),
+  background: radial-gradient(1200px 800px at -10% -10%, rgba(255,107,53,0.18), transparent 60%),
+              radial-gradient(1000px 700px at 110% 10%, rgba(255,107,53,0.10), transparent 60%),
               radial-gradient(800px 600px at 50% 120%, rgba(100,104,129,0.14), transparent 60%),
               #080708;
   @apply text-gray-100;
@@ -548,11 +548,11 @@ code {
 /* Button variants */
 .btn-primary {
   @apply text-black font-medium py-2 px-4 rounded-lg transition-colors focus-ring;
-  background: linear-gradient(180deg, #fdc600, #e0b200);
+  background: linear-gradient(180deg, #FF6B35, #ea580c);
   box-shadow: none;
 }
 .btn-primary:hover {
-  background: linear-gradient(180deg, #e0b200, #b98f00);
+  background: linear-gradient(180deg, #ea580c, #c2410c);
 }
 
 .btn-secondary {
@@ -812,21 +812,21 @@ code {
 .bg-primary-400, .bg-primary-500, .bg-primary-600 { background-color: theme('colors.primary.500') !important; color: #000 !important; }
 
 /* Darker yellow on hover utility */
-.hover-darken-primary:hover { background-color: #e0b200 !important; }
-.hover-darken-primary:active { background-color: #b98f00 !important; }
+.hover-darken-primary:hover { background-color: #ea580c !important; }
+.hover-darken-primary:active { background-color: #c2410c !important; }
 
 /* Inputs: glass */
 .form-input {
   background: rgba(255,255,255,0.06);
   border: 0.5px solid rgba(255,255,255,0.12);
-  caret-color: #fdc600;
+  caret-color: #FF6B35;
   -webkit-appearance: none;
   appearance: none;
 }
 .form-input:focus {
   outline: none !important;
   box-shadow: none !important;
-  border-color: #fdc600 !important;
+  border-color: #FF6B35 !important;
 }
 .form-input:focus-visible {
   outline: none !important;
@@ -852,7 +852,7 @@ input:-webkit-autofill:focus {
 textarea:focus {
   outline: none !important;
   box-shadow: none !important;
-  border-color: #fdc600 !important;
+  border-color: #FF6B35 !important;
 }
 
 /* Remove default input focus rings everywhere */
@@ -882,7 +882,7 @@ input[type="password"]:focus,
 textarea:focus,
 select:focus {
   background: rgba(255,255,255,0.06) !important;
-  border-color: #fdc600 !important;
+  border-color: #FF6B35 !important;
 }
 
 /* Buttons hover refinement */

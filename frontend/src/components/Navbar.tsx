@@ -25,7 +25,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
   const getLocalAvatar = (email: string) => {
     const initials = email.split('@')[0].substring(0, 2).toUpperCase();
     return `data:image/svg+xml;utf8,${encodeURIComponent(
-      `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='#fdc600'/><text x='50' y='50' text-anchor='middle' dy='0.35em' font-family='system-ui' font-size='40' font-weight='600' fill='#000'>${initials}</text></svg>`
+      `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='#FF6B35'/><text x='50' y='50' text-anchor='middle' dy='0.35em' font-family='system-ui' font-size='40' font-weight='600' fill='#fff'>${initials}</text></svg>`
     )}`;
   };
 
@@ -44,10 +44,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
               <Bars3Icon className="h-6 w-6 text-gray-700 dark:text-gray-200" />
             </button>
             <Link to="/dashboard" className="flex items-center space-x-2 min-w-0">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center text-black text-lg font-bold">
-                ED
+              <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center text-white text-lg font-bold">
+                E
               </div>
-              <h1 className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100">Discovery</h1>
+              <h1 className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100">Envisioner</h1>
             </Link>
           </div>
 

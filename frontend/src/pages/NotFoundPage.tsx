@@ -16,11 +16,11 @@ const NotFoundPage: React.FC = () => {
           The page you're looking for doesn't exist or has been moved.
         </p>
         <Link
-          to="/chat"
-          className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-black bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+          to="/dashboard"
+          className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
         >
           <HomeIcon className="h-5 w-5 mr-2" />
-          Go to Chat
+          Go to Dashboard
         </Link>
       </div>
     </div>
