@@ -37,11 +37,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
           <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
             {/* Mobile menu button */}
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-white/10"
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100"
               onClick={onMenuClick}
               aria-label="Open menu"
             >
-              <Bars3Icon className="h-6 w-6 text-gray-700 dark:text-gray-200" />
+              <Bars3Icon className="h-6 w-6 text-gray-700" />
             </button>
             <Link to="/dashboard" className="flex items-center space-x-2 min-w-0">
               <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center text-white text-lg font-bold">
@@ -56,11 +56,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
             {/* Language Toggle */}
             <button
               onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
-              className="flex items-center space-x-1 p-2 rounded-lg hover:bg-white/10 transition-colors group"
+              className="flex items-center space-x-1 p-2 rounded-lg hover:bg-gray-100 transition-colors group"
               title={language === 'en' ? 'Cambiar a Español' : 'Switch to English'}
             >
-              <LanguageIcon className="h-5 w-5 text-primary-500 group-hover:text-primary-400" />
-              <span className="text-sm font-medium text-gray-300 group-hover:text-gray-100">
+              <LanguageIcon className="h-5 w-5 text-primary-500 group-hover:text-primary-600" />
+              <span className="text-sm font-medium text-gray-600 group-hover:text-gray-900">
                 {language === 'en' ? 'ES' : 'EN'}
               </span>
             </button>
@@ -72,7 +72,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
 
             {/* User dropdown */}
             <Menu as="div" className="relative">
-              <Menu.Button className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 transition-colors">
+              <Menu.Button className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors">
                 <img
                   src={avatarError ? getLocalAvatar(user?.email || 'default-user') : getUserAvatar(user?.email || 'default-user')}
                   alt="User avatar"
@@ -80,13 +80,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                   onError={() => setAvatarError(true)}
                 />
                 <div className="hidden sm:block text-left truncate max-w-[40vw]">
-                  <p className="text-sm font-medium text-gray-100 truncate">
+                  <p className="text-sm font-medium text-gray-900 truncate">
                     {user?.firstName && user?.lastName
                       ? `${user.firstName} ${user.lastName}`
                       : user?.email?.split('@')[0]
                   }
                   </p>
-                  <p className="text-xs text-primary-700 font-semibold truncate">{user?.email}</p>
+                  <p className="text-xs text-primary-500 font-semibold truncate">{user?.email}</p>
                 </div>
               </Menu.Button>
 
@@ -99,26 +99,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <Menu.Items className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg focus:outline-none z-50 bg-primary-600 text-black border border-primary-700">
+                <Menu.Items className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg focus:outline-none z-50 bg-white border border-gray-200">
                   <div className="py-1 space-y-1">
                     <Menu.Item>
                       {({ active }) => (
                         <button
-                          className={`${active ? 'bg-primary-700' : 'bg-primary-500'} flex items-center w-full px-4 py-2 text-sm text-black rounded-md hover:bg-primary-600 transition-colors`}
+                          className={`${active ? 'bg-gray-100' : ''} flex items-center w-full px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 transition-colors`}
                         >
-                          <Cog6ToothIcon className="h-4 w-4 mr-3 text-black" />
+                          <Cog6ToothIcon className="h-4 w-4 mr-3 text-gray-500" />
                           {t('nav.settings')}
                         </button>
                       )}
                     </Menu.Item>
-                    <hr className="my-1 border-primary-700" />
+                    <hr className="my-1 border-gray-200" />
                     <Menu.Item>
                       {({ active }) => (
                         <button
                           onClick={logout}
-                          className={`${active ? 'bg-primary-700' : 'bg-primary-500'} flex items-center w-full px-4 py-2 text-sm text-black rounded-md hover:bg-primary-600 transition-colors`}
+                          className={`${active ? 'bg-gray-100' : ''} flex items-center w-full px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 transition-colors`}
                         >
-                          <ArrowRightOnRectangleIcon className="h-4 w-4 mr-3 text-black" />
+                          <ArrowRightOnRectangleIcon className="h-4 w-4 mr-3 text-gray-500" />
                           {t('nav.logout')}
                         </button>
                       )}

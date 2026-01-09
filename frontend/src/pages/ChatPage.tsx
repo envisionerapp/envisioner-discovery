@@ -157,7 +157,7 @@ const ChatPage: React.FC = () => {
 
           <div className={`${showHistoryMobile ? 'block' : 'hidden'} 2xl:block mb-3 2xl:mb-0`} style={{ width: '100%', minWidth: 0 }}>
             <div className="card flex flex-col h-auto max-h-[400px] sm:max-h-[500px] md:max-h-[600px] 2xl:h-[calc(100vh-120px)] 2xl:max-h-none overflow-hidden" style={{ width: '100%', minWidth: 0 }}>
-            <div className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 border-b border-gray-800/30 flex-shrink-0 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(255, 107, 53, 0.10) 0%, rgba(0, 0, 0, 0) 100%)' }}>
+            <div className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 border-b border-gray-800/30 flex-shrink-0 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(255, 107, 53, 0.08) 0%, transparent 100%)' }}>
               <div className="flex items-center justify-between">
                 <p className="text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wide">Conversations</p>
                 <button
@@ -232,7 +232,7 @@ const ChatPage: React.FC = () => {
         <section className="2xl:col-span-3 w-full min-w-0">
           <div className="card flex flex-col w-full max-w-full" style={{ height: 'calc(100vh - 120px)' }}>
             {/* Chat header */}
-            <div className="px-3 py-2 md:px-4 md:py-3 border-b border-gray-800/30 flex items-center justify-between flex-shrink-0 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(255, 107, 53, 0.10) 0%, rgba(0, 0, 0, 0) 100%)' }}>
+            <div className="px-3 py-2 md:px-4 md:py-3 border-b border-gray-800/30 flex items-center justify-between flex-shrink-0 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(255, 107, 53, 0.08) 0%, transparent 100%)' }}>
               <div>
                 <p className="text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wide">Assistant</p>
                 <p className="text-xs text-gray-500 hidden sm:block">
@@ -459,7 +459,7 @@ const ChatPage: React.FC = () => {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDetails(false)} />
           <div className="absolute inset-y-0 right-0 w-full sm:w-[580px] card overflow-y-auto" style={{ boxShadow: '-4px 0 24px rgba(0,0,0,0.5)' }}>
             {/* Header with Avatar */}
-            <div className="sticky top-0 z-10 backdrop-blur-md border-b p-5 rounded-t-xl" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.12) 0%, rgba(0, 0, 0, 0.6) 100%)', borderColor: 'rgba(255, 107, 53, 0.25)' }}>
+            <div className="sticky top-0 z-10 backdrop-blur-md border-b p-5 rounded-t-xl" style={{ background: 'rgba(255, 107, 53, 0.08)', borderColor: 'rgba(255, 107, 53, 0.2)' }}>
               <div className="flex items-start gap-4">
                 <div className="relative">
                   <img
@@ -472,7 +472,7 @@ const ChatPage: React.FC = () => {
                       String(selected.platform).toLowerCase() === 'twitch' ? 'brand-twitch' :
                       String(selected.platform).toLowerCase() === 'youtube' ? 'brand-youtube' :
                       'brand-kick'
-                    } w-5 h-5`} style={{ backgroundColor: 'rgba(0,0,0,0.75)' }}>
+                    } w-5 h-5`} style={{ backgroundColor: 'rgba(20, 28, 46, 0.9)' }}>
                       <PlatformIcon name={String(selected.platform).toLowerCase() as any} className="h-3 w-3" />
                     </span>
                   )}
@@ -534,28 +534,28 @@ const ChatPage: React.FC = () => {
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'rgba(255, 107, 53, 0.05)', borderColor: 'rgba(255, 107, 53, 0.2)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                     <UsersIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" />
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">Followers</p>
                   </div>
                   <p className="text-lg sm:text-2xl font-bold text-gray-100">{selected.followers?.toLocaleString?.() || '-'}</p>
                 </div>
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'rgba(255, 107, 53, 0.05)', borderColor: 'rgba(255, 107, 53, 0.2)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                     <TrophyIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500" />
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">Peak Viewers</p>
                   </div>
                   <p className="text-lg sm:text-2xl font-bold text-amber-400">{selected.highestViewers?.toLocaleString?.() || '-'}</p>
                 </div>
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'rgba(255, 107, 53, 0.05)', borderColor: 'rgba(255, 107, 53, 0.2)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                     <EyeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" />
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">Current Viewers</p>
                   </div>
                   <p className="text-lg sm:text-2xl font-bold text-gray-100">{selected.currentViewers?.toLocaleString?.() || '-'}</p>
                 </div>
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'rgba(255, 107, 53, 0.05)', borderColor: 'rgba(255, 107, 53, 0.2)' }}>
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
                     <ClockIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500" />
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wide">Last Streamed</p>
@@ -577,7 +577,7 @@ const ChatPage: React.FC = () => {
 
               {/* Bio / Description */}
               {selected.profileDescription && (
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'rgba(255, 107, 53, 0.05)', borderColor: 'rgba(255, 107, 53, 0.2)' }}>
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">
                     <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -590,7 +590,7 @@ const ChatPage: React.FC = () => {
 
               {/* Social Links */}
               {selected.externalLinks && Object.keys(selected.externalLinks).length > 0 && (
-                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
+                <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'rgba(255, 107, 53, 0.05)', borderColor: 'rgba(255, 107, 53, 0.2)' }}>
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">
                     <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -761,7 +761,7 @@ const ChatPage: React.FC = () => {
               )}
 
               {/* Notes Section */}
-              <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
+              <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'rgba(255, 107, 53, 0.05)', borderColor: 'rgba(255, 107, 53, 0.2)' }}>
                 <div className="flex items-center gap-2 mb-2 sm:mb-3">
                   <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -777,7 +777,7 @@ const ChatPage: React.FC = () => {
               </div>
 
               {/* Assignments Section */}
-              <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderColor: 'rgba(255, 107, 53, 0.15)' }}>
+              <div className="p-3 sm:p-4 rounded-xl border" style={{ background: 'rgba(255, 107, 53, 0.05)', borderColor: 'rgba(255, 107, 53, 0.2)' }}>
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <div className="flex items-center gap-2">
                     <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

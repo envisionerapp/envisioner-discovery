@@ -63,7 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, onNavigate }
   );
 
   return (
-    <aside className={containerClasses} style={{ background: 'rgba(8, 7, 8, 0.95)', border: '1px solid rgba(255,255,255,0.08)' }}>
+    <aside className={containerClasses}>
       <nav className="h-full flex flex-col py-3">
         {/* Navigation Links */}
         <div className="flex-1">

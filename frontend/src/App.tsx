@@ -43,14 +43,14 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 dark:text-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 dark:text-gray-100">
+    <div className="min-h-screen bg-white">
       <Routes>
         {/* Root redirect to dashboard */}
         <Route index element={<Navigate to="/dashboard" replace />} />
