@@ -1,5 +1,7 @@
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_BASE_URL = import.meta.env.DEV
+  ? 'http://localhost:5001'
+  : 'https://envisioner-discovery.onrender.com';
 
 // Get user email - matches envisioner widget.js pattern
 export const getUserEmail = (): string | null => {
