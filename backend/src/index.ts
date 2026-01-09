@@ -168,7 +168,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Manual seed trigger (temporary - remove after data is seeded)
+// Manual seed trigger (temporary)
 app.post('/seed-now', async (req, res) => {
   try {
     const { seedFromCsvIfEmpty } = await import('./utils/seedFromCsv');
@@ -178,6 +178,19 @@ app.post('/seed-now', async (req, res) => {
     res.json({ success: true, result });
   } catch (error: any) {
     logger.error('🌱 Manual seed error:', { message: error?.message, stack: error?.stack });
+    res.status(500).json({ success: false, error: error?.message });
+  }
+});
+
+// Manual live status sync trigger (temporary)
+app.post('/sync-live', async (req, res) => {
+  try {
+    logger.info('🔴 Manual live status sync triggered');
+    const result = await liveStatusService.updateStreamersLiveStatus(500, 100);
+    logger.info(`🔴 Live status sync result: ${JSON.stringify(result)}`);
+    res.json({ success: true, result });
+  } catch (error: any) {
+    logger.error('🔴 Live status sync error:', { message: error?.message, stack: error?.stack });
     res.status(500).json({ success: false, error: error?.message });
   }
 });
