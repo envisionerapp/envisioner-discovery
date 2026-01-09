@@ -93,11 +93,10 @@ export async function seedFromCsvIfEmpty(): Promise<{ created: number; updated: 
       return { created: 0, updated: 0, skipped: 0 };
     }
 
-    // In production (dist/), CSV is at dist/csv/combined.csv
-    // In development, CSV is at src/../csv/combined.csv
-    const csvPath = process.env.NODE_ENV === 'production'
-      ? path.resolve(__dirname, 'csv', 'combined.csv')
-      : path.resolve(__dirname, '..', 'csv', 'combined.csv');
+    // In production (dist/utils/), CSV is at dist/csv/combined.csv
+    // In development (src/utils/), CSV is at csv/combined.csv
+    // Both need to go up one level from utils/ to find csv/
+    const csvPath = path.resolve(__dirname, '..', 'csv', 'combined.csv');
     if (!fs.existsSync(csvPath)) {
       logger.warn(`CSV not found at ${csvPath}; skipping auto-seed.`);
       return { created: 0, updated: 0, skipped: 0 };
