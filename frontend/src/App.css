@@ -13,6 +13,13 @@ html, body {
   color: #141C2E;
   height: 100%;
   margin: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
 }
 
 .app {
@@ -1180,12 +1187,12 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #141C2E 0%, #1a2744 100%);
+  background: #FFFFFF;
 }
 
 .access-gate-content {
   text-align: center;
-  color: #fff;
+  color: #141C2E;
   padding: 40px;
 }
 
@@ -1204,7 +1211,7 @@ html, body {
 .access-gate-spinner {
   width: 48px;
   height: 48px;
-  border: 3px solid rgba(255, 255, 255, 0.2);
+  border: 3px solid #e0e0e0;
   border-top-color: #FF6B35;
   border-radius: 50%;
   margin: 0 auto 24px;
