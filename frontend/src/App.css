@@ -16,9 +16,8 @@ html, body {
 }
 
 .app {
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
+  min-height: 100%;
+  overflow: visible;
 }
 
 /* Header */
