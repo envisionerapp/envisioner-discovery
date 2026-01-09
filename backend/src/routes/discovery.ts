@@ -1,7 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { asyncHandler } from '../middleware/errorHandler';
 import { db, logger } from '../utils/database';
-import { Platform, Region } from '@prisma/client';
+import { Platform, Region, FraudStatus } from '@prisma/client';
+import { discoveryService } from '../services/discoveryService';
+import multer from 'multer';
+import { parse } from 'csv-parse/sync';
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 const router = Router();
 
@@ -456,6 +461,323 @@ function getRecommendationReasons(creator: any, campaignType?: string): string[]
   }
 
   return reasons;
+}
+
+// ==================== DISCOVERY ENDPOINTS ====================
+
+/**
+ * POST /api/discovery/run
+ * Run discovery to find new streamers from APIs
+ */
+router.post('/run', asyncHandler(async (req: Request, res: Response) => {
+  const { type = 'full', gameId, keyword, platform, limit = 100 } = req.body;
+
+  logger.info('Discovery run requested', { type, gameId, keyword, platform, limit });
+
+  let result;
+
+  switch (type) {
+    case 'full':
+      result = await discoveryService.runFullDiscovery();
+      break;
+    case 'twitch-game':
+      if (!gameId) {
+        return res.status(400).json({ success: false, error: 'gameId required for twitch-game discovery' });
+      }
+      result = await discoveryService.discoverTwitchByGame(gameId, limit);
+      break;
+    case 'twitch-keyword':
+      if (!keyword) {
+        return res.status(400).json({ success: false, error: 'keyword required for twitch-keyword discovery' });
+      }
+      result = await discoveryService.discoverTwitchByKeyword(keyword, limit);
+      break;
+    case 'twitch-top':
+      result = await discoveryService.discoverTwitchTopStreams(limit);
+      break;
+    case 'kick-top':
+      result = await discoveryService.discoverKickTopStreams(limit);
+      break;
+    case 'kick-category':
+      const { categorySlug } = req.body;
+      if (!categorySlug) {
+        return res.status(400).json({ success: false, error: 'categorySlug required for kick-category discovery' });
+      }
+      result = await discoveryService.discoverKickByCategory(categorySlug, limit);
+      break;
+    default:
+      return res.status(400).json({ success: false, error: 'Invalid discovery type' });
+  }
+
+  res.json({
+    success: true,
+    data: result
+  });
+}));
+
+/**
+ * POST /api/discovery/backfill-followers
+ * Backfill missing follower counts from Twitch API
+ */
+router.post('/backfill-followers', asyncHandler(async (req: Request, res: Response) => {
+  const { limit = 500 } = req.body;
+
+  logger.info('Follower backfill requested', { limit });
+
+  const result = await discoveryService.backfillTwitchFollowers(limit);
+
+  res.json({
+    success: true,
+    data: result
+  });
+}));
+
+// ==================== CSV IMPORT ENDPOINTS ====================
+
+/**
+ * POST /api/discovery/import/csv
+ * Bulk import streamers from CSV file
+ */
+router.post('/import/csv', upload.single('file'), asyncHandler(async (req: Request, res: Response) => {
+  const file = (req as any).file;
+  if (!file) {
+    return res.status(400).json({ success: false, error: 'No file uploaded' });
+  }
+
+  logger.info('CSV import started', { filename: file.originalname, size: file.size });
+
+  const content = file.buffer.toString('utf8');
+  const rows = parse(content, { columns: true, skip_empty_lines: true, trim: true }) as Record<string, any>[];
+
+  let created = 0;
+  let updated = 0;
+  let skipped = 0;
+  const errors: string[] = [];
+
+  for (const row of rows) {
+    try {
+      // Flexible column mapping
+      const platform = mapPlatform(row.Platform || row.platform || row.PLATFORM);
+      const username = (row['Channel name'] || row.Username || row.username || row['Channel Name'] || row.channel_name || '').trim();
+      const displayName = row['Display Name'] || row.displayName || row['Channel name'] || username;
+      const profileUrl = (row['Channel url'] || row.URL || row.url || row.profileUrl || row['Profile URL'] || '').trim();
+      const region = mapRegion(row.Country || row.Region || row.country || row.region);
+      const language = mapLanguage(row.Language || row.language);
+      const followers = toInt(row.Followers || row.followers) || 0;
+      const peakViewers = toInt(row['Peak Viewers'] || row.peakViewers || row['Highest Viewers']);
+      const avgViewers = toInt(row['Average Viewers'] || row.avgViewers);
+      const topGame = (row['Top Game'] || row.topGame || row.Game || row.game || '').trim();
+
+      if (!platform || !username) {
+        skipped++;
+        continue;
+      }
+
+      const existing = await db.streamer.findFirst({
+        where: { platform, username: username.toLowerCase() }
+      });
+
+      if (existing) {
+        await db.streamer.update({
+          where: { id: existing.id },
+          data: {
+            displayName: displayName || existing.displayName,
+            profileUrl: profileUrl || existing.profileUrl,
+            followers: followers || existing.followers,
+            highestViewers: peakViewers ?? existing.highestViewers,
+            currentGame: topGame || existing.currentGame,
+            topGames: topGame ? [topGame] : existing.topGames as string[],
+            region: region || existing.region,
+            language: language || existing.language,
+            lastScrapedAt: new Date(),
+          },
+        });
+        updated++;
+      } else {
+        await db.streamer.create({
+          data: {
+            platform,
+            username: username.toLowerCase(),
+            displayName: displayName || username,
+            profileUrl,
+            followers,
+            currentViewers: avgViewers || 0,
+            highestViewers: peakViewers,
+            isLive: false,
+            currentGame: topGame || null,
+            topGames: topGame ? [topGame] : [],
+            tags: [],
+            region: region || Region.MEXICO,
+            language: language || 'es',
+            usesCamera: false,
+            isVtuber: false,
+            fraudCheck: FraudStatus.PENDING_REVIEW,
+          },
+        });
+        created++;
+      }
+    } catch (e: any) {
+      skipped++;
+      if (errors.length < 10) {
+        errors.push(e.message);
+      }
+    }
+  }
+
+  const totalStreamers = await db.streamer.count();
+
+  logger.info('CSV import complete', { created, updated, skipped, total: totalStreamers });
+
+  res.json({
+    success: true,
+    data: {
+      created,
+      updated,
+      skipped,
+      totalStreamers,
+      errors: errors.length > 0 ? errors : undefined
+    }
+  });
+}));
+
+/**
+ * POST /api/discovery/import/json
+ * Bulk import streamers from JSON array
+ */
+router.post('/import/json', asyncHandler(async (req: Request, res: Response) => {
+  const { streamers } = req.body;
+
+  if (!Array.isArray(streamers)) {
+    return res.status(400).json({ success: false, error: 'streamers must be an array' });
+  }
+
+  logger.info('JSON import started', { count: streamers.length });
+
+  let created = 0;
+  let updated = 0;
+  let skipped = 0;
+
+  for (const s of streamers) {
+    try {
+      const platform = mapPlatform(s.platform);
+      const username = (s.username || s.channel_name || '').trim().toLowerCase();
+
+      if (!platform || !username) {
+        skipped++;
+        continue;
+      }
+
+      const existing = await db.streamer.findFirst({
+        where: { platform, username }
+      });
+
+      if (existing) {
+        await db.streamer.update({
+          where: { id: existing.id },
+          data: {
+            displayName: s.displayName || s.display_name || existing.displayName,
+            profileUrl: s.profileUrl || s.profile_url || existing.profileUrl,
+            avatarUrl: s.avatarUrl || s.avatar_url || existing.avatarUrl,
+            followers: s.followers || existing.followers,
+            highestViewers: s.peakViewers || s.peak_viewers || existing.highestViewers,
+            region: mapRegion(s.region || s.country) || existing.region,
+            language: s.language || existing.language,
+            lastScrapedAt: new Date(),
+          },
+        });
+        updated++;
+      } else {
+        await db.streamer.create({
+          data: {
+            platform,
+            username,
+            displayName: s.displayName || s.display_name || username,
+            profileUrl: s.profileUrl || s.profile_url || `https://${platform.toLowerCase()}.tv/${username}`,
+            avatarUrl: s.avatarUrl || s.avatar_url,
+            followers: s.followers || 0,
+            highestViewers: s.peakViewers || s.peak_viewers,
+            isLive: false,
+            region: mapRegion(s.region || s.country) || Region.MEXICO,
+            language: s.language || 'es',
+            tags: s.tags || [],
+            usesCamera: false,
+            isVtuber: false,
+            fraudCheck: FraudStatus.PENDING_REVIEW,
+          },
+        });
+        created++;
+      }
+    } catch (e) {
+      skipped++;
+    }
+  }
+
+  const totalStreamers = await db.streamer.count();
+
+  logger.info('JSON import complete', { created, updated, skipped, total: totalStreamers });
+
+  res.json({
+    success: true,
+    data: { created, updated, skipped, totalStreamers }
+  });
+}));
+
+// ==================== HELPER FUNCTIONS ====================
+
+function mapPlatform(p: string | undefined): Platform | null {
+  if (!p) return null;
+  const v = p.toLowerCase();
+  if (v.includes('twitch')) return Platform.TWITCH;
+  if (v.includes('youtube')) return Platform.YOUTUBE;
+  if (v.includes('kick')) return Platform.KICK;
+  if (v.includes('facebook')) return Platform.FACEBOOK;
+  if (v.includes('tiktok')) return Platform.TIKTOK;
+  if (v.includes('instagram')) return Platform.INSTAGRAM;
+  if (v === 'x' || v.includes('twitter')) return Platform.X;
+  if (v.includes('linkedin')) return Platform.LINKEDIN;
+  return null;
+}
+
+function mapRegion(country: string | undefined): Region | null {
+  if (!country) return null;
+  const c = country.toLowerCase();
+  const map: Record<string, Region> = {
+    mexico: Region.MEXICO, méxico: Region.MEXICO,
+    colombia: Region.COLOMBIA,
+    argentina: Region.ARGENTINA,
+    chile: Region.CHILE,
+    peru: Region.PERU, perú: Region.PERU,
+    venezuela: Region.VENEZUELA,
+    ecuador: Region.ECUADOR,
+    bolivia: Region.BOLIVIA,
+    paraguay: Region.PARAGUAY,
+    uruguay: Region.URUGUAY,
+    'costa rica': Region.COSTA_RICA,
+    panama: Region.PANAMA, panamá: Region.PANAMA,
+    guatemala: Region.GUATEMALA,
+    'el salvador': Region.EL_SALVADOR,
+    honduras: Region.HONDURAS,
+    nicaragua: Region.NICARAGUA,
+    'dominican republic': Region.DOMINICAN_REPUBLIC,
+    'puerto rico': Region.PUERTO_RICO,
+    brazil: Region.BRAZIL, brasil: Region.BRAZIL,
+  };
+  return map[c] ?? null;
+}
+
+function mapLanguage(lang: string | undefined): string {
+  if (!lang) return 'es';
+  const l = lang.toLowerCase();
+  if (l.startsWith('spanish') || l === 'es') return 'es';
+  if (l.startsWith('portuguese') || l === 'pt') return 'pt';
+  if (l.startsWith('english') || l === 'en') return 'en';
+  return l.slice(0, 2);
+}
+
+function toInt(val: string | number | null | undefined): number | null {
+  if (val === null || val === undefined) return null;
+  const n = typeof val === 'number' ? val : parseFloat(String(val).replace(/[, ]/g, ''));
+  return Number.isFinite(n) ? Math.round(n) : null;
 }
 
 export const discoveryRoutes = router;
