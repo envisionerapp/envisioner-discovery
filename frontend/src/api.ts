@@ -1,48 +1,45 @@
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-// Check if running inside Softr
-export const isSoftrContext = (): boolean => {
-  // Check for Softr's logged_in_user object
-  if ((window as any).logged_in_user) return true;
-
-  // Check for Softr in URL/referrer
-  const href = window.location.href;
-  const referrer = document.referrer;
-  if (href.includes('.softr.') || referrer.includes('.softr.')) return true;
-
-  // Check for parent frame (embedded in Softr)
-  try {
-    if (window.parent !== window && document.referrer.includes('softr')) return true;
-  } catch (e) {
-    // Cross-origin frame, likely embedded
-    return true;
+// Get user email - matches envisioner widget.js pattern
+export const getUserEmail = (): string | null => {
+  // 1. Check Softr logged_in_user.email
+  if ((window as any).logged_in_user?.email) {
+    return (window as any).logged_in_user.email;
   }
 
-  // Development mode bypass
+  // 2. Check URL token parameter (base64 encoded email)
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  if (token) {
+    try {
+      return atob(token);
+    } catch {}
+  }
+
+  // 3. Check URL user/email parameter
+  return params.get('user') || params.get('email') || null;
+};
+
+// Check if running inside Softr or has valid user
+export const isSoftrContext = (): boolean => {
+  const params = new URLSearchParams(window.location.search);
+
+  // Has softr flag in URL
+  if (params.get('softr') === 'true') return true;
+
+  // Has logged_in_user object
+  if ((window as any).logged_in_user) return true;
+
+  // Has token or user param (passed from Softr embed)
+  if (params.get('token') || params.get('user') || params.get('email')) return true;
+
+  // Development mode
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return true;
   }
 
   return false;
-};
-
-// Get user email - prioritizes Softr user, then URL param
-export const getUserEmail = (): string | null => {
-  // 1. Check Softr logged-in user
-  const softrUser = (window as any).logged_in_user;
-  if (softrUser?.email) {
-    return softrUser.email;
-  }
-
-  // 2. Check URL parameter
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlUser = urlParams.get('user') || urlParams.get('email');
-  if (urlUser) {
-    return urlUser;
-  }
-
-  return null;
 };
 
 // Get user ID for favorites - prioritizes Softr user, then URL param, then localStorage
