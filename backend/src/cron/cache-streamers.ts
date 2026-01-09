@@ -5,6 +5,7 @@
  */
 
 import { db, logger } from '../utils/database';
+import { Prisma } from '@prisma/client';
 
 export async function cacheStreamers() {
   try {
@@ -24,10 +25,10 @@ export async function cacheStreamers() {
       where: { key: 'top_live_streamers' },
       create: {
         key: 'top_live_streamers',
-        value: liveStreamers,
+        value: JSON.parse(JSON.stringify(liveStreamers)) as Prisma.InputJsonValue,
       },
       update: {
-        value: liveStreamers,
+        value: JSON.parse(JSON.stringify(liveStreamers)) as Prisma.InputJsonValue,
       },
     });
 
@@ -45,10 +46,10 @@ export async function cacheStreamers() {
       where: { key: 'top_streamers' },
       create: {
         key: 'top_streamers',
-        value: topStreamers,
+        value: JSON.parse(JSON.stringify(topStreamers)) as Prisma.InputJsonValue,
       },
       update: {
-        value: topStreamers,
+        value: JSON.parse(JSON.stringify(topStreamers)) as Prisma.InputJsonValue,
       },
     });
 
