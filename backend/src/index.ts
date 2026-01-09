@@ -168,6 +168,20 @@ app.get('/', (req, res) => {
   });
 });
 
+// Manual seed trigger (temporary - remove after data is seeded)
+app.post('/seed-now', async (req, res) => {
+  try {
+    const { seedFromCsvIfEmpty } = await import('./utils/seedFromCsv');
+    logger.info('🌱 Manual seed triggered via /seed-now endpoint');
+    const result = await seedFromCsvIfEmpty();
+    logger.info(`🌱 Manual seed result: ${JSON.stringify(result)}`);
+    res.json({ success: true, result });
+  } catch (error: any) {
+    logger.error('🌱 Manual seed error:', { message: error?.message, stack: error?.stack });
+    res.status(500).json({ success: false, error: error?.message });
+  }
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/streamers', streamerRoutes);
