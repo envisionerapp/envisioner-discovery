@@ -1,0 +1,5 @@
+{
+  "redirects": [
+    { "source": "/((?!assets/|.*\\.(js|css|png|svg|jpg|jpeg|gif|ico|woff|woff2|ttf|eot)).*)$", "destination": "/index.html", "status": 200 }
+  ]
+}

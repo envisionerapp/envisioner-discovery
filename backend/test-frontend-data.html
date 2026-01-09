@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Kick Streamer Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .streamer-card {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .social-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .social-link {
+            padding: 8px 16px;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .instagram { background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); }
+        .twitter { background: #1DA1F2; }
+        .youtube { background: #FF0000; }
+        .tiktok { background: #000; }
+        .discord { background: #5865F2; }
+        pre {
+            background: #000;
+            padding: 15px;
+            border-radius: 6px;
+            overflow: auto;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #45a049; }
+        .debug { color: #888; font-size: 12px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test KICK Streamer External Links</h1>
+    <p>This tests if enriched KICK streamers return externalLinks from the database</p>
+
+    <button onclick="testKickStreamer()">Test KICK Streamer (erickdbz)</button>
+
+    <div id="results"></div>
+
+    <script>
+        async function testKickStreamer() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Loading...</p>';
+
+            try {
+                // Direct database query via API
+                const response = await fetch('http://localhost:8080/api/streamers?username=erickdbz&platform=KICK');
+
+                if (!response.ok) {
+                    // Try alternative: search for all kick streamers and find erickdbz
+                    const searchResponse = await fetch('http://localhost:8080/api/streamers?platform=KICK&limit=100');
+                    const searchData = await searchResponse.json();
+                    const erick = searchData.data?.find(s => s.username === 'erickdbz');
+
+                    if (erick) {
+                        displayStreamer(erick);
+                    } else {
+                        results.innerHTML = '<p style="color: #ff6b6b;">❌ Could not find erickdbz</p>';
+                    }
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.success && data.data && data.data.length > 0) {
+                    displayStreamer(data.data[0]);
+                } else {
+                    results.innerHTML = '<p style="color: #ff6b6b;">❌ No data returned</p>';
+                }
+            } catch (error) {
+                results.innerHTML = `<p style="color: #ff6b6b;">❌ Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+
+        function displayStreamer(streamer) {
+            const results = document.getElementById('results');
+
+            const hasExternalLinks = streamer.externalLinks && Object.keys(streamer.externalLinks).length > 0;
+
+            let html = `
+                <div class="streamer-card">
+                    <h2>${streamer.displayName || streamer.username}</h2>
+                    <p><strong>Platform:</strong> ${streamer.platform}</p>
+                    <p><strong>Followers:</strong> ${streamer.followers?.toLocaleString() || 'N/A'}</p>
+
+                    ${streamer.profileDescription ? `
+                        <div style="background: #333; padding: 10px; border-radius: 6px; margin: 10px 0;">
+                            <strong>Bio:</strong> ${streamer.profileDescription}
+                        </div>
+                    ` : '<p class="debug">No profileDescription</p>'}
+
+                    ${hasExternalLinks ? `
+                        <div class="social-links">
+                            ${streamer.externalLinks.instagram ? `<a href="${streamer.externalLinks.instagram}" target="_blank" class="social-link instagram">Instagram</a>` : ''}
+                            ${streamer.externalLinks.twitter ? `<a href="${streamer.externalLinks.twitter}" target="_blank" class="social-link twitter">Twitter</a>` : ''}
+                            ${streamer.externalLinks.youtube ? `<a href="${streamer.externalLinks.youtube}" target="_blank" class="social-link youtube">YouTube</a>` : ''}
+                            ${streamer.externalLinks.tiktok ? `<a href="${streamer.externalLinks.tiktok}" target="_blank" class="social-link tiktok">TikTok</a>` : ''}
+                            ${streamer.externalLinks.discord ? `<a href="${streamer.externalLinks.discord}" target="_blank" class="social-link discord">Discord</a>` : ''}
+                        </div>
+                    ` : '<p class="debug">❌ No externalLinks found</p>'}
+
+                    <div class="debug">
+                        <strong>Debug:</strong> externalLinks exists: ${hasExternalLinks ? 'YES' : 'NO'}
+                        ${hasExternalLinks ? ` | Keys: ${Object.keys(streamer.externalLinks).join(', ')}` : ''}
+                    </div>
+
+                    <details style="margin-top: 15px;">
+                        <summary style="cursor: pointer; color: #4CAF50;">Show Raw JSON</summary>
+                        <pre>${JSON.stringify(streamer, null, 2)}</pre>
+                    </details>
+                </div>
+            `;
+
+            results.innerHTML = html;
+        }
+
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            setTimeout(testKickStreamer, 500);
+        });
+    </script>
+</body>
+</html>

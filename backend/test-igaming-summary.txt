@@ -1,0 +1,471 @@
+Total checks: 468
+Passed: 354
+Failed: 114
+
+Query: 40 Chile streamers for betting campaign
+  Mixed -> total=2, tags=["betting"]
+  [TWITCH] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=2, platformsSeen=["YOUTUBE"], tags=["betting"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+
+Query: 50 Mexico streamers for casino campaign
+  Mixed -> total=7, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=7, platformsSeen=["YOUTUBE"], tags=["casino"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+
+Query: 100 casino streamers in Mexico
+  Mixed -> total=7, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=7, platformsSeen=["YOUTUBE"], tags=["casino"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+
+Query: 50 Peru streamers for Betano campaign
+  Mixed -> total=0, tags=["betano"]
+  [TWITCH] total=0, platformsSeen=[], tags=["betano"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["betano"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["betano"], platformOk=true, tagConsistent=true
+
+Query: 60 Argentina streamers for sports betting
+  Mixed -> total=1, tags=["sports betting"]
+  [TWITCH] total=0, platformsSeen=[], tags=["sports betting"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["sports betting"], platformOk=true, tagConsistent=true
+  [KICK] total=1, platformsSeen=["KICK"], tags=["sports betting"], platformOk=true, tagConsistent=true
+
+Query: 30 Brazil streamers for casino promotion
+  Mixed -> total=33, tags=["casino"]
+  [TWITCH] total=20, platformsSeen=["TWITCH"], tags=["casino"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=13, platformsSeen=["YOUTUBE"], tags=["casino"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+
+Query: 25 Colombia streamers for poker campaign
+  Mixed -> total=0, tags=["poker"]
+  [TWITCH] total=0, platformsSeen=[], tags=["poker"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["poker"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["poker"], platformOk=true, tagConsistent=true
+
+Query: 45 streamers in Chile for gambling ads
+  Mixed -> total=1, tags=["gambling"]
+  [TWITCH] total=1, platformsSeen=["TWITCH"], tags=["gambling"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["gambling"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["gambling"], platformOk=true, tagConsistent=true
+
+Query: 80 Mexico influencers for betting brand
+  Mixed -> total=7, tags=["betting"]
+  [TWITCH] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=7, platformsSeen=["YOUTUBE"], tags=["betting"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+
+Query: 35 Peru content creators for casino
+  Mixed -> total=2, tags=["casino"]
+  [TWITCH] total=1, platformsSeen=["TWITCH"], tags=["casino"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=1, platformsSeen=["YOUTUBE"], tags=["casino"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+
+Query: Spanish speaking streamers for betting in LATAM
+  Mixed -> total=14, tags=["betting"]
+  [TWITCH] total=0, platformsSeen=[], tags=["spanish speaking betting"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["spanish speaking betting"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["spanish speaking betting"], platformOk=true, tagConsistent=false
+
+Query: Top casino streamers in South America
+  Mixed -> total=58, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["top casino south america"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["top casino south america"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["top casino south america"], platformOk=true, tagConsistent=false
+
+Query: Female streamers in Brazil for gambling promotion
+  Mixed -> total=3, tags=["gambling"]
+  [TWITCH] total=0, platformsSeen=[], tags=["female gambling"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["female gambling"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["female gambling"], platformOk=true, tagConsistent=false
+
+Query: Esports streamers in Mexico for casino sponsorship
+  Mixed -> total=17, tags=["esports","casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["esports casino"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["esports casino"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["esports casino"], platformOk=true, tagConsistent=false
+
+Query: Just Chatting streamers in Colombia for casino
+  Mixed -> total=109, tags=["just chatting","casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["just chatting casino"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["just chatting casino"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["just chatting casino"], platformOk=true, tagConsistent=false
+
+Query: Variety streamers in Peru for Betano
+  Mixed -> total=4, tags=["variety","betano"]
+  [TWITCH] total=0, platformsSeen=[], tags=["variety betano"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["variety betano"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["variety betano"], platformOk=true, tagConsistent=false
+
+Query: Gaming influencers across LATAM for betting
+  Mixed -> total=27, tags=["betting"]
+  [TWITCH] total=0, platformsSeen=[], tags=["across betting"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["across betting"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["across betting"], platformOk=true, tagConsistent=false
+
+Query: Live streamers in Mexico for casino campaign
+  Mixed -> total=0, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+
+Query: Chile streamers currently streaming
+  Mixed -> total=2, tags=[]
+  [TWITCH] total=0, platformsSeen=[], tags=[], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=[], platformOk=true, tagConsistent=true
+  [KICK] total=2, platformsSeen=["KICK"], tags=[], platformOk=true, tagConsistent=true
+
+Query: Brazil live gaming streamers
+  Mixed -> total=0, tags=["gaming"]
+  [TWITCH] total=58, platformsSeen=["TWITCH"], tags=[], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=[], platformOk=true, tagConsistent=false
+  [KICK] total=1, platformsSeen=["KICK"], tags=[], platformOk=true, tagConsistent=false
+
+Query: 60 streamers for World of Warships campaign
+  Mixed -> total=1, tags=["world of warships"]
+  [TWITCH] total=0, platformsSeen=[], tags=["world warships"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["world warships"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["world warships"], platformOk=true, tagConsistent=false
+
+Query: 30 Brazil WoW streamers for campaign
+  Mixed -> total=2, tags=["wow"]
+  [TWITCH] total=2, platformsSeen=["TWITCH"], tags=["wow"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["wow"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["wow"], platformOk=true, tagConsistent=true
+
+Query: 50 slot streamers for casino promotion
+  Mixed -> total=2, tags=["slot"]
+  [TWITCH] total=0, platformsSeen=[], tags=["slot casino"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["slot casino"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["slot casino"], platformOk=true, tagConsistent=false
+
+Query: 40 poker streamers in Mexico
+  Mixed -> total=1, tags=["poker"]
+  [TWITCH] total=1, platformsSeen=["TWITCH"], tags=["poker"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["poker"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["poker"], platformOk=true, tagConsistent=true
+
+Query: 70 casino game streamers in Argentina
+  Mixed -> total=12, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["casino game"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["casino game"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["casino game"], platformOk=true, tagConsistent=false
+
+Query: 45 Grand Theft Auto V streamers for betting
+  Mixed -> total=366, tags=["grand theft auto v"]
+  [TWITCH] total=0, platformsSeen=[], tags=["grand theft auto v betting"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["grand theft auto v betting"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["grand theft auto v betting"], platformOk=true, tagConsistent=false
+
+Query: 55 League of Legends streamers in Brazil
+  Mixed -> total=192, tags=["league of legends"]
+  [TWITCH] total=0, platformsSeen=[], tags=["league legends"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["league legends"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["league legends"], platformOk=true, tagConsistent=false
+
+Query: 35 Counter-Strike streamers for gambling campaign
+  Mixed -> total=290, tags=["counter-strike"]
+  [TWITCH] total=0, platformsSeen=[], tags=["counter-strike gambling"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["counter-strike gambling"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["counter-strike gambling"], platformOk=true, tagConsistent=false
+
+Query: 50 FIFA streamers in Chile for sports betting
+  Mixed -> total=1, tags=["fifa"]
+  [TWITCH] total=0, platformsSeen=[], tags=["fifa sports betting"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["fifa sports betting"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["fifa sports betting"], platformOk=true, tagConsistent=false
+
+Query: 40 Call of Duty streamers in Colombia
+  Mixed -> total=0, tags=["call of duty"]
+  [TWITCH] total=0, platformsSeen=[], tags=["call duty"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["call duty"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["call duty"], platformOk=true, tagConsistent=false
+
+Query: 20 Mexico World of Warships streamers
+  Mixed -> total=0, tags=["world of warships"]
+  [TWITCH] total=0, platformsSeen=[], tags=["world warships"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["world warships"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["world warships"], platformOk=true, tagConsistent=false
+
+Query: GTA 5 streamers in Brazil for betting
+  Mixed -> total=0, tags=["gta 5"]
+  [TWITCH] total=0, platformsSeen=[], tags=["gta betting"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["gta betting"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["gta betting"], platformOk=true, tagConsistent=false
+
+Query: Valorant streamers in Chile for casino
+  Mixed -> total=65, tags=["valorant","casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["valorant casino"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["valorant casino"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["valorant casino"], platformOk=true, tagConsistent=false
+
+Query: Just Chatting streamers in Argentina
+  Mixed -> total=372, tags=["just chatting"]
+  [TWITCH] total=297, platformsSeen=["TWITCH"], tags=["just chatting"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["just chatting"], platformOk=true, tagConsistent=true
+  [KICK] total=75, platformsSeen=["KICK"], tags=["just chatting"], platformOk=true, tagConsistent=true
+
+Query: Poker pros in Argentina for betting campaign
+  Mixed -> total=0, tags=[]
+  [TWITCH] total=0, platformsSeen=[], tags=["poker pros betting"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["poker pros betting"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["poker pros betting"], platformOk=true, tagConsistent=false
+
+Query: Slots streamers in Peru
+  Mixed -> total=9, tags=["slots"]
+  [TWITCH] total=8, platformsSeen=["TWITCH"], tags=["slots"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=1, platformsSeen=["YOUTUBE"], tags=["slots"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["slots"], platformOk=true, tagConsistent=true
+
+Query: Roulette streamers in Mexico
+  Mixed -> total=0, tags=["roulette"]
+  [TWITCH] total=0, platformsSeen=[], tags=["roulette"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["roulette"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["roulette"], platformOk=true, tagConsistent=true
+
+Query: Minecraft streamers in Colombia for casino
+  Mixed -> total=17, tags=["minecraft","casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["minecraft casino"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["minecraft casino"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["minecraft casino"], platformOk=true, tagConsistent=false
+
+Query: Fortnite streamers in Chile for betting
+  Mixed -> total=23, tags=["fortnite"]
+  [TWITCH] total=0, platformsSeen=[], tags=["fortnite betting"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["fortnite betting"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["fortnite betting"], platformOk=true, tagConsistent=false
+
+Query: 50 Chile streamers with 100k+ followers for betting
+  Mixed -> total=2, tags=["betting"]
+  [TWITCH] total=0, platformsSeen=[], tags=["100k+ betting"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["100k+ betting"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["100k+ betting"], platformOk=true, tagConsistent=false
+
+Query: 30 Mexico streamers with 50k+ followers
+  Mixed -> total=908, tags=[]
+  [TWITCH] total=0, platformsSeen=[], tags=["50k+"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["50k+"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["50k+"], platformOk=true, tagConsistent=false
+
+Query: 40 Brazil influencers with 200k+ followers for casino
+  Mixed -> total=15, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["200k+ casino"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["200k+ casino"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["200k+ casino"], platformOk=true, tagConsistent=false
+
+Query: 25 Argentina streamers with 150k followers
+  Mixed -> total=295, tags=[]
+  [TWITCH] total=126, platformsSeen=["TWITCH"], tags=[], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=154, platformsSeen=["YOUTUBE"], tags=[], platformOk=true, tagConsistent=true
+  [KICK] total=15, platformsSeen=["KICK"], tags=[], platformOk=true, tagConsistent=true
+
+Query: 35 Peru streamers with 75k+ followers for Betano
+  Mixed -> total=0, tags=["betano"]
+  [TWITCH] total=0, platformsSeen=[], tags=["75k+ betano"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["75k+ betano"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["75k+ betano"], platformOk=true, tagConsistent=false
+
+Query: 20 Colombia streamers with 500k+ followers
+  Mixed -> total=71, tags=[]
+  [TWITCH] total=0, platformsSeen=[], tags=["500k+"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["500k+"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["500k+"], platformOk=true, tagConsistent=false
+
+Query: 15 Chile gaming influencers with 1 million followers
+  Mixed -> total=15, tags=["gaming"]
+  [TWITCH] total=2, platformsSeen=["TWITCH"], tags=[], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=15, platformsSeen=["YOUTUBE"], tags=[], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=[], platformOk=true, tagConsistent=false
+
+Query: 50 Mexico streamers over 100000 followers
+  Mixed -> total=703, tags=[]
+  [TWITCH] total=866, platformsSeen=["TWITCH"], tags=[], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=724, platformsSeen=["YOUTUBE"], tags=[], platformOk=true, tagConsistent=true
+  [KICK] total=87, platformsSeen=["KICK"], tags=[], platformOk=true, tagConsistent=true
+
+Query: 30 Brazil casino streamers with 80k followers
+  Mixed -> total=19, tags=["casino"]
+  [TWITCH] total=6, platformsSeen=["TWITCH"], tags=["casino"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=13, platformsSeen=["YOUTUBE"], tags=["casino"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+
+Query: 40 Peru poker streamers with 60k+ followers
+  Mixed -> total=0, tags=["poker"]
+  [TWITCH] total=0, platformsSeen=[], tags=["poker 60k+"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["poker 60k+"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["poker 60k+"], platformOk=true, tagConsistent=false
+
+Query: 50 Mexico casino streamers with 100k followers
+  Mixed -> total=7, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=7, platformsSeen=["YOUTUBE"], tags=["casino"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+
+Query: 30 Chile live streamers for betting campaign
+  Mixed -> total=0, tags=["betting"]
+  [TWITCH] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+
+Query: 40 Brazil GTA streamers with 50k+ followers
+  Mixed -> total=20, tags=["gta"]
+  [TWITCH] total=0, platformsSeen=[], tags=["gta 50k+"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["gta 50k+"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["gta 50k+"], platformOk=true, tagConsistent=false
+
+Query: 25 Peru poker streamers with 75k followers
+  Mixed -> total=0, tags=["poker"]
+  [TWITCH] total=0, platformsSeen=[], tags=["poker"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["poker"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["poker"], platformOk=true, tagConsistent=true
+
+Query: 35 Argentina FIFA streamers for sports betting
+  Mixed -> total=7, tags=["fifa"]
+  [TWITCH] total=0, platformsSeen=[], tags=["fifa sports betting"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["fifa sports betting"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["fifa sports betting"], platformOk=true, tagConsistent=false
+
+Query: 20 Mexico live casino streamers with 100k followers
+  Mixed -> total=0, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+
+Query: 45 Chile slot streamers for gambling promotion
+  Mixed -> total=2, tags=["slot"]
+  [TWITCH] total=0, platformsSeen=[], tags=["slot gambling"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["slot gambling"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["slot gambling"], platformOk=true, tagConsistent=false
+
+Query: 30 Brazil live League of Legends streamers
+  Mixed -> total=9, tags=["league of legends"]
+  [TWITCH] total=0, platformsSeen=[], tags=["league legends"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["league legends"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["league legends"], platformOk=true, tagConsistent=false
+
+Query: 40 Colombia casino streamers with 60k+ followers
+  Mixed -> total=1, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["casino 60k+"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["casino 60k+"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["casino 60k+"], platformOk=true, tagConsistent=false
+
+Query: 25 Peru live streamers for Betano campaign
+  Mixed -> total=0, tags=["betano"]
+  [TWITCH] total=0, platformsSeen=[], tags=["betano"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["betano"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["betano"], platformOk=true, tagConsistent=true
+
+Query: 50 Mexico poker streamers with 80k followers
+  Mixed -> total=0, tags=["poker"]
+  [TWITCH] total=0, platformsSeen=[], tags=["poker"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["poker"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["poker"], platformOk=true, tagConsistent=true
+
+Query: 35 Argentina casino streamers for betting brand
+  Mixed -> total=12, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["casino betting"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["casino betting"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["casino betting"], platformOk=true, tagConsistent=false
+
+Query: 30 Chile GTA streamers with 100k+ followers
+  Mixed -> total=0, tags=["gta"]
+  [TWITCH] total=0, platformsSeen=[], tags=["gta 100k+"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["gta 100k+"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["gta 100k+"], platformOk=true, tagConsistent=false
+
+Query: 40 Brazil casino live streamers
+  Mixed -> total=0, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+
+Query: 25 Peru FIFA streamers with 50k followers
+  Mixed -> total=1, tags=["fifa"]
+  [TWITCH] total=1, platformsSeen=["TWITCH"], tags=["fifa"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["fifa"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["fifa"], platformOk=true, tagConsistent=true
+
+Query: 45 Argentina live casino streamers with 75k followers
+  Mixed -> total=0, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+
+Query: 30 Chile poker streamers for gambling campaign
+  Mixed -> total=2, tags=["poker"]
+  [TWITCH] total=0, platformsSeen=[], tags=["poker gambling"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["poker gambling"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["poker gambling"], platformOk=true, tagConsistent=false
+
+Query: 35 Brazil slot streamers with 100k+ followers
+  Mixed -> total=0, tags=["slot"]
+  [TWITCH] total=0, platformsSeen=[], tags=["slot 100k+"], platformOk=true, tagConsistent=false
+  [YOUTUBE] total=0, platformsSeen=[], tags=["slot 100k+"], platformOk=true, tagConsistent=false
+  [KICK] total=0, platformsSeen=[], tags=["slot 100k+"], platformOk=true, tagConsistent=false
+
+Query: 40 Colombia live streamers for betting promotion
+  Mixed -> total=0, tags=["betting"]
+  [TWITCH] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+
+Query: 50 Twitch streamers in Mexico for casino
+  Mixed -> total=0, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=7, platformsSeen=["YOUTUBE"], tags=["casino"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+
+Query: 30 YouTube streamers in Brazil for betting
+  Mixed -> total=13, tags=["betting"]
+  [TWITCH] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=13, platformsSeen=["YOUTUBE"], tags=["betting"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+
+Query: 40 Kick streamers in Argentina
+  Mixed -> total=280, tags=[]
+  [TWITCH] total=882, platformsSeen=["TWITCH"], tags=[], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=275, platformsSeen=["YOUTUBE"], tags=[], platformOk=true, tagConsistent=true
+  [KICK] total=280, platformsSeen=["KICK"], tags=[], platformOk=true, tagConsistent=true
+
+Query: 25 Twitch Peru streamers for Betano
+  Mixed -> total=0, tags=["betano"]
+  [TWITCH] total=0, platformsSeen=[], tags=["betano"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["betano"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["betano"], platformOk=true, tagConsistent=true
+
+Query: 35 YouTube Chile streamers for gambling
+  Mixed -> total=0, tags=["gambling"]
+  [TWITCH] total=1, platformsSeen=["TWITCH"], tags=["gambling"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["gambling"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["gambling"], platformOk=true, tagConsistent=true
+
+Query: 20 Twitch Mexico casino streamers with 100k followers
+  Mixed -> total=0, tags=["casino"]
+  [TWITCH] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=7, platformsSeen=["YOUTUBE"], tags=["casino"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true
+
+Query: 45 YouTube Brazil poker streamers
+  Mixed -> total=0, tags=["poker"]
+  [TWITCH] total=32, platformsSeen=["TWITCH"], tags=["poker"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=["poker"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["poker"], platformOk=true, tagConsistent=true
+
+Query: 30 Kick Colombia streamers for betting
+  Mixed -> total=0, tags=["betting"]
+  [TWITCH] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=1, platformsSeen=["YOUTUBE"], tags=["betting"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["betting"], platformOk=true, tagConsistent=true
+
+Query: 40 Twitch Argentina live streamers
+  Mixed -> total=18, tags=[]
+  [TWITCH] total=18, platformsSeen=["TWITCH"], tags=[], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=0, platformsSeen=[], tags=[], platformOk=true, tagConsistent=true
+  [KICK] total=3, platformsSeen=["KICK"], tags=[], platformOk=true, tagConsistent=true
+
+Query: 25 YouTube Peru casino streamers
+  Mixed -> total=1, tags=["casino"]
+  [TWITCH] total=1, platformsSeen=["TWITCH"], tags=["casino"], platformOk=true, tagConsistent=true
+  [YOUTUBE] total=1, platformsSeen=["YOUTUBE"], tags=["casino"], platformOk=true, tagConsistent=true
+  [KICK] total=0, platformsSeen=[], tags=["casino"], platformOk=true, tagConsistent=true

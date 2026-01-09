@@ -1,0 +1,21 @@
+/Users/bheelz/Desktop/Mielo/backend/node_modules/ts-node/src/index.ts:859
+    return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+           ^
+TSError: ⨯ Unable to compile TypeScript:
+src/services/chatService.ts(267,9): error TS2353: Object literal may only specify known properties, and 'streamers' does not exist in type 'ChatMessage'.
+src/services/chatService.ts(648,9): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type 'ChatMessageSelect<DefaultArgs>'.
+src/services/chatService.ts(661,7): error TS2322: Type '{ id: string; userId: string; conversationId: string; message: string; response: string | null; timestamp: Date; streamersReturned: string[]; processingTime: number | null; }[]' is not assignable to type 'ChatMessage[]'.
+  Property 'type' is missing in type '{ id: string; userId: string; conversationId: string; message: string; response: string | null; timestamp: Date; streamersReturned: string[]; processingTime: number | null; }' but required in type 'ChatMessage'.
+
+    at createTSError (/Users/bheelz/Desktop/Mielo/backend/node_modules/ts-node/src/index.ts:859:12)
+    at reportTSError (/Users/bheelz/Desktop/Mielo/backend/node_modules/ts-node/src/index.ts:863:19)
+    at getOutput (/Users/bheelz/Desktop/Mielo/backend/node_modules/ts-node/src/index.ts:1077:36)
+    at Object.compile (/Users/bheelz/Desktop/Mielo/backend/node_modules/ts-node/src/index.ts:1433:41)
+    at Module.m._compile (/Users/bheelz/Desktop/Mielo/backend/node_modules/ts-node/src/index.ts:1617:30)
+    at loadTS (node:internal/modules/cjs/loader:1826:10)
+    at Object.require.extensions.<computed> [as .ts] (/Users/bheelz/Desktop/Mielo/backend/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1469:32)
+    at Module._load (node:internal/modules/cjs/loader:1286:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) {
+  diagnosticCodes: [ 2353, 2353, 2322 ]
+}

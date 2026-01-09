@@ -1,0 +1,385 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  firstName   String?
+  lastName    String?
+  password    String
+  mfaEnabled  Boolean  @default(false)
+  mfaSecret   String?
+  lastLogin   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  conversations Conversation[]
+  chatMessages ChatMessage[]
+  campaignAssignments StreamerCampaign[]
+
+  @@map("discovery_users")
+}
+
+model Streamer {
+  id            String    @id @default(cuid())
+  platform      Platform
+  username      String
+  displayName   String
+  profileUrl    String
+  avatarUrl     String?
+  followers     Int       @default(0)
+  currentViewers Int?
+  highestViewers Int?
+  lastStreamed  DateTime?
+  isLive        Boolean   @default(false)
+  currentGame   String?
+  topGames      String[]
+  tags          String[]
+  region        Region
+  language      String    @default("en")
+  socialLinks   Json      @default("[]")
+  usesCamera    Boolean   @default(false)
+  isVtuber      Boolean   @default(false)
+  fraudCheck    FraudStatus @default(CLEAN)
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastScrapedAt DateTime?
+
+  // iGaming Intelligence Fields
+  igamingIntelligence   Json? @map("igaming_intelligence")
+  igamingScore          Int   @default(0) @map("igaming_score")
+  audiencePsychology    Json? @map("audience_psychology")
+  brandSafetyScore      Int   @default(0) @map("brand_safety_score")
+  gamblingCompatibility Boolean @default(false) @map("gambling_compatibility")
+  lastIntelligenceUpdate DateTime? @map("last_intelligence_update")
+  riskAssessment        Json? @map("risk_assessment")
+  conversionPotential   Json? @map("conversion_potential")
+
+  // Enriched Web Data Fields
+  profileDescription    String? @map("profile_description") @db.Text
+  bannerText            String? @map("banner_text") @db.Text
+  panelTexts            String[] @map("panel_texts")
+  panelImages           Json? @map("panel_images")
+  aboutSection          String? @map("about_section") @db.Text
+  externalLinks         Json? @map("external_links")
+  streamTitles          Json? @map("stream_titles")
+  chatKeywords          String[] @map("chat_keywords")
+  communityPosts        Json? @map("community_posts")
+  contentAnalysis       Json? @map("content_analysis")
+  webPresence           Json? @map("web_presence")
+  lastEnrichmentUpdate  DateTime? @map("last_enrichment_update")
+
+  // Performance feedback from Envisioner (historical data)
+  historicalCpa         Float? @map("historical_cpa")
+  historicalConversions Int    @default(0) @map("historical_conversions")
+  historicalCampaigns   Int    @default(0) @map("historical_campaigns")
+  avgRoi                Float? @map("avg_roi")
+  lastPerformanceSync   DateTime? @map("last_performance_sync")
+
+  // Relations
+  campaignAssignments StreamerCampaign[]
+  chatMessages ChatMessage[] @relation("ChatMessageStreamers")
+  campaignPerformances CampaignPerformance[]
+
+  @@unique([platform, username])
+  @@index([isLive])
+  @@index([platform])
+  @@index([region])
+  @@index([currentViewers(sort: Desc)])
+  @@index([highestViewers(sort: Desc)])
+  @@index([followers(sort: Desc)])
+  @@index([displayName])
+  @@index([isLive, platform])
+  @@index([isLive, currentViewers(sort: Desc)])
+  @@map("discovery_creators")
+}
+
+model CachedStats {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@map("discovery_cached_stats")
+}
+
+model Campaign {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  rules       Json     @default("[]")
+  isActive    Boolean  @default(true)
+  startDate   DateTime?
+  endDate     DateTime?
+  budget      Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  assignedStreamers StreamerCampaign[]
+
+  @@map("discovery_campaigns")
+}
+
+model StreamerCampaign {
+  id         String   @id @default(cuid())
+  streamerId String
+  campaignId String
+  assignedBy String
+  assignedAt DateTime @default(now())
+  notes      String?
+  status     CampaignStatus @default(ACTIVE)
+
+  // Relations
+  streamer Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [assignedBy], references: [id])
+
+  @@unique([streamerId, campaignId])
+  @@map("discovery_streamer_campaigns")
+}
+
+model Conversation {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@map("discovery_conversations")
+}
+
+model ChatMessage {
+  id               String    @id @default(cuid())
+  userId           String
+  conversationId   String
+  message          String
+  response         String?
+  streamersReturned String[]
+  timestamp        DateTime  @default(now())
+  processingTime   Int?
+
+  // Relations
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  streamers    Streamer[]   @relation("ChatMessageStreamers")
+
+  @@map("discovery_chat_messages")
+}
+
+model ScrapingLog {
+  id             String    @id @default(cuid())
+  platform       Platform
+  success        Boolean
+  recordsFound   Int       @default(0)
+  recordsUpdated Int       @default(0)
+  errors         String[]  @default([])
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  duration       Int?
+
+  @@map("discovery_scraping_logs")
+}
+
+model SystemConfig {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  updatedAt DateTime @updatedAt
+
+  @@map("discovery_system_config")
+}
+
+// Link table for tracking creators assigned to Envisioner campaigns
+model DiscoveryAssignment {
+  id                  String    @id @default(cuid())
+  discoveryCreatorId  String    @map("discovery_creator_id")
+  envisionerInfluencerId String? @map("envisioner_influencer_id")
+  assignedAt          DateTime  @default(now()) @map("assigned_at")
+  envisionerCampaignId String?  @map("envisioner_campaign_id")
+
+  // Performance sync from Envisioner
+  lastPerformanceSync DateTime? @map("last_performance_sync")
+  totalConversions    Int       @default(0) @map("total_conversions")
+  totalSpent          Float     @default(0) @map("total_spent")
+  avgCpa              Float?    @map("avg_cpa")
+
+  @@map("discovery_assignments")
+}
+
+// Search history for analytics
+model DiscoverySearch {
+  id           String   @id @default(cuid())
+  userId       String?  @map("user_id")
+  filters      Json
+  resultsCount Int      @map("results_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("discovery_searches")
+}
+
+enum Platform {
+  TWITCH
+  YOUTUBE
+  KICK
+  FACEBOOK
+  TIKTOK
+  INSTAGRAM
+  X
+  LINKEDIN
+}
+
+enum StreamerTag {
+  GAMING
+  IRL
+  MUSIC
+  ART
+  COOKING
+  FITNESS
+  EDUCATION
+  TECHNOLOGY
+  FASHION
+  TRAVEL
+  SPORTS
+  COMEDY
+  VARIETY
+  RPG
+  FPS
+  STRATEGY
+  SIMULATION
+  HORROR
+  ADVENTURE
+  CASINO
+  SLOTS
+  BETTING
+  POKER
+  BLACKJACK
+  ROULETTE
+  GAMBLING
+  IGAMING
+}
+
+enum Region {
+  // Latin America
+  MEXICO
+  COLOMBIA
+  ARGENTINA
+  CHILE
+  PERU
+  VENEZUELA
+  ECUADOR
+  BOLIVIA
+  PARAGUAY
+  URUGUAY
+  COSTA_RICA
+  PANAMA
+  GUATEMALA
+  EL_SALVADOR
+  HONDURAS
+  NICARAGUA
+  DOMINICAN_REPUBLIC
+  PUERTO_RICO
+  BRAZIL
+
+  // North America
+  USA
+  CANADA
+
+  // Europe
+  UK
+  SPAIN
+  GERMANY
+  FRANCE
+  ITALY
+  PORTUGAL
+  NETHERLANDS
+  SWEDEN
+  NORWAY
+  DENMARK
+  FINLAND
+  POLAND
+  RUSSIA
+
+  // Asia
+  JAPAN
+  KOREA
+  CHINA
+  INDIA
+  INDONESIA
+  PHILIPPINES
+  THAILAND
+  VIETNAM
+  MALAYSIA
+  SINGAPORE
+
+  // Oceania
+  AUSTRALIA
+  NEW_ZEALAND
+
+  // Other
+  WORLDWIDE
+  OTHER
+}
+
+enum FraudStatus {
+  CLEAN
+  SUSPICIOUS
+  FLAGGED
+  PENDING_REVIEW
+}
+
+enum CampaignStatus {
+  ACTIVE
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+model IGamingCampaign {
+  id                String    @id @default(cuid())
+  name              String
+  campaignType      String    @map("campaign_type")
+  targetDemographics Json?    @map("target_demographics")
+  budget            Int?
+  expectedRoi       Float?    @map("expected_roi")
+  startDate         DateTime? @map("start_date")
+  endDate           DateTime? @map("end_date")
+  status            String    @default("draft")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  performances CampaignPerformance[]
+
+  @@map("discovery_igaming_campaigns")
+}
+
+model CampaignPerformance {
+  id                   String    @id @default(cuid())
+  campaignId           String    @map("campaign_id")
+  streamerId           String    @map("streamer_id")
+  predictedPerformance Json?     @map("predicted_performance")
+  actualPerformance    Json?     @map("actual_performance")
+  performanceScore     Int       @default(0) @map("performance_score")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  campaign IGamingCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  streamer Streamer         @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+
+  @@map("discovery_campaign_performance")
+}

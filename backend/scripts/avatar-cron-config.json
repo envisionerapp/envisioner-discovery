@@ -1,0 +1,12 @@
+{
+  "batchSizes": {
+    "TWITCH": 50,
+    "YOUTUBE": 30,
+    "KICK": 25,
+    "FACEBOOK": 20,
+    "TIKTOK": 20
+  },
+  "maxRuntimeMinutes": 30,
+  "enabledPlatforms": ["TWITCH", "YOUTUBE", "KICK"],
+  "logRetentionDays": 7
+}

@@ -1,0 +1,158 @@
+/* Mobile responsiveness fixes */
+
+/* Ensure all content fits within viewport width */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Mobile-specific responsive utilities */
+@media (max-width: 768px) {
+  /* Prevent horizontal overflow */
+  .container, .card, .card-body {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Fix table overflow on mobile */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
+  /* Make tables scroll horizontally instead of breaking layout */
+  table {
+    min-width: 600px;
+    width: auto !important;
+  }
+
+  /* Reduce padding on mobile for more space */
+  .mobile-compact {
+    padding: 0.5rem !important;
+  }
+
+  /* Smaller text on mobile */
+  .mobile-text {
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+  }
+
+  /* Fix fixed widths that break mobile layout */
+  [class*="w-["], [class*="min-w-["], [class*="max-w-["] {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Ensure sidebar doesn't affect main content width */
+  .sidebar {
+    position: fixed !important;
+    z-index: 50;
+  }
+
+  /* Make main content full width on mobile */
+  main {
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  /* Fix flex layouts that might cause overflow */
+  .flex {
+    flex-wrap: wrap;
+  }
+
+  /* Prevent images from overflowing */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Fix layout component padding */
+  .content-offset {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  /* Make cards mobile-friendly */
+  .card {
+    margin: 0.25rem !important;
+    border-radius: 0.5rem !important;
+  }
+
+  /* Responsive grid layouts */
+  .grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Fix any absolute positioning that might cause overflow */
+  .absolute {
+    position: relative !important;
+  }
+
+  /* Ensure buttons and inputs are touch-friendly */
+  button, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Fix modal/overlay positioning on mobile */
+  .fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+}
+
+/* Specific fixes for common responsive issues */
+@media (max-width: 640px) {
+  /* Even smaller screens - further reductions */
+  .sm-compact {
+    padding: 0.25rem !important;
+    margin: 0.25rem !important;
+  }
+
+  /* Hide non-essential elements on very small screens */
+  .sm-hide {
+    display: none !important;
+  }
+
+  /* Stack elements vertically on small screens */
+  .sm-stack {
+    flex-direction: column !important;
+  }
+
+  /* Reduce font sizes further on small screens */
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.125rem !important; }
+
+  /* Make table text smaller on very small screens */
+  table {
+    font-size: 0.75rem !important;
+  }
+
+  th, td {
+    padding: 0.25rem !important;
+  }
+}
+
+/* Landscape orientation fixes */
+@media (max-height: 500px) and (orientation: landscape) {
+  .content-offset {
+    padding-top: 3.5rem !important;
+  }
+
+  .sidebar {
+    height: calc(100vh - 3.5rem) !important;
+  }
+}

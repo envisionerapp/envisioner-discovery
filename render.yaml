@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: envisioner-discovery
+    runtime: node
+    region: ohio
+    plan: starter
+    buildCommand: cd backend && npm install && npm run build && npx prisma generate
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: REFRESH_TOKEN_SECRET
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: ALLOWED_EMBED_DOMAINS
+        value: softr.app,softr.io,envisioner.io
+      - key: ENABLE_STARTUP_DATA_TASKS
+        value: "false"
+      - key: TWITCH_CLIENT_ID
+        sync: false
+      - key: TWITCH_CLIENT_SECRET
+        sync: false
+    healthCheckPath: /health
+    autoDeploy: false

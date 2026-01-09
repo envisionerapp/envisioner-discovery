@@ -1,0 +1,3240 @@
+{
+  "totalChecks": 468,
+  "passChecks": 354,
+  "failChecks": 114,
+  "results": [
+    {
+      "query": "40 Chile streamers for betting campaign",
+      "mixed": {
+        "total": 2,
+        "tags": [
+          "betting"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 2,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "50 Mexico streamers for casino campaign",
+      "mixed": {
+        "total": 7,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 7,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "100 casino streamers in Mexico",
+      "mixed": {
+        "total": 7,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 7,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "50 Peru streamers for Betano campaign",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "betano"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "60 Argentina streamers for sports betting",
+      "mixed": {
+        "total": 1,
+        "tags": [
+          "sports betting"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "sports betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "sports betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 1,
+          "platformsSeen": [
+            "KICK"
+          ],
+          "tags": [
+            "sports betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "30 Brazil streamers for casino promotion",
+      "mixed": {
+        "total": 33,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 20,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 13,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "25 Colombia streamers for poker campaign",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "poker"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "45 streamers in Chile for gambling ads",
+      "mixed": {
+        "total": 1,
+        "tags": [
+          "gambling"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 1,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [
+            "gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "80 Mexico influencers for betting brand",
+      "mixed": {
+        "total": 7,
+        "tags": [
+          "betting"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 7,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "35 Peru content creators for casino",
+      "mixed": {
+        "total": 2,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 1,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 1,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "Spanish speaking streamers for betting in LATAM",
+      "mixed": {
+        "total": 14,
+        "tags": [
+          "betting"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "spanish speaking betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "spanish speaking betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "spanish speaking betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "Top casino streamers in South America",
+      "mixed": {
+        "total": 58,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "top casino south america"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "top casino south america"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "top casino south america"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "Female streamers in Brazil for gambling promotion",
+      "mixed": {
+        "total": 3,
+        "tags": [
+          "gambling"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "female gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "female gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "female gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "Esports streamers in Mexico for casino sponsorship",
+      "mixed": {
+        "total": 17,
+        "tags": [
+          "esports",
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "esports casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "esports casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "esports casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "Just Chatting streamers in Colombia for casino",
+      "mixed": {
+        "total": 109,
+        "tags": [
+          "just chatting",
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "just chatting casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "just chatting casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "just chatting casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "Variety streamers in Peru for Betano",
+      "mixed": {
+        "total": 4,
+        "tags": [
+          "variety",
+          "betano"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "variety betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "variety betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "variety betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "Gaming influencers across LATAM for betting",
+      "mixed": {
+        "total": 27,
+        "tags": [
+          "betting"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "across betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "across betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "across betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "Live streamers in Mexico for casino campaign",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "Chile streamers currently streaming",
+      "mixed": {
+        "total": 2,
+        "tags": []
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 2,
+          "platformsSeen": [
+            "KICK"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "Brazil live gaming streamers",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "gaming"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 58,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 1,
+          "platformsSeen": [
+            "KICK"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "60 streamers for World of Warships campaign",
+      "mixed": {
+        "total": 1,
+        "tags": [
+          "world of warships"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "world warships"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "world warships"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "world warships"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "30 Brazil WoW streamers for campaign",
+      "mixed": {
+        "total": 2,
+        "tags": [
+          "wow"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 2,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [
+            "wow"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "wow"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "wow"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "50 slot streamers for casino promotion",
+      "mixed": {
+        "total": 2,
+        "tags": [
+          "slot"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "slot casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "slot casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "slot casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "40 poker streamers in Mexico",
+      "mixed": {
+        "total": 1,
+        "tags": [
+          "poker"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 1,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "70 casino game streamers in Argentina",
+      "mixed": {
+        "total": 12,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino game"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino game"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino game"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "45 Grand Theft Auto V streamers for betting",
+      "mixed": {
+        "total": 366,
+        "tags": [
+          "grand theft auto v"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "grand theft auto v betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "grand theft auto v betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "grand theft auto v betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "55 League of Legends streamers in Brazil",
+      "mixed": {
+        "total": 192,
+        "tags": [
+          "league of legends"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "league legends"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "league legends"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "league legends"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "35 Counter-Strike streamers for gambling campaign",
+      "mixed": {
+        "total": 290,
+        "tags": [
+          "counter-strike"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "counter-strike gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "counter-strike gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "counter-strike gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "50 FIFA streamers in Chile for sports betting",
+      "mixed": {
+        "total": 1,
+        "tags": [
+          "fifa"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "fifa sports betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "fifa sports betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "fifa sports betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "40 Call of Duty streamers in Colombia",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "call of duty"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "call duty"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "call duty"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "call duty"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "20 Mexico World of Warships streamers",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "world of warships"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "world warships"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "world warships"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "world warships"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "GTA 5 streamers in Brazil for betting",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "gta 5"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "gta betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "gta betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "gta betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "Valorant streamers in Chile for casino",
+      "mixed": {
+        "total": 65,
+        "tags": [
+          "valorant",
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "valorant casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "valorant casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "valorant casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "Just Chatting streamers in Argentina",
+      "mixed": {
+        "total": 372,
+        "tags": [
+          "just chatting"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 297,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [
+            "just chatting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "just chatting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 75,
+          "platformsSeen": [
+            "KICK"
+          ],
+          "tags": [
+            "just chatting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "Poker pros in Argentina for betting campaign",
+      "mixed": {
+        "total": 0,
+        "tags": []
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker pros betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker pros betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker pros betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "Slots streamers in Peru",
+      "mixed": {
+        "total": 9,
+        "tags": [
+          "slots"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 8,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [
+            "slots"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 1,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "slots"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "slots"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "Roulette streamers in Mexico",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "roulette"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "roulette"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "roulette"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "roulette"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "Minecraft streamers in Colombia for casino",
+      "mixed": {
+        "total": 17,
+        "tags": [
+          "minecraft",
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "minecraft casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "minecraft casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "minecraft casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "Fortnite streamers in Chile for betting",
+      "mixed": {
+        "total": 23,
+        "tags": [
+          "fortnite"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "fortnite betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "fortnite betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "fortnite betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "50 Chile streamers with 100k+ followers for betting",
+      "mixed": {
+        "total": 2,
+        "tags": [
+          "betting"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "100k+ betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "100k+ betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "100k+ betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "30 Mexico streamers with 50k+ followers",
+      "mixed": {
+        "total": 908,
+        "tags": []
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "50k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "50k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "50k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "40 Brazil influencers with 200k+ followers for casino",
+      "mixed": {
+        "total": 15,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "200k+ casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "200k+ casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "200k+ casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "25 Argentina streamers with 150k followers",
+      "mixed": {
+        "total": 295,
+        "tags": []
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 126,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 154,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 15,
+          "platformsSeen": [
+            "KICK"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "35 Peru streamers with 75k+ followers for Betano",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "betano"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "75k+ betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "75k+ betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "75k+ betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "20 Colombia streamers with 500k+ followers",
+      "mixed": {
+        "total": 71,
+        "tags": []
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "500k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "500k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "500k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "15 Chile gaming influencers with 1 million followers",
+      "mixed": {
+        "total": 15,
+        "tags": [
+          "gaming"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 2,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 15,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "50 Mexico streamers over 100000 followers",
+      "mixed": {
+        "total": 703,
+        "tags": []
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 866,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 724,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 87,
+          "platformsSeen": [
+            "KICK"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "30 Brazil casino streamers with 80k followers",
+      "mixed": {
+        "total": 19,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 6,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 13,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "40 Peru poker streamers with 60k+ followers",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "poker"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker 60k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker 60k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker 60k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "50 Mexico casino streamers with 100k followers",
+      "mixed": {
+        "total": 7,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 7,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "30 Chile live streamers for betting campaign",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "betting"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "40 Brazil GTA streamers with 50k+ followers",
+      "mixed": {
+        "total": 20,
+        "tags": [
+          "gta"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "gta 50k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "gta 50k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "gta 50k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "25 Peru poker streamers with 75k followers",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "poker"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "35 Argentina FIFA streamers for sports betting",
+      "mixed": {
+        "total": 7,
+        "tags": [
+          "fifa"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "fifa sports betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "fifa sports betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "fifa sports betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "20 Mexico live casino streamers with 100k followers",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "45 Chile slot streamers for gambling promotion",
+      "mixed": {
+        "total": 2,
+        "tags": [
+          "slot"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "slot gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "slot gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "slot gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "30 Brazil live League of Legends streamers",
+      "mixed": {
+        "total": 9,
+        "tags": [
+          "league of legends"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "league legends"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "league legends"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "league legends"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "40 Colombia casino streamers with 60k+ followers",
+      "mixed": {
+        "total": 1,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino 60k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino 60k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino 60k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "25 Peru live streamers for Betano campaign",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "betano"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "50 Mexico poker streamers with 80k followers",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "poker"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "35 Argentina casino streamers for betting brand",
+      "mixed": {
+        "total": 12,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "30 Chile GTA streamers with 100k+ followers",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "gta"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "gta 100k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "gta 100k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "gta 100k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "40 Brazil casino live streamers",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "25 Peru FIFA streamers with 50k followers",
+      "mixed": {
+        "total": 1,
+        "tags": [
+          "fifa"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 1,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [
+            "fifa"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "fifa"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "fifa"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "45 Argentina live casino streamers with 75k followers",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "30 Chile poker streamers for gambling campaign",
+      "mixed": {
+        "total": 2,
+        "tags": [
+          "poker"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "35 Brazil slot streamers with 100k+ followers",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "slot"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "slot 100k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "slot 100k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "slot 100k+"
+          ],
+          "platformOk": true,
+          "tagConsistent": false
+        }
+      ]
+    },
+    {
+      "query": "40 Colombia live streamers for betting promotion",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "betting"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "50 Twitch streamers in Mexico for casino",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 7,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "30 YouTube streamers in Brazil for betting",
+      "mixed": {
+        "total": 13,
+        "tags": [
+          "betting"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 13,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "40 Kick streamers in Argentina",
+      "mixed": {
+        "total": 280,
+        "tags": []
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 882,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 275,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 280,
+          "platformsSeen": [
+            "KICK"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "25 Twitch Peru streamers for Betano",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "betano"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betano"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "35 YouTube Chile streamers for gambling",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "gambling"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 1,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [
+            "gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "gambling"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "20 Twitch Mexico casino streamers with 100k followers",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 7,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "45 YouTube Brazil poker streamers",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "poker"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 32,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "poker"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "30 Kick Colombia streamers for betting",
+      "mixed": {
+        "total": 0,
+        "tags": [
+          "betting"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 1,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "betting"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "40 Twitch Argentina live streamers",
+      "mixed": {
+        "total": 18,
+        "tags": []
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 18,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 3,
+          "platformsSeen": [
+            "KICK"
+          ],
+          "tags": [],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    },
+    {
+      "query": "25 YouTube Peru casino streamers",
+      "mixed": {
+        "total": 1,
+        "tags": [
+          "casino"
+        ]
+      },
+      "byPlatform": [
+        {
+          "platform": "TWITCH",
+          "total": 1,
+          "platformsSeen": [
+            "TWITCH"
+          ],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "YOUTUBE",
+          "total": 1,
+          "platformsSeen": [
+            "YOUTUBE"
+          ],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        },
+        {
+          "platform": "KICK",
+          "total": 0,
+          "platformsSeen": [],
+          "tags": [
+            "casino"
+          ],
+          "platformOk": true,
+          "tagConsistent": true
+        }
+      ]
+    }
+  ]
+}
