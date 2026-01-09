@@ -122,12 +122,39 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
+  const fs = await import('fs');
+  const path = await import('path');
+
+  // Check CSV location
+  const csvPath = path.resolve(__dirname, '..', 'csv', 'combined.csv');
+  const csvExists = fs.existsSync(csvPath);
+  let csvLines = 0;
+  if (csvExists) {
+    try {
+      const content = fs.readFileSync(csvPath, 'utf8');
+      csvLines = content.split('\n').length;
+    } catch (e) {}
+  }
+
+  // Check DB count
+  let dbCount = 0;
+  try {
+    dbCount = await db.streamer.count();
+  } catch (e) {}
+
   res.status(200).json({
     status: 'OK',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development',
+    debug: {
+      csvPath,
+      csvExists,
+      csvLines,
+      dbStreamerCount: dbCount,
+      dirname: __dirname,
+    }
   });
 });
 
