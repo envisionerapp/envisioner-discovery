@@ -19,7 +19,7 @@ export const Layout: React.FC = () => {
     <div className="min-h-screen bg-white">
       {/* Tab navigation */}
       <nav className="sticky top-0 z-10 border-b border-secondary/10 bg-white">
-        <div className="flex items-center justify-between pl-8 pr-6 py-2.5">
+        <div className="flex items-center justify-between px-4 py-2.5">
           {/* Tab items */}
           <div className="flex items-center gap-1">
             {navItems.map((item) => {
