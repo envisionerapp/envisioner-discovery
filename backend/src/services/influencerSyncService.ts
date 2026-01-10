@@ -13,13 +13,6 @@ interface ExternalInfluencer {
   stats_updated_at: string | null; // Used for lastSeenLive/lastScrapedAt
 }
 
-interface PromotionalStats {
-  influencer_id: number;
-  promo_views: string;
-  promo_likes: string;
-  promo_comments: string;
-}
-
 /**
  * Sync influencers from the external `influencers` table to `discovery_creators` (Streamer model)
  * This allows manually added influencers to appear in the discovery tool
@@ -74,6 +67,8 @@ export class InfluencerSyncService {
 
     try {
       // Fetch all influencers from the external table
+      // Note: The influencers table only has subscribers/views/videos - no platform-specific metrics
+      // like avgViewers, peakViewers, totalLikes (those come from platform APIs)
       const influencers = await db.$queryRawUnsafe<ExternalInfluencer[]>(`
         SELECT id, influencer, clean_name, channel_url, thumbnail, subscribers,
                views::text as views, videos, stats_updated_at::text as stats_updated_at
@@ -82,27 +77,6 @@ export class InfluencerSyncService {
       `);
 
       logger.info(`📊 Found ${influencers.length} influencers with channel URLs`);
-
-      // Fetch promotional stats from deliverables table (only where promotion = 'Yes')
-      // This gives us views/likes/comments from promotional content only
-      const promoStats = await db.$queryRawUnsafe<PromotionalStats[]>(`
-        SELECT
-          influencer_id,
-          COALESCE(SUM(views), 0)::text as promo_views,
-          COALESCE(SUM(likes), 0)::text as promo_likes,
-          COALESCE(SUM(comments), 0)::text as promo_comments
-        FROM deliverables
-        WHERE promotion = 'Yes' AND influencer_id IS NOT NULL
-        GROUP BY influencer_id
-      `);
-
-      // Create a map for quick lookup
-      const promoStatsMap = new Map<number, PromotionalStats>();
-      for (const stat of promoStats) {
-        promoStatsMap.set(stat.influencer_id, stat);
-      }
-
-      logger.info(`📊 Found promotional stats for ${promoStats.length} influencers`);
 
       for (const inf of influencers) {
         try {
@@ -123,12 +97,6 @@ export class InfluencerSyncService {
             },
           });
 
-          // Get promotional stats for this influencer (views/likes/comments from promotion='Yes' content only)
-          const promoData = promoStatsMap.get(inf.id);
-          const promoViews = promoData ? BigInt(promoData.promo_views) : BigInt(0);
-          const promoLikes = promoData ? BigInt(promoData.promo_likes) : BigInt(0);
-          const promoComments = promoData ? BigInt(promoData.promo_comments) : BigInt(0);
-
           if (existing) {
             // Update with latest metrics from influencers table
             const updates: any = {};
@@ -138,16 +106,11 @@ export class InfluencerSyncService {
             if (inf.subscribers && inf.subscribers !== existing.followers) {
               updates.followers = inf.subscribers;
             }
-            // Use promotional views (from deliverables where promotion='Yes'), not total channel views
-            if (promoViews !== existing.totalViews) {
-              updates.totalViews = promoViews;
-            }
-            // Also sync promotional likes and comments
-            if (promoLikes !== existing.totalLikes) {
-              updates.totalLikes = promoLikes;
-            }
-            if (promoComments !== existing.totalComments) {
-              updates.totalComments = promoComments;
+            if (inf.views) {
+              const viewsBigInt = BigInt(inf.views);
+              if (viewsBigInt !== existing.totalViews) {
+                updates.totalViews = viewsBigInt;
+              }
             }
             // Use stats_updated_at as proxy for last activity
             if (inf.stats_updated_at) {
@@ -163,7 +126,7 @@ export class InfluencerSyncService {
                 where: { id: existing.id },
                 data: updates,
               });
-              logger.info(`📝 Updated ${username} on ${platform} with followers=${inf.subscribers}, promoViews=${promoViews}, promoLikes=${promoLikes}`);
+              logger.info(`📝 Updated ${username} on ${platform} with followers=${inf.subscribers}, views=${inf.views}`);
               synced++;
             } else {
               skipped++;
@@ -183,10 +146,7 @@ export class InfluencerSyncService {
               avatarUrl: inf.thumbnail,
               profileUrl: inf.channel_url || '',
               followers: inf.subscribers || 0,
-              // Use promotional views/likes/comments (from deliverables where promotion='Yes')
-              totalViews: promoViews,
-              totalLikes: promoLikes,
-              totalComments: promoComments,
+              totalViews: inf.views ? BigInt(inf.views) : BigInt(0),
               region: 'WORLDWIDE',
               language: 'es',
               isLive: false,
