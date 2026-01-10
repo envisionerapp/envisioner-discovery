@@ -5,6 +5,8 @@ import { seedFromCsvIfEmpty } from '../utils/seedFromCsv';
 import { replaceAllStreamersWithLocal } from '../utils/replaceAllStreamers';
 import { tagScrapingService } from '../services/tagScrapingService';
 import { StreamerService } from '../services/streamerService';
+import { scrapeCreatorsService } from '../services/scrapeCreatorsService';
+import { Platform } from '@prisma/client';
 
 // Removed AuthRequest interface - using basic Request for now
 
@@ -377,6 +379,169 @@ export class AdminController {
         success: false,
         message: 'Avatar backfill failed',
         error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
+      });
+    }
+  });
+
+  // ==================== SOCIAL SYNC (ScrapeCreators) ====================
+
+  /**
+   * Get social sync queue stats
+   */
+  getSocialSyncStats = asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const stats = await scrapeCreatorsService.getQueueStats();
+
+      // Get total credits estimate
+      const totalPending = Object.values(stats).reduce((sum, s) => sum + s.pending, 0);
+
+      res.status(200).json({
+        success: true,
+        data: {
+          ...stats,
+          totalPending,
+          estimatedCredits: totalPending, // 1 credit per profile
+        }
+      });
+    } catch (error) {
+      logger.error('Failed to get social sync stats', { error });
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get social sync stats',
+      });
+    }
+  });
+
+  /**
+   * Extract social handles from existing streamers and add to queue
+   */
+  extractSocialHandles = asyncHandler(async (req: Request, res: Response) => {
+    try {
+      logger.info('🔍 ADMIN: Starting social handle extraction');
+
+      const counts = await scrapeCreatorsService.extractSocialHandlesFromStreamers();
+
+      res.status(200).json({
+        success: true,
+        message: 'Social handles extracted and queued',
+        data: counts,
+      });
+    } catch (error) {
+      logger.error('Failed to extract social handles', { error });
+      res.status(500).json({
+        success: false,
+        message: 'Failed to extract social handles',
+      });
+    }
+  });
+
+  /**
+   * Sync a specific social platform
+   */
+  syncSocialPlatform = asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { platform } = req.params;
+      const batchSize = parseInt(req.query.batchSize as string) || 50;
+
+      const validPlatforms = ['TIKTOK', 'INSTAGRAM', 'X', 'FACEBOOK', 'LINKEDIN'];
+      if (!validPlatforms.includes(platform.toUpperCase())) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid platform. Must be one of: ${validPlatforms.join(', ')}`,
+        });
+      }
+
+      logger.info(`🌐 ADMIN: Starting ${platform} sync`, { batchSize });
+
+      const result = await scrapeCreatorsService.syncPlatform(platform.toUpperCase() as Platform, batchSize);
+
+      res.status(200).json({
+        success: true,
+        message: `${platform} sync completed`,
+        data: result,
+      });
+    } catch (error) {
+      logger.error('Failed to sync social platform', { error });
+      res.status(500).json({
+        success: false,
+        message: 'Failed to sync social platform',
+      });
+    }
+  });
+
+  /**
+   * Sync all social platforms
+   */
+  syncAllSocialPlatforms = asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const batchSize = parseInt(req.query.batchSize as string) || 50;
+      logger.info('🌐 ADMIN: Starting all social platforms sync', { batchSize });
+
+      const platforms: Platform[] = ['TIKTOK', 'INSTAGRAM', 'X', 'FACEBOOK', 'LINKEDIN'];
+      const results: Record<string, any> = {};
+      let totalCredits = 0;
+
+      for (const platform of platforms) {
+        const result = await scrapeCreatorsService.syncPlatform(platform, batchSize);
+        results[platform] = result;
+        totalCredits += result.credits;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'All social platforms synced',
+        data: {
+          results,
+          totalCredits,
+        },
+      });
+    } catch (error) {
+      logger.error('Failed to sync all social platforms', { error });
+      res.status(500).json({
+        success: false,
+        message: 'Failed to sync all social platforms',
+      });
+    }
+  });
+
+  /**
+   * Seed social queue with usernames
+   */
+  seedSocialQueue = asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { platform, usernames, priority } = req.body;
+
+      if (!platform || !usernames || !Array.isArray(usernames)) {
+        return res.status(400).json({
+          success: false,
+          message: 'platform and usernames array required',
+        });
+      }
+
+      const validPlatforms = ['TIKTOK', 'INSTAGRAM', 'X', 'FACEBOOK', 'LINKEDIN'];
+      if (!validPlatforms.includes(platform.toUpperCase())) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid platform. Must be one of: ${validPlatforms.join(', ')}`,
+        });
+      }
+
+      const added = await scrapeCreatorsService.seedQueueFromUsernames(
+        platform.toUpperCase() as Platform,
+        usernames,
+        priority || 50
+      );
+
+      res.status(200).json({
+        success: true,
+        message: `Added ${added} usernames to ${platform} queue`,
+        data: { added },
+      });
+    } catch (error) {
+      logger.error('Failed to seed social queue', { error });
+      res.status(500).json({
+        success: false,
+        message: 'Failed to seed social queue',
       });
     }
   });

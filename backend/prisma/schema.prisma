@@ -403,6 +403,31 @@ enum CampaignStatus {
   CANCELLED
 }
 
+enum SyncStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+// Queue for social platform sync (ScrapeCreators API)
+model SocialSyncQueue {
+  id              String     @id @default(cuid())
+  platform        Platform
+  username        String
+  priority        Int        @default(50) // Higher = processed first
+  status          SyncStatus @default(PENDING)
+  sourceStreamerId String?   @map("source_streamer_id") // The Twitch/Kick/YT streamer this was extracted from
+  retryCount      Int        @default(0) @map("retry_count")
+  errorMessage    String?    @map("error_message")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  processedAt     DateTime?  @map("processed_at")
+
+  @@unique([platform, username])
+  @@index([platform, status])
+  @@index([priority(sort: Desc)])
+  @@map("discovery_social_sync_queue")
+}
+
 model IGamingCampaign {
   id                String    @id @default(cuid())
   name              String

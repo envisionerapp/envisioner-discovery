@@ -23,4 +23,11 @@ router.post('/sync/replace-all-streamers', adminController.replaceAllStreamersWi
 router.post('/scrape-tags', adminController.scrapeStreamerTags);
 router.post('/backfill-avatars', adminController.backfillAvatars);
 
+// Social sync (ScrapeCreators API)
+router.get('/social-sync/stats', adminController.getSocialSyncStats);
+router.post('/social-sync/extract-handles', adminController.extractSocialHandles);
+router.post('/social-sync/platform/:platform', adminController.syncSocialPlatform);
+router.post('/social-sync/all', adminController.syncAllSocialPlatforms);
+router.post('/social-sync/seed', adminController.seedSocialQueue);
+
 export { router as adminRoutes };
