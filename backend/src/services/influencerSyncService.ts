@@ -9,6 +9,7 @@ interface ExternalInfluencer {
   thumbnail: string | null;
   subscribers: number | null;
   views: string | null;
+  videos: number | null;
 }
 
 /**
@@ -66,7 +67,7 @@ export class InfluencerSyncService {
     try {
       // Fetch all influencers from the external table
       const influencers = await db.$queryRawUnsafe<ExternalInfluencer[]>(`
-        SELECT id, influencer, clean_name, channel_url, thumbnail, subscribers, views::text as views
+        SELECT id, influencer, clean_name, channel_url, thumbnail, subscribers, views::text as views, videos
         FROM influencers
         WHERE channel_url IS NOT NULL AND channel_url != ''
       `);
@@ -93,13 +94,19 @@ export class InfluencerSyncService {
           });
 
           if (existing) {
-            // Update if needed (e.g., avatar, followers)
+            // Update with latest metrics from influencers table
             const updates: any = {};
-            if (inf.thumbnail && !existing.avatarUrl) {
+            if (inf.thumbnail && inf.thumbnail !== existing.avatarUrl) {
               updates.avatarUrl = inf.thumbnail;
             }
-            if (inf.subscribers && inf.subscribers > (existing.followers || 0)) {
+            if (inf.subscribers && inf.subscribers !== existing.followers) {
               updates.followers = inf.subscribers;
+            }
+            if (inf.views) {
+              const viewsBigInt = BigInt(inf.views);
+              if (viewsBigInt !== existing.totalViews) {
+                updates.totalViews = viewsBigInt;
+              }
             }
 
             if (Object.keys(updates).length > 0) {
@@ -107,9 +114,11 @@ export class InfluencerSyncService {
                 where: { id: existing.id },
                 data: updates,
               });
-              logger.info(`📝 Updated ${username} on ${platform}`);
+              logger.info(`📝 Updated ${username} on ${platform} with followers=${inf.subscribers}, views=${inf.views}`);
+              synced++;
+            } else {
+              skipped++;
             }
-            skipped++;
             continue;
           }
 
