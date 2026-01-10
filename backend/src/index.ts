@@ -47,6 +47,7 @@ import { performanceSyncRoutes } from './routes/performanceSync';
 import { discoveryRoutes } from './routes/discovery';
 import { favoritesRoutes } from './routes/favorites';
 import { discardsRoutes } from './routes/discards';
+import { notesRoutes } from './routes/notes';
 import { accessRoutes } from './routes/access';
 
 // Define allowed origins before creating server/socket
@@ -210,6 +211,7 @@ app.use('/api/performance-sync', performanceSyncRoutes);
 app.use('/api/discovery', discoveryRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/discards', discardsRoutes);
+app.use('/api/notes', notesRoutes);
 app.use('/api/access', accessRoutes);
 app.use('/dbviewer', dbViewerRoutes);
 app.use('/admin-panel', adminPanelRoutes);

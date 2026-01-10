@@ -108,6 +108,7 @@ model Streamer {
   campaignPerformances CampaignPerformance[]
   favorites DiscoveryFavorite[]
   discarded DiscoveryDiscarded[]
+  notes DiscoveryNote[]
   viewerPolls DiscoveryViewerPoll[]
 
   @@unique([platform, username])
@@ -287,6 +288,24 @@ model DiscoveryDiscarded {
   @@index([userId])
   @@index([streamerId])
   @@map("discovery_discarded")
+}
+
+// Notes for creators (per user)
+model DiscoveryNote {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  streamerId String   @map("streamer_id")
+  content    String   @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  streamer Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, streamerId])
+  @@index([userId])
+  @@index([streamerId])
+  @@map("discovery_notes")
 }
 
 // Viewer polls for calculating avg_viewers

@@ -1,8 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { differenceInMinutes, formatDistanceToNow } from 'date-fns';
 import { useQuery, useQueryClient, useMutation } from 'react-query';
-import { ArrowDownTrayIcon, PlusIcon, HashtagIcon, UserIcon, MapPinIcon, UsersIcon, EyeIcon, ClockIcon, ChevronUpIcon, ChevronDownIcon, TrophyIcon, HeartIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+import { ArrowDownTrayIcon, PlusIcon, HashtagIcon, UserIcon, MapPinIcon, UsersIcon, EyeIcon, ClockIcon, ChevronUpIcon, ChevronDownIcon, TrophyIcon, HeartIcon, TrashIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartIconSolid, PencilSquareIcon as PencilSquareIconSolid } from '@heroicons/react/24/solid';
 import { PlatformIcon } from '@/components/icons/PlatformIcon';
 import { getStreamerAvatar } from '@/utils/avatars';
 import { flagFor, regionLabel } from '@/utils/geo';
@@ -12,7 +12,7 @@ import { streamerService } from '@/services/streamerService';
 import { subscribeToLiveStatusUpdates } from '@/utils/socket';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLiveCount } from '@/contexts/LiveCountContext';
-import { fetchFavoriteIds, toggleFavorite, fetchDiscardedIds, toggleDiscarded, USER_ID } from '@/api';
+import { fetchFavoriteIds, toggleFavorite, fetchDiscardedIds, toggleDiscarded, fetchNotesMap, saveNote as apiSaveNote, USER_ID } from '@/api';
 
 // Compact number formatter for followers/viewers (e.g., 12.3k, 1.2m)
 const formatCount = (val: any): string => {
@@ -76,9 +76,16 @@ const StreamersPage: React.FC = () => {
   const [discardedOnly, setDiscardedOnly] = useState(false);
   const queryClient = useQueryClient();
 
-  // Fetch favorite and discarded IDs
+  // Fetch favorite, discarded IDs, and notes
   const { data: favoriteIds = [] } = useQuery(['favoriteIds'], fetchFavoriteIds);
   const { data: discardedIds = [] } = useQuery(['discardedIds'], fetchDiscardedIds);
+  const { data: notesMap = {} } = useQuery(['notesMap'], fetchNotesMap);
+
+  // Note modal state
+  const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [noteModalStreamer, setNoteModalStreamer] = useState<any>(null);
+  const [noteContent, setNoteContent] = useState('');
+  const [noteSaving, setNoteSaving] = useState(false);
 
   // Toggle favorite mutation with optimistic update
   const favoriteMutation = useMutation(
@@ -141,6 +148,31 @@ const StreamersPage: React.FC = () => {
       },
     }
   );
+
+  // Open note modal
+  const openNoteModal = (streamer: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setNoteModalStreamer(streamer);
+    setNoteContent(notesMap[streamer.id] || '');
+    setNoteModalOpen(true);
+  };
+
+  // Save note
+  const handleSaveNote = async () => {
+    if (!noteModalStreamer) return;
+    setNoteSaving(true);
+    try {
+      await apiSaveNote(noteModalStreamer.id, noteContent);
+      // Invalidate notes query to refresh data
+      queryClient.invalidateQueries(['notesMap']);
+      setNoteModalOpen(false);
+    } catch (error) {
+      console.error('Failed to save note:', error);
+    } finally {
+      setNoteSaving(false);
+    }
+  };
 
   // Debounce search input
   useEffect(() => {
@@ -543,8 +575,10 @@ const StreamersPage: React.FC = () => {
               }}
               favoriteIds={favoriteIds}
               discardedIds={discardedIds}
+              notesMap={notesMap}
               onToggleFavorite={(streamerId) => favoriteMutation.mutate(streamerId)}
               onToggleDiscard={(streamerId) => discardMutation.mutate(streamerId)}
+              onOpenNote={openNoteModal}
             />
           </div>
         </div>
@@ -950,6 +984,52 @@ const StreamersPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Note Modal */}
+      {noteModalOpen && noteModalStreamer && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setNoteModalOpen(false)} />
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
+            <div className="card p-6" style={{ background: '#1a1a2e', border: '1px solid rgba(255, 107, 53, 0.2)' }}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white">
+                  Note for {noteModalStreamer.displayName}
+                </h3>
+                <button
+                  onClick={() => setNoteModalOpen(false)}
+                  className="p-1 rounded hover:bg-gray-700 transition-colors"
+                >
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <textarea
+                value={noteContent}
+                onChange={(e) => setNoteContent(e.target.value)}
+                placeholder="Write your notes here..."
+                className="w-full h-32 p-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 resize-none"
+                style={{ fontFamily: 'inherit' }}
+              />
+              <div className="flex justify-end gap-3 mt-4">
+                <button
+                  onClick={() => setNoteModalOpen(false)}
+                  className="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveNote}
+                  disabled={noteSaving}
+                  className="px-4 py-2 rounded-lg bg-primary-600 text-white font-semibold hover:bg-primary-500 transition-colors disabled:opacity-50"
+                >
+                  {noteSaving ? 'Saving...' : 'Save Note'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -1013,9 +1093,11 @@ const StreamerTable: React.FC<{
   onRowClick: (s: any) => void;
   favoriteIds: string[];
   discardedIds: string[];
+  notesMap: Record<string, string>;
   onToggleFavorite: (streamerId: string) => void;
   onToggleDiscard: (streamerId: string) => void;
-}> = ({ items, isLoading, page, pageSize, activeSort, activeDir, onToggleSort, onRowClick, favoriteIds, discardedIds, onToggleFavorite, onToggleDiscard }) => {
+  onOpenNote: (streamer: any, e: React.MouseEvent) => void;
+}> = ({ items, isLoading, page, pageSize, activeSort, activeDir, onToggleSort, onRowClick, favoriteIds, discardedIds, notesMap, onToggleFavorite, onToggleDiscard, onOpenNote }) => {
   const resolveAvatar = (s: any, idx: number) => {
     return getStreamerAvatar(s, idx);
   };
@@ -1127,6 +1209,7 @@ const StreamerTable: React.FC<{
             })();
             const isFavorite = favoriteIds.includes(s.id);
             const isDiscarded = discardedIds.includes(s.id);
+            const hasNote = !!notesMap[s.id];
             return (
               <tr key={s.id}>
                 <td className="align-middle text-center" style={{ paddingLeft: '8px', paddingRight: '4px' }}>
@@ -1153,6 +1236,17 @@ const StreamerTable: React.FC<{
                       title={isDiscarded ? 'Restore from discarded' : 'Discard'}
                     >
                       <TrashIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={(e) => onOpenNote(s, e)}
+                      className={`p-1 rounded transition-all ${hasNote ? 'text-yellow-500 hover:text-yellow-400' : 'text-gray-500 hover:text-yellow-400'}`}
+                      title={hasNote ? 'Edit note' : 'Add note'}
+                    >
+                      {hasNote ? (
+                        <PencilSquareIconSolid className="h-4 w-4" />
+                      ) : (
+                        <PencilSquareIcon className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
                 </td>

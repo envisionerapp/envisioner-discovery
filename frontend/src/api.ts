@@ -270,3 +270,26 @@ export async function toggleDiscarded(streamerId: string): Promise<{ isDiscarded
   const data = await response.json();
   return { isDiscarded: data.isDiscarded };
 }
+
+// Fetch notes map (streamerId -> content)
+export async function fetchNotesMap(): Promise<Record<string, string>> {
+  const response = await fetch(`${API_BASE_URL}/api/notes/map?userId=${USER_ID}`);
+  const data: ApiResponse<Record<string, string>> = await response.json();
+  return data.success ? data.data : {};
+}
+
+// Get note for a specific creator
+export async function getNote(streamerId: string): Promise<string | null> {
+  const response = await fetch(`${API_BASE_URL}/api/notes/${streamerId}?userId=${USER_ID}`);
+  const data = await response.json();
+  return data.success && data.data ? data.data.content : null;
+}
+
+// Save note for a creator
+export async function saveNote(streamerId: string, content: string): Promise<void> {
+  await fetch(`${API_BASE_URL}/api/notes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: USER_ID, streamerId, content }),
+  });
+}

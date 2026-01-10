@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import './App.css';
-import { fetchCreators, fetchFavoriteIds, toggleFavorite as apiToggleFavorite, fetchDiscardedIds, toggleDiscarded as apiToggleDiscarded, formatLastActive, ApiCreator, validateAccess, AccessValidationResult } from './api';
+import { fetchCreators, fetchFavoriteIds, toggleFavorite as apiToggleFavorite, fetchDiscardedIds, toggleDiscarded as apiToggleDiscarded, fetchNotesMap, saveNote as apiSaveNote, formatLastActive, ApiCreator, validateAccess, AccessValidationResult } from './api';
 
 // ===========================================
 // API HELPER FUNCTIONS
@@ -298,6 +298,8 @@ const Icons = {
   heart: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
   heartFilled: <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
   trash: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>,
+  note: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+  noteFilled: <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
 };
 
 const PlatformIcons: Record<Platform, JSX.Element> = {
@@ -522,6 +524,11 @@ function App() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [discardedOnly, setDiscardedOnly] = useState(false);
   const [discarded, setDiscarded] = useState<string[]>([]);
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [noteModalCreator, setNoteModalCreator] = useState<ApiCreator | null>(null);
+  const [noteContent, setNoteContent] = useState('');
+  const [noteSaving, setNoteSaving] = useState(false);
   const [sortBy, setSortBy] = useState<string>('lastactive');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
@@ -534,10 +541,11 @@ function App() {
   // Profile modal
   const [selectedCreator, setSelectedCreator] = useState<ApiCreator | null>(null);
 
-  // Load favorites and discarded on mount
+  // Load favorites, discarded, and notes on mount
   useEffect(() => {
     fetchFavoriteIds().then(setFavorites).catch(console.error);
     fetchDiscardedIds().then(setDiscarded).catch(console.error);
+    fetchNotesMap().then(setNotes).catch(console.error);
   }, []);
 
   // Build filter params (shared between initial load and load more)
@@ -678,6 +686,38 @@ function App() {
         setDiscarded(prev => prev.filter(x => x !== id));
         if (!discardedOnly) loadCreators();
       }
+    }
+  };
+
+  // Open note modal
+  const openNoteModal = (creator: ApiCreator, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setNoteModalCreator(creator);
+    setNoteContent(notes[creator.id] || '');
+    setNoteModalOpen(true);
+  };
+
+  // Save note
+  const handleSaveNote = async () => {
+    if (!noteModalCreator) return;
+    setNoteSaving(true);
+    try {
+      await apiSaveNote(noteModalCreator.id, noteContent);
+      if (noteContent.trim()) {
+        setNotes(prev => ({ ...prev, [noteModalCreator.id]: noteContent.trim() }));
+      } else {
+        setNotes(prev => {
+          const newNotes = { ...prev };
+          delete newNotes[noteModalCreator.id];
+          return newNotes;
+        });
+      }
+      setNoteModalOpen(false);
+    } catch (error) {
+      console.error('Failed to save note:', error);
+    } finally {
+      setNoteSaving(false);
     }
   };
 
@@ -1110,6 +1150,14 @@ function App() {
                     >
                       {Icons.trash}
                     </button>
+                    <button
+                      className={`favorite-btn note-btn ${notes[creator.id] ? 'active' : ''}`}
+                      onClick={(e) => openNoteModal(creator, e)}
+                      style={notes[creator.id] ? { color: '#3b82f6' } : {}}
+                      title={notes[creator.id] ? 'Edit note' : 'Add note'}
+                    >
+                      {notes[creator.id] ? Icons.noteFilled : Icons.note}
+                    </button>
                     {platformKey !== 'twitch' && platformKey !== 'kick' && (
                       <div className="engagement-badge">
                         <div className="engagement-circle">
@@ -1204,6 +1252,54 @@ function App() {
       </div>
 
       {/* Profile Modal */}
+      {/* Note Modal */}
+      {noteModalOpen && noteModalCreator && (
+        <div className="profile-modal-overlay" onClick={() => setNoteModalOpen(false)}>
+          <div className="profile-modal note-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+            <button className="profile-close" onClick={() => setNoteModalOpen(false)}>{Icons.x}</button>
+            <div className="profile-content">
+              <h3 style={{ marginBottom: '16px', color: '#fff' }}>
+                Note for {noteModalCreator.displayName}
+              </h3>
+              <textarea
+                value={noteContent}
+                onChange={(e) => setNoteContent(e.target.value)}
+                placeholder="Write your notes about this creator..."
+                style={{
+                  width: '100%',
+                  minHeight: '150px',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  background: 'rgba(0,0,0,0.3)',
+                  color: '#fff',
+                  fontSize: '14px',
+                  resize: 'vertical',
+                  fontFamily: 'inherit',
+                }}
+              />
+              <div style={{ display: 'flex', gap: '12px', marginTop: '16px', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={() => setNoteModalOpen(false)}
+                  className="profile-btn secondary"
+                  style={{ padding: '8px 16px' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveNote}
+                  disabled={noteSaving}
+                  className="profile-btn primary"
+                  style={{ padding: '8px 16px' }}
+                >
+                  {noteSaving ? 'Saving...' : 'Save Note'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {selectedCreator && (() => {
         const modalPlatformKey = getPlatformKey(selectedCreator.platform) as Platform;
         const modalDisplayName = selectedCreator.displayName || selectedCreator.username;
