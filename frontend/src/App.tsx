@@ -971,7 +971,7 @@ function App() {
 
           {/* Creators Found - Bottom */}
           <div className="filter-group creators-count">
-            <span className="results-count">{filteredCreators.length} creators found</span>
+            <span className="results-count">{hasMore ? '500+' : filteredCreators.length} creators found</span>
           </div>
         </aside>
 
@@ -1076,7 +1076,7 @@ function App() {
                 onClick={loadMoreCreators}
                 disabled={loadingMore}
               >
-                {loadingMore ? 'Loading...' : `Load More (${creators.length} of ${totalCreators})`}
+                {loadingMore ? 'Loading...' : 'Load More'}
               </button>
             </div>
           )}
