@@ -1148,31 +1148,6 @@ function App() {
                     </div>
                   )}
 
-                  {/* Action buttons at bottom left */}
-                  <div className="card-actions">
-                    <button
-                      className={`action-btn ${favorites.includes(creator.id) ? 'active favorite' : ''}`}
-                      onClick={(e) => toggleFavorite(creator.id, e)}
-                      title={favorites.includes(creator.id) ? 'Remove from favorites' : 'Add to favorites'}
-                    >
-                      {favorites.includes(creator.id) ? Icons.heartFilled : Icons.heart}
-                    </button>
-                    <button
-                      className={`action-btn ${discarded.includes(creator.id) ? 'active discard' : ''}`}
-                      onClick={(e) => toggleDiscarded(creator.id, e)}
-                      title={discarded.includes(creator.id) ? 'Restore' : 'Discard'}
-                    >
-                      {Icons.trash}
-                    </button>
-                    <button
-                      className={`action-btn ${notes[creator.id] ? 'active note' : ''}`}
-                      onClick={(e) => openNoteModal(creator, e)}
-                      title={notes[creator.id] ? 'Edit note' : 'Add note'}
-                    >
-                      {notes[creator.id] ? Icons.noteFilled : Icons.note}
-                    </button>
-                  </div>
-
                   <div className="creator-top">
                     <div
                       className="creator-avatar"
@@ -1196,6 +1171,29 @@ function App() {
                   <div className="creator-meta">
                     <span className="meta-item">{FLAGS[regionKey] || '🌍'} {creator.region}</span>
                     <span className="meta-item category">{category}</span>
+                    <div className="card-actions">
+                      <button
+                        className={`action-btn ${favorites.includes(creator.id) ? 'active favorite' : ''}`}
+                        onClick={(e) => toggleFavorite(creator.id, e)}
+                        title={favorites.includes(creator.id) ? 'Remove from favorites' : 'Add to favorites'}
+                      >
+                        {favorites.includes(creator.id) ? Icons.heartFilled : Icons.heart}
+                      </button>
+                      <button
+                        className={`action-btn ${discarded.includes(creator.id) ? 'active discard' : ''}`}
+                        onClick={(e) => toggleDiscarded(creator.id, e)}
+                        title={discarded.includes(creator.id) ? 'Restore' : 'Discard'}
+                      >
+                        {Icons.trash}
+                      </button>
+                      <button
+                        className={`action-btn ${notes[creator.id] ? 'active note' : ''}`}
+                        onClick={(e) => openNoteModal(creator, e)}
+                        title={notes[creator.id] ? 'Edit note' : 'Add note'}
+                      >
+                        {notes[creator.id] ? Icons.noteFilled : Icons.note}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="creator-stats">

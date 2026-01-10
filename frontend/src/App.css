@@ -707,15 +707,12 @@ body::-webkit-scrollbar {
   transform: scale(1.1);
 }
 
-/* Card Actions Container - Bottom Left */
+/* Card Actions Container - Right side of meta row */
 .card-actions {
-  position: absolute;
-  bottom: 12px;
-  left: 12px;
   display: flex;
   flex-direction: row;
-  gap: 6px;
-  z-index: 10;
+  gap: 4px;
+  margin-left: auto;
 }
 
 .action-btn {

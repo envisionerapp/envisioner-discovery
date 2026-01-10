@@ -20,7 +20,10 @@
       "Bash(curl:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nFix ScrapeCreators API response parsing\n\n- Handle TikTok response structure \\(user + stats objects\\)\n- Convert string stats to numbers\n- Handle undefined values gracefully\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(node scripts/fix-tiktok-likes.js:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(node scripts/run-unification.js:*)",
+      "Bash(tasklist:*)",
+      "Bash(npx vercel:*)"
     ]
   }
 }

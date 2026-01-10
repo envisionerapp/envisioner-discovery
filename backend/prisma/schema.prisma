@@ -108,7 +108,7 @@ model Streamer {
   campaignPerformances CampaignPerformance[]
   favorites DiscoveryFavorite[]
   discarded DiscoveryDiscarded[]
-  notes DiscoveryNote[]
+  discoveryNotes DiscoveryNote[]
   viewerPolls DiscoveryViewerPoll[]
 
   @@unique([platform, username])

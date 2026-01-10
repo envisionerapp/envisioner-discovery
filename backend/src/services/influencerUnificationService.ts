@@ -249,16 +249,20 @@ export class InfluencerUnificationService {
       .sort((a, b) => (b?.followers || 0) - (a?.followers || 0))
       .find(p => p?.avatar)?.avatar;
 
-    // Check if already exists
-    const existing = await db.influencer.findFirst({
-      where: {
-        OR: [
-          unified.twitch ? { twitchId: unified.twitch.id } : {},
-          unified.youtube ? { youtubeId: unified.youtube.id } : {},
-          unified.kick ? { kickId: unified.kick.id } : {},
-        ].filter(o => Object.keys(o).length > 0)
-      }
-    });
+    // Check if already exists (by any platform ID)
+    const orConditions: Record<string, string>[] = [];
+    if (unified.twitch) orConditions.push({ twitchId: unified.twitch.id });
+    if (unified.youtube) orConditions.push({ youtubeId: unified.youtube.id });
+    if (unified.kick) orConditions.push({ kickId: unified.kick.id });
+    if (unified.tiktok) orConditions.push({ tiktokId: unified.tiktok.id });
+    if (unified.instagram) orConditions.push({ instagramId: unified.instagram.id });
+    if (unified.x) orConditions.push({ xId: unified.x.id });
+    if (unified.facebook) orConditions.push({ facebookId: unified.facebook.id });
+    if (unified.linkedin) orConditions.push({ linkedinId: unified.linkedin.id });
+
+    const existing = orConditions.length > 0
+      ? await db.influencer.findFirst({ where: { OR: orConditions } })
+      : null;
 
     const data = {
       displayName: unified.displayName,
@@ -347,9 +351,120 @@ export class InfluencerUnificationService {
     };
 
     if (existing) {
+      // Merge sourceStreamerIds
+      const mergedSourceIds = [...new Set([
+        ...(existing.sourceStreamerIds || []),
+        ...unified.sourceStreamerIds
+      ])];
+
+      // Only update platform fields if they're not already set
+      const mergeData: any = {
+        sourceStreamerIds: mergedSourceIds,
+        lastVerifiedAt: new Date(),
+      };
+
+      // Merge each platform data (only set if not already in existing)
+      if (unified.twitch && !existing.twitchId) {
+        mergeData.twitchId = unified.twitch.id;
+        mergeData.twitchUsername = unified.twitch.username;
+        mergeData.twitchDisplayName = unified.twitch.displayName;
+        mergeData.twitchFollowers = unified.twitch.followers;
+        mergeData.twitchAvatar = unified.twitch.avatar;
+        mergeData.twitchUrl = unified.twitch.url;
+        mergeData.twitchVerified = unified.twitch.verified || false;
+      }
+      if (unified.youtube && !existing.youtubeId) {
+        mergeData.youtubeId = unified.youtube.id;
+        mergeData.youtubeUsername = unified.youtube.username;
+        mergeData.youtubeDisplayName = unified.youtube.displayName;
+        mergeData.youtubeFollowers = unified.youtube.followers;
+        mergeData.youtubeAvatar = unified.youtube.avatar;
+        mergeData.youtubeUrl = unified.youtube.url;
+        mergeData.youtubeVerified = unified.youtube.verified || false;
+      }
+      if (unified.kick && !existing.kickId) {
+        mergeData.kickId = unified.kick.id;
+        mergeData.kickUsername = unified.kick.username;
+        mergeData.kickDisplayName = unified.kick.displayName;
+        mergeData.kickFollowers = unified.kick.followers;
+        mergeData.kickAvatar = unified.kick.avatar;
+        mergeData.kickUrl = unified.kick.url;
+        mergeData.kickVerified = unified.kick.verified || false;
+      }
+      if (unified.tiktok && !existing.tiktokId) {
+        mergeData.tiktokId = unified.tiktok.id;
+        mergeData.tiktokUsername = unified.tiktok.username;
+        mergeData.tiktokDisplayName = unified.tiktok.displayName;
+        mergeData.tiktokFollowers = unified.tiktok.followers;
+        mergeData.tiktokAvatar = unified.tiktok.avatar;
+        mergeData.tiktokUrl = unified.tiktok.url;
+        mergeData.tiktokVerified = unified.tiktok.verified || false;
+      }
+      if (unified.instagram && !existing.instagramId) {
+        mergeData.instagramId = unified.instagram.id;
+        mergeData.instagramUsername = unified.instagram.username;
+        mergeData.instagramDisplayName = unified.instagram.displayName;
+        mergeData.instagramFollowers = unified.instagram.followers;
+        mergeData.instagramAvatar = unified.instagram.avatar;
+        mergeData.instagramUrl = unified.instagram.url;
+        mergeData.instagramVerified = unified.instagram.verified || false;
+      }
+      if (unified.x && !existing.xId) {
+        mergeData.xId = unified.x.id;
+        mergeData.xUsername = unified.x.username;
+        mergeData.xDisplayName = unified.x.displayName;
+        mergeData.xFollowers = unified.x.followers;
+        mergeData.xAvatar = unified.x.avatar;
+        mergeData.xUrl = unified.x.url;
+        mergeData.xVerified = unified.x.verified || false;
+      }
+      if (unified.facebook && !existing.facebookId) {
+        mergeData.facebookId = unified.facebook.id;
+        mergeData.facebookUsername = unified.facebook.username;
+        mergeData.facebookDisplayName = unified.facebook.displayName;
+        mergeData.facebookFollowers = unified.facebook.followers;
+        mergeData.facebookAvatar = unified.facebook.avatar;
+        mergeData.facebookUrl = unified.facebook.url;
+        mergeData.facebookVerified = unified.facebook.verified || false;
+      }
+      if (unified.linkedin && !existing.linkedinId) {
+        mergeData.linkedinId = unified.linkedin.id;
+        mergeData.linkedinUsername = unified.linkedin.username;
+        mergeData.linkedinDisplayName = unified.linkedin.displayName;
+        mergeData.linkedinFollowers = unified.linkedin.followers;
+        mergeData.linkedinAvatar = unified.linkedin.avatar;
+        mergeData.linkedinUrl = unified.linkedin.url;
+        mergeData.linkedinVerified = unified.linkedin.verified || false;
+      }
+
+      // Recalculate aggregated metrics after merge
+      const mergedPlatformCount = [
+        existing.twitchId || mergeData.twitchId,
+        existing.youtubeId || mergeData.youtubeId,
+        existing.kickId || mergeData.kickId,
+        existing.tiktokId || mergeData.tiktokId,
+        existing.instagramId || mergeData.instagramId,
+        existing.xId || mergeData.xId,
+        existing.facebookId || mergeData.facebookId,
+        existing.linkedinId || mergeData.linkedinId,
+      ].filter(Boolean).length;
+
+      const mergedReach =
+        (existing.twitchFollowers || mergeData.twitchFollowers || 0) +
+        (existing.youtubeFollowers || mergeData.youtubeFollowers || 0) +
+        (existing.kickFollowers || mergeData.kickFollowers || 0) +
+        (existing.tiktokFollowers || mergeData.tiktokFollowers || 0) +
+        (existing.instagramFollowers || mergeData.instagramFollowers || 0) +
+        (existing.xFollowers || mergeData.xFollowers || 0) +
+        (existing.facebookFollowers || mergeData.facebookFollowers || 0) +
+        (existing.linkedinFollowers || mergeData.linkedinFollowers || 0);
+
+      mergeData.platformCount = mergedPlatformCount;
+      mergeData.totalReach = BigInt(mergedReach);
+
       await db.influencer.update({
         where: { id: existing.id },
-        data,
+        data: mergeData,
       });
       return 'updated';
     } else {
