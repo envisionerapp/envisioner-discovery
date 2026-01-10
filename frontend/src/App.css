@@ -707,6 +707,58 @@ body::-webkit-scrollbar {
   transform: scale(1.1);
 }
 
+/* Card Actions Container - Bottom Left */
+.card-actions {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  z-index: 10;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn:hover {
+  background: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn.active.favorite {
+  color: #FF6B35;
+  background: #FFF5F2;
+}
+
+.action-btn.active.discard {
+  color: #ef4444;
+  background: #FEF2F2;
+}
+
+.action-btn.active.note {
+  color: #3b82f6;
+  background: #EFF6FF;
+}
+
+.action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
 /* Favorite Count in Filter */
 .favorite-count {
   background: #FF6B35;

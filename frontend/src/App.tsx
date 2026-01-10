@@ -1136,36 +1136,41 @@ function App() {
 
               return (
                 <a key={creator.id} className="creator-card" href={channelUrl} target="_blank" rel="noopener noreferrer">
-                  <div className="card-top-right">
-                    <button
-                      className={`favorite-btn ${favorites.includes(creator.id) ? 'active' : ''}`}
-                      onClick={(e) => toggleFavorite(creator.id, e)}
-                    >
-                      {favorites.includes(creator.id) ? Icons.heartFilled : Icons.heart}
-                    </button>
-                    <button
-                      className={`favorite-btn discard-btn ${discarded.includes(creator.id) ? 'active' : ''}`}
-                      onClick={(e) => toggleDiscarded(creator.id, e)}
-                      style={discarded.includes(creator.id) ? { color: '#ef4444' } : {}}
-                    >
-                      {Icons.trash}
-                    </button>
-                    <button
-                      className={`favorite-btn note-btn ${notes[creator.id] ? 'active' : ''}`}
-                      onClick={(e) => openNoteModal(creator, e)}
-                      style={notes[creator.id] ? { color: '#3b82f6' } : {}}
-                      title={notes[creator.id] ? 'Edit note' : 'Add note'}
-                    >
-                      {notes[creator.id] ? Icons.noteFilled : Icons.note}
-                    </button>
-                    {platformKey !== 'twitch' && platformKey !== 'kick' && (
+                  {/* Engagement badge in top right */}
+                  {platformKey !== 'twitch' && platformKey !== 'kick' && (
+                    <div className="card-top-right">
                       <div className="engagement-badge">
                         <div className="engagement-circle">
                           <span>{(engagement * 100).toFixed(1)}%</span>
                         </div>
                         <span className="engagement-label">Eng. Rate</span>
                       </div>
-                    )}
+                    </div>
+                  )}
+
+                  {/* Action buttons at bottom left */}
+                  <div className="card-actions">
+                    <button
+                      className={`action-btn ${favorites.includes(creator.id) ? 'active favorite' : ''}`}
+                      onClick={(e) => toggleFavorite(creator.id, e)}
+                      title={favorites.includes(creator.id) ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                      {favorites.includes(creator.id) ? Icons.heartFilled : Icons.heart}
+                    </button>
+                    <button
+                      className={`action-btn ${discarded.includes(creator.id) ? 'active discard' : ''}`}
+                      onClick={(e) => toggleDiscarded(creator.id, e)}
+                      title={discarded.includes(creator.id) ? 'Restore' : 'Discard'}
+                    >
+                      {Icons.trash}
+                    </button>
+                    <button
+                      className={`action-btn ${notes[creator.id] ? 'active note' : ''}`}
+                      onClick={(e) => openNoteModal(creator, e)}
+                      title={notes[creator.id] ? 'Edit note' : 'Add note'}
+                    >
+                      {notes[creator.id] ? Icons.noteFilled : Icons.note}
+                    </button>
                   </div>
 
                   <div className="creator-top">
