@@ -9,7 +9,7 @@ export class StreamerController {
   getStreamers = asyncHandler(async (req: Request, res: Response) => {
     try {
       const page = Math.max(parseInt((req.query.page as string) || '1', 10), 1);
-      const limit = Math.min(Math.max(parseInt((req.query.limit as string) || '20', 10), 1), 100);
+      const limit = Math.min(Math.max(parseInt((req.query.limit as string) || '20', 10), 1), 500);
       const skip = (page - 1) * limit;
 
       const sort = (String(req.query.sort || '').toLowerCase());
