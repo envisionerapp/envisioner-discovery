@@ -10,6 +10,7 @@ interface ExternalInfluencer {
   subscribers: number | null;
   views: string | null;
   videos: number | null;
+  stats_updated_at: string | null; // Used for lastSeenLive/lastScrapedAt
 }
 
 /**
@@ -66,8 +67,11 @@ export class InfluencerSyncService {
 
     try {
       // Fetch all influencers from the external table
+      // Note: The influencers table only has subscribers/views/videos - no platform-specific metrics
+      // like avgViewers, peakViewers, totalLikes (those come from platform APIs)
       const influencers = await db.$queryRawUnsafe<ExternalInfluencer[]>(`
-        SELECT id, influencer, clean_name, channel_url, thumbnail, subscribers, views::text as views, videos
+        SELECT id, influencer, clean_name, channel_url, thumbnail, subscribers,
+               views::text as views, videos, stats_updated_at::text as stats_updated_at
         FROM influencers
         WHERE channel_url IS NOT NULL AND channel_url != ''
       `);
@@ -108,6 +112,14 @@ export class InfluencerSyncService {
                 updates.totalViews = viewsBigInt;
               }
             }
+            // Use stats_updated_at as proxy for last activity
+            if (inf.stats_updated_at) {
+              const statsDate = new Date(inf.stats_updated_at);
+              if (!existing.lastSeenLive || statsDate > existing.lastSeenLive) {
+                updates.lastSeenLive = statsDate;
+                updates.lastScrapedAt = statsDate;
+              }
+            }
 
             if (Object.keys(updates).length > 0) {
               await db.streamer.update({
@@ -123,6 +135,9 @@ export class InfluencerSyncService {
           }
 
           // Create new streamer record
+          // Use stats_updated_at as proxy for last activity
+          const lastActiveDate = inf.stats_updated_at ? new Date(inf.stats_updated_at) : null;
+
           await db.streamer.create({
             data: {
               platform,
@@ -138,6 +153,9 @@ export class InfluencerSyncService {
               currentViewers: 0,
               highestViewers: 0,
               tags: [],
+              // Set last active dates from stats_updated_at
+              lastSeenLive: lastActiveDate,
+              lastScrapedAt: lastActiveDate,
               // Mark as synced from influencers table
               notes: `Synced from influencers table (id: ${inf.id})`,
             },
