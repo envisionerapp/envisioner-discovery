@@ -50,6 +50,7 @@ export class InfluencerUnificationService {
   /**
    * Unify all existing streamers into Influencer profiles
    * Groups by: same person across platforms
+   * OPTIMIZED: Uses batch inserts instead of individual upserts
    */
   async unifyAllStreamers(): Promise<{
     created: number;
@@ -58,9 +59,10 @@ export class InfluencerUnificationService {
   }> {
     console.log('🔗 Starting influencer unification...');
 
-    let created = 0;
-    let updated = 0;
-    let errors = 0;
+    // Check if we already have influencers (fresh start vs incremental)
+    const existingCount = await db.influencer.count();
+    const isFreshStart = existingCount === 0;
+    console.log(`📊 Existing influencers: ${existingCount} (${isFreshStart ? 'fresh start' : 'incremental'})`);
 
     // Step 1: Get all streamers grouped by base platforms (Twitch, YouTube, Kick)
     const baseStreamers = await db.streamer.findMany({
@@ -91,42 +93,79 @@ export class InfluencerUnificationService {
       socialByUsername.get(key)!.push(s as StreamerData);
     }
 
-    // Step 3: Process each base streamer
-    for (const streamer of baseStreamers) {
-      try {
-        const unified = await this.buildUnifiedProfile(streamer as StreamerData, socialByUsername);
+    // Step 3: Build all unified profiles in memory first
+    console.log('🔨 Building unified profiles in memory...');
+    const unifiedProfiles: UnifiedInfluencer[] = [];
+    const processedSocialIds = new Set<string>();
+    let errors = 0;
 
+    for (let i = 0; i < baseStreamers.length; i++) {
+      const streamer = baseStreamers[i];
+      try {
+        const unified = this.buildUnifiedProfileSync(streamer as StreamerData, socialByUsername);
         if (unified) {
-          const result = await this.upsertInfluencer(unified);
-          if (result === 'created') created++;
-          else if (result === 'updated') updated++;
+          unifiedProfiles.push(unified);
+          // Track which social IDs have been linked
+          for (const id of unified.sourceStreamerIds) {
+            processedSocialIds.add(id);
+          }
         }
       } catch (error: any) {
-        logger.error(`Failed to unify ${streamer.username}:`, error.message);
         errors++;
       }
-    }
 
-    // Step 4: Handle orphan social streamers (those not linked to any base streamer)
-    const processedIds = new Set<string>();
-    const influencers = await db.influencer.findMany({
-      select: { sourceStreamerIds: true }
-    });
-    for (const inf of influencers) {
-      for (const id of inf.sourceStreamerIds) {
-        processedIds.add(id);
+      // Progress every 1000
+      if ((i + 1) % 1000 === 0) {
+        console.log(`   Processed ${i + 1}/${baseStreamers.length} base streamers...`);
       }
     }
 
+    // Add orphan social streamers
     for (const social of socialStreamers) {
-      if (!processedIds.has(social.id)) {
+      if (!processedSocialIds.has(social.id)) {
+        const unified = this.createStandaloneInfluencer(social as StreamerData);
+        unifiedProfiles.push(unified);
+      }
+    }
+
+    console.log(`📊 Built ${unifiedProfiles.length} unified profiles`);
+
+    // Step 4: Batch insert (fresh start) or batch upsert
+    let created = 0;
+    let updated = 0;
+
+    if (isFreshStart) {
+      // Fresh start - use createMany for speed
+      console.log('🚀 Batch inserting all profiles...');
+      const batchSize = 500;
+
+      for (let i = 0; i < unifiedProfiles.length; i += batchSize) {
+        const batch = unifiedProfiles.slice(i, i + batchSize);
+        const dataToInsert = batch.map(u => this.unifiedToDbData(u));
+
+        await db.influencer.createMany({
+          data: dataToInsert as any[],
+          skipDuplicates: true,
+        });
+
+        created += batch.length;
+        console.log(`   Inserted ${Math.min(i + batchSize, unifiedProfiles.length)}/${unifiedProfiles.length}...`);
+      }
+    } else {
+      // Incremental - need to check for existing (slower but safer)
+      console.log('🔄 Incrementally upserting profiles...');
+      for (let i = 0; i < unifiedProfiles.length; i++) {
+        const unified = unifiedProfiles[i];
         try {
-          const unified = this.createStandaloneInfluencer(social as StreamerData);
           const result = await this.upsertInfluencer(unified);
           if (result === 'created') created++;
           else if (result === 'updated') updated++;
         } catch (error: any) {
           errors++;
+        }
+
+        if ((i + 1) % 500 === 0) {
+          console.log(`   Upserted ${i + 1}/${unifiedProfiles.length}...`);
         }
       }
     }
@@ -135,6 +174,165 @@ export class InfluencerUnificationService {
     console.log(`   Created: ${created}, Updated: ${updated}, Errors: ${errors}`);
 
     return { created, updated, errors };
+  }
+
+  /**
+   * Synchronous version of buildUnifiedProfile (no DB queries)
+   */
+  private buildUnifiedProfileSync(
+    baseStreamer: StreamerData,
+    socialByUsername: Map<string, StreamerData[]>
+  ): UnifiedInfluencer {
+    const unified: UnifiedInfluencer = {
+      displayName: baseStreamer.displayName,
+      country: this.regionToCountry(baseStreamer.region),
+      language: baseStreamer.language,
+      primaryCategory: baseStreamer.primaryCategory,
+      tags: baseStreamer.tags || [],
+      sourceStreamerIds: [baseStreamer.id],
+    };
+
+    // Add base platform data
+    this.addPlatformData(unified, baseStreamer);
+
+    // Try to find matching social accounts
+    const possibleMatches = [
+      baseStreamer.username.toLowerCase(),
+      baseStreamer.displayName.toLowerCase().replace(/\s+/g, ''),
+    ];
+
+    for (const key of possibleMatches) {
+      const matches = socialByUsername.get(key);
+      if (matches) {
+        for (const match of matches) {
+          this.addPlatformData(unified, match);
+          unified.sourceStreamerIds.push(match.id);
+        }
+      }
+    }
+
+    // Also check socialLinks for explicit links
+    const socialLinks = (baseStreamer.socialLinks as string[]) || [];
+    for (const link of socialLinks) {
+      const parsed = this.parseSocialLink(link);
+      if (parsed) {
+        const matches = socialByUsername.get(parsed.username.toLowerCase());
+        if (matches) {
+          const match = matches.find(m => m.platform === parsed.platform);
+          if (match && !unified.sourceStreamerIds.includes(match.id)) {
+            this.addPlatformData(unified, match);
+            unified.sourceStreamerIds.push(match.id);
+          }
+        }
+      }
+    }
+
+    return unified;
+  }
+
+  /**
+   * Convert unified profile to database-ready object
+   */
+  private unifiedToDbData(unified: UnifiedInfluencer): Record<string, unknown> {
+    const platforms = [
+      unified.twitch,
+      unified.youtube,
+      unified.kick,
+      unified.tiktok,
+      unified.instagram,
+      unified.x,
+      unified.facebook,
+      unified.linkedin,
+    ].filter(Boolean);
+
+    const totalReach = platforms.reduce((sum, p) => sum + (p?.followers || 0), 0);
+    const platformCount = platforms.length;
+
+    return {
+      displayName: unified.displayName,
+      country: unified.country,
+      language: unified.language,
+      primaryCategory: unified.primaryCategory,
+      tags: unified.tags,
+      sourceStreamerIds: unified.sourceStreamerIds,
+
+      // Twitch
+      twitchId: unified.twitch?.id ?? null,
+      twitchUsername: unified.twitch?.username ?? null,
+      twitchDisplayName: unified.twitch?.displayName ?? null,
+      twitchFollowers: unified.twitch?.followers ?? null,
+      twitchAvatar: unified.twitch?.avatar ?? null,
+      twitchUrl: unified.twitch?.url ?? null,
+      twitchVerified: unified.twitch?.verified ?? false,
+
+      // YouTube
+      youtubeId: unified.youtube?.id ?? null,
+      youtubeUsername: unified.youtube?.username ?? null,
+      youtubeDisplayName: unified.youtube?.displayName ?? null,
+      youtubeFollowers: unified.youtube?.followers ?? null,
+      youtubeAvatar: unified.youtube?.avatar ?? null,
+      youtubeUrl: unified.youtube?.url ?? null,
+      youtubeVerified: unified.youtube?.verified ?? false,
+
+      // Kick
+      kickId: unified.kick?.id ?? null,
+      kickUsername: unified.kick?.username ?? null,
+      kickDisplayName: unified.kick?.displayName ?? null,
+      kickFollowers: unified.kick?.followers ?? null,
+      kickAvatar: unified.kick?.avatar ?? null,
+      kickUrl: unified.kick?.url ?? null,
+      kickVerified: unified.kick?.verified ?? false,
+
+      // TikTok
+      tiktokId: unified.tiktok?.id ?? null,
+      tiktokUsername: unified.tiktok?.username ?? null,
+      tiktokDisplayName: unified.tiktok?.displayName ?? null,
+      tiktokFollowers: unified.tiktok?.followers ?? null,
+      tiktokAvatar: unified.tiktok?.avatar ?? null,
+      tiktokUrl: unified.tiktok?.url ?? null,
+      tiktokVerified: unified.tiktok?.verified ?? false,
+
+      // Instagram
+      instagramId: unified.instagram?.id ?? null,
+      instagramUsername: unified.instagram?.username ?? null,
+      instagramDisplayName: unified.instagram?.displayName ?? null,
+      instagramFollowers: unified.instagram?.followers ?? null,
+      instagramAvatar: unified.instagram?.avatar ?? null,
+      instagramUrl: unified.instagram?.url ?? null,
+      instagramVerified: unified.instagram?.verified ?? false,
+
+      // X
+      xId: unified.x?.id ?? null,
+      xUsername: unified.x?.username ?? null,
+      xDisplayName: unified.x?.displayName ?? null,
+      xFollowers: unified.x?.followers ?? null,
+      xAvatar: unified.x?.avatar ?? null,
+      xUrl: unified.x?.url ?? null,
+      xVerified: unified.x?.verified ?? false,
+
+      // Facebook
+      facebookId: unified.facebook?.id ?? null,
+      facebookUsername: unified.facebook?.username ?? null,
+      facebookDisplayName: unified.facebook?.displayName ?? null,
+      facebookFollowers: unified.facebook?.followers ?? null,
+      facebookAvatar: unified.facebook?.avatar ?? null,
+      facebookUrl: unified.facebook?.url ?? null,
+      facebookVerified: unified.facebook?.verified ?? false,
+
+      // LinkedIn
+      linkedinId: unified.linkedin?.id ?? null,
+      linkedinUsername: unified.linkedin?.username ?? null,
+      linkedinDisplayName: unified.linkedin?.displayName ?? null,
+      linkedinFollowers: unified.linkedin?.followers ?? null,
+      linkedinAvatar: unified.linkedin?.avatar ?? null,
+      linkedinUrl: unified.linkedin?.url ?? null,
+      linkedinVerified: unified.linkedin?.verified ?? false,
+
+      // Aggregated
+      totalReach: BigInt(totalReach),
+      platformCount,
+      lastVerifiedAt: new Date(),
+    };
   }
 
   /**

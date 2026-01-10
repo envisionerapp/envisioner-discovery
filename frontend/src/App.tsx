@@ -693,6 +693,7 @@ function App() {
   const openNoteModal = (creator: ApiCreator, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log('Opening note modal for:', creator.displayName);
     setNoteModalCreator(creator);
     setNoteContent(notes[creator.id] || '');
     setNoteModalOpen(true);
@@ -1173,6 +1174,7 @@ function App() {
                     <span className="meta-item category">{category}</span>
                     <div className="card-actions">
                       <button
+                        type="button"
                         className={`action-btn ${favorites.includes(creator.id) ? 'active favorite' : ''}`}
                         onClick={(e) => toggleFavorite(creator.id, e)}
                         title={favorites.includes(creator.id) ? 'Remove from favorites' : 'Add to favorites'}
@@ -1180,19 +1182,41 @@ function App() {
                         {favorites.includes(creator.id) ? Icons.heartFilled : Icons.heart}
                       </button>
                       <button
+                        type="button"
                         className={`action-btn ${discarded.includes(creator.id) ? 'active discard' : ''}`}
                         onClick={(e) => toggleDiscarded(creator.id, e)}
                         title={discarded.includes(creator.id) ? 'Restore' : 'Discard'}
                       >
                         {Icons.trash}
                       </button>
-                      <button
-                        className={`action-btn ${notes[creator.id] ? 'active note' : ''}`}
-                        onClick={(e) => openNoteModal(creator, e)}
-                        title={notes[creator.id] ? 'Edit note' : 'Add note'}
-                      >
-                        {notes[creator.id] ? Icons.noteFilled : Icons.note}
-                      </button>
+                      <div className="note-wrapper">
+                        <button
+                          type="button"
+                          className={`action-btn ${notes[creator.id] ? 'active note' : ''}`}
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); openNoteModal(creator, e); }}
+                          title={notes[creator.id] ? 'Edit note' : 'Add note'}
+                        >
+                          {notes[creator.id] ? Icons.noteFilled : Icons.note}
+                        </button>
+                        {noteModalOpen && noteModalCreator?.id === creator.id && (
+                          <div className="note-popout" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} onMouseDown={(e) => e.stopPropagation()}>
+                            <textarea
+                              value={noteContent}
+                              onChange={(e) => setNoteContent(e.target.value)}
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                              onMouseDown={(e) => e.stopPropagation()}
+                              placeholder="Add a note..."
+                              autoFocus
+                            />
+                            <div className="note-popout-actions">
+                              <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setNoteModalOpen(false); }} onMouseDown={(e) => e.stopPropagation()}>Cancel</button>
+                              <button type="button" className="save" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleSaveNote(); }} onMouseDown={(e) => e.stopPropagation()} disabled={noteSaving}>
+                                {noteSaving ? '...' : 'Save'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -1254,54 +1278,6 @@ function App() {
         </main>
       </div>
 
-      {/* Profile Modal */}
-      {/* Note Modal */}
-      {noteModalOpen && noteModalCreator && (
-        <div className="profile-modal-overlay" onClick={() => setNoteModalOpen(false)}>
-          <div className="profile-modal note-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
-            <button className="profile-close" onClick={() => setNoteModalOpen(false)}>{Icons.x}</button>
-            <div className="profile-content">
-              <h3 style={{ marginBottom: '16px', color: '#fff' }}>
-                Note for {noteModalCreator.displayName}
-              </h3>
-              <textarea
-                value={noteContent}
-                onChange={(e) => setNoteContent(e.target.value)}
-                placeholder="Write your notes about this creator..."
-                style={{
-                  width: '100%',
-                  minHeight: '150px',
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  background: 'rgba(0,0,0,0.3)',
-                  color: '#fff',
-                  fontSize: '14px',
-                  resize: 'vertical',
-                  fontFamily: 'inherit',
-                }}
-              />
-              <div style={{ display: 'flex', gap: '12px', marginTop: '16px', justifyContent: 'flex-end' }}>
-                <button
-                  onClick={() => setNoteModalOpen(false)}
-                  className="profile-btn secondary"
-                  style={{ padding: '8px 16px' }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveNote}
-                  disabled={noteSaving}
-                  className="profile-btn primary"
-                  style={{ padding: '8px 16px' }}
-                >
-                  {noteSaving ? 'Saving...' : 'Save Note'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {selectedCreator && (() => {
         const modalPlatformKey = getPlatformKey(selectedCreator.platform) as Platform;

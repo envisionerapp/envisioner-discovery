@@ -1,9 +1,20 @@
 require('dotenv').config();
+const { PrismaClient } = require('@prisma/client');
 const { influencerUnificationService } = require('../dist/services/influencerUnificationService');
+
+const db = new PrismaClient();
 
 async function run() {
   console.log('🔗 Starting full influencer unification...\n');
   console.log('This will merge 12k+ streamers into unified profiles.\n');
+
+  // Clear existing influencers for fresh batch insert
+  const existing = await db.influencer.count();
+  if (existing > 0) {
+    console.log(`🗑️ Clearing ${existing} existing influencers for fresh start...`);
+    await db.influencer.deleteMany({});
+    console.log('✅ Table cleared\n');
+  }
 
   const startTime = Date.now();
 
