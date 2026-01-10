@@ -8,14 +8,15 @@ interface TikTokProfile {
   uniqueId: string;
   nickname: string;
   avatarLarger: string;
+  avatarMedium?: string;
   signature: string;
   verified: boolean;
-  followerCount: number;
-  followingCount: number;
-  heartCount: number;
-  videoCount: number;
-  diggCount: number;
-  region: string;
+  followerCount: number | string;
+  followingCount: number | string;
+  heart: number | string;
+  heartCount: number | string;
+  videoCount: number | string;
+  diggCount: number | string;
 }
 
 interface InstagramProfile {
@@ -107,7 +108,16 @@ export class ScrapeCreatorsService {
       const response = await this.client.get('/v1/tiktok/profile', {
         params: { handle: handle.replace('@', '') }
       });
-      return response.data?.data || response.data;
+      // API returns { success, user, stats } - combine user and stats
+      const data = response.data;
+      if (data?.user) {
+        return {
+          ...data.user,
+          ...data.stats,
+          ...data.statsV2,
+        };
+      }
+      return null;
     } catch (error: any) {
       logger.error(`TikTok profile fetch failed for ${handle}:`, error.response?.data || error.message);
       return null;
@@ -331,16 +341,21 @@ export class ScrapeCreatorsService {
     switch (platform) {
       case 'TIKTOK': {
         const p = profile as TikTokProfile;
+        const followers = typeof p.followerCount === 'string' ? parseInt(p.followerCount) : (p.followerCount || 0);
+        const hearts = typeof p.heartCount === 'string' ? parseInt(p.heartCount) : (p.heartCount || 0);
+        const videos = typeof p.videoCount === 'string' ? parseInt(p.videoCount) : (p.videoCount || 0);
+        const diggs = typeof p.diggCount === 'string' ? parseInt(p.diggCount) : (p.diggCount || 0);
+
         return {
-          username: p.uniqueId,
-          displayName: p.nickname,
-          profileUrl: `https://tiktok.com/@${p.uniqueId}`,
-          avatarUrl: p.avatarLarger,
-          followers: p.followerCount || 0,
-          totalViews: BigInt(p.heartCount || 0),
-          totalLikes: BigInt(p.diggCount || 0),
-          profileDescription: p.signature,
-          engagementRate: this.calculateEngagementRate(p.followerCount, p.heartCount, p.videoCount),
+          username: p.uniqueId || '',
+          displayName: p.nickname || p.uniqueId || '',
+          profileUrl: `https://tiktok.com/@${p.uniqueId || ''}`,
+          avatarUrl: p.avatarLarger || p.avatarMedium,
+          followers: followers,
+          totalViews: BigInt(hearts),
+          totalLikes: BigInt(diggs),
+          profileDescription: p.signature || '',
+          engagementRate: this.calculateEngagementRate(followers, hearts, videos),
         };
       }
       case 'INSTAGRAM': {
