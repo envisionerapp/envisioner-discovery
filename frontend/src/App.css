@@ -925,6 +925,42 @@ body::-webkit-scrollbar {
   margin-top: 12px;
 }
 
+/* Load More */
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+  margin-top: 16px;
+}
+
+.load-more-btn {
+  padding: 14px 32px;
+  background: #FF6B35;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.load-more-btn:hover:not(:disabled) {
+  background: #e55a2b;
+  transform: translateY(-1px);
+}
+
+.load-more-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.all-loaded {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
 /* No Results */
 .no-results {
   text-align: center;

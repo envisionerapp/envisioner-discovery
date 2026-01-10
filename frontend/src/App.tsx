@@ -521,6 +521,12 @@ function App() {
   const [sortBy, setSortBy] = useState<string>('lastactive');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const PAGE_SIZE = 500;
+
   // Profile modal
   const [selectedCreator, setSelectedCreator] = useState<ApiCreator | null>(null);
 
@@ -529,37 +535,66 @@ function App() {
     fetchFavoriteIds().then(setFavorites).catch(console.error);
   }, []);
 
-  // Fetch creators from API
+  // Build filter params (shared between initial load and load more)
+  const getFilterParams = useCallback(() => ({
+    limit: PAGE_SIZE,
+    search: search || undefined,
+    platforms: selectedPlatforms.length > 0 ? selectedPlatforms : undefined,
+    regions: selectedRegions.length > 0 ? selectedRegions : undefined,
+    categories: selectedCategories.length > 0 ? selectedCategories : undefined,
+    minFollowers: minFollowers > 0 ? minFollowers : undefined,
+    maxFollowers: maxFollowers < 500000000 ? maxFollowers : undefined,
+    minViews: minViews > 0 ? minViews : undefined,
+    maxViews: maxViews < 50000000000 ? maxViews : undefined,
+    minEngagement: minEngagement > 0 ? minEngagement : undefined,
+    minAvgViewers: minAvgViewers > 0 ? minAvgViewers : undefined,
+    maxLastActive: maxLastActive < 365 ? maxLastActive : undefined,
+    favoritesOnly: favoritesOnly || undefined,
+    sort: sortBy,
+    dir: sortDir,
+  }), [search, selectedPlatforms, selectedRegions, selectedCategories, minFollowers, maxFollowers, minViews, maxViews, minEngagement, minAvgViewers, maxLastActive, favoritesOnly, sortBy, sortDir]);
+
+  // Fetch creators from API (initial load, page 1)
   const loadCreators = useCallback(async () => {
     setLoading(true);
+    setPage(1);
+    setHasMore(true);
+
     try {
-      const response = await fetchCreators({
-        limit: 500,
-        search: search || undefined,
-        platforms: selectedPlatforms.length > 0 ? selectedPlatforms : undefined,
-        regions: selectedRegions.length > 0 ? selectedRegions : undefined,
-        categories: selectedCategories.length > 0 ? selectedCategories : undefined,
-        minFollowers: minFollowers > 0 ? minFollowers : undefined,
-        maxFollowers: maxFollowers < 500000000 ? maxFollowers : undefined,
-        minViews: minViews > 0 ? minViews : undefined,
-        maxViews: maxViews < 50000000000 ? maxViews : undefined,
-        minEngagement: minEngagement > 0 ? minEngagement : undefined,
-        minAvgViewers: minAvgViewers > 0 ? minAvgViewers : undefined,
-        maxLastActive: maxLastActive < 365 ? maxLastActive : undefined,
-        favoritesOnly: favoritesOnly || undefined,
-        sort: sortBy,
-        dir: sortDir,
-      });
+      const response = await fetchCreators({ ...getFilterParams(), page: 1 });
       if (response.success) {
         setCreators(response.data);
         setTotalCreators(response.pagination?.total || response.data.length);
+        setHasMore(response.data.length === PAGE_SIZE && (response.pagination?.total || 0) > PAGE_SIZE);
       }
     } catch (error) {
       console.error('Failed to fetch creators:', error);
     } finally {
       setLoading(false);
     }
-  }, [search, selectedPlatforms, selectedRegions, selectedCategories, minFollowers, maxFollowers, minViews, maxViews, minEngagement, minAvgViewers, maxLastActive, favoritesOnly, sortBy, sortDir]);
+  }, [getFilterParams]);
+
+  // Load more creators (next page)
+  const loadMoreCreators = async () => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    const nextPage = page + 1;
+
+    try {
+      const response = await fetchCreators({ ...getFilterParams(), page: nextPage });
+      if (response.success) {
+        setCreators(prev => [...prev, ...response.data]);
+        setPage(nextPage);
+        setTotalCreators(response.pagination?.total || response.data.length);
+        setHasMore(response.data.length === PAGE_SIZE && (response.pagination?.total || 0) > nextPage * PAGE_SIZE);
+      }
+    } catch (error) {
+      console.error('Failed to load more creators:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   // Debounce API calls
   useEffect(() => {
@@ -1033,7 +1068,27 @@ function App() {
             })}
           </div>
 
-          {filteredCreators.length === 0 && (
+          {/* Load More Button */}
+          {!loading && hasMore && filteredCreators.length > 0 && (
+            <div className="load-more-container">
+              <button
+                className="load-more-btn"
+                onClick={loadMoreCreators}
+                disabled={loadingMore}
+              >
+                {loadingMore ? 'Loading...' : `Load More (${creators.length} of ${totalCreators})`}
+              </button>
+            </div>
+          )}
+
+          {/* All loaded message */}
+          {!loading && !hasMore && filteredCreators.length > 0 && (
+            <div className="load-more-container">
+              <span className="all-loaded">All {totalCreators} creators loaded</span>
+            </div>
+          )}
+
+          {filteredCreators.length === 0 && !loading && (
             <div className="no-results">
               <p>No creators found matching your filters</p>
               <button onClick={clearFilters}>Clear filters</button>
