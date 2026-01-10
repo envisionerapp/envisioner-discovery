@@ -52,6 +52,7 @@ model Streamer {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   lastScrapedAt DateTime?
+  lastSeenLive  DateTime? @map("last_seen_live")
 
   // Social Metrics (Instagram/TikTok/FB/X/LinkedIn)
   totalViews    BigInt    @default(0) @map("total_views")

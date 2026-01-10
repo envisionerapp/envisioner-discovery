@@ -505,7 +505,8 @@ export class DiscoveryService {
                 isLive: true,
                 currentViewers: streamer.currentViewers || 0,
                 currentGame: streamer.currentGame,
-                lastScrapedAt: new Date()
+                lastScrapedAt: new Date(),
+                lastSeenLive: new Date() // Track when we saw them live
               }
             });
           }
@@ -527,7 +528,8 @@ export class DiscoveryService {
               usesCamera: false,
               isVtuber: false,
               fraudCheck: FraudStatus.PENDING_REVIEW,
-              lastScrapedAt: new Date()
+              lastScrapedAt: new Date(),
+              lastSeenLive: streamer.isLive ? new Date() : null // Only set if live
             }
           });
           added++;

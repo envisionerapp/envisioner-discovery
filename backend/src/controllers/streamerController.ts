@@ -142,7 +142,7 @@ export class StreamerController {
           orderBy.push({ totalViews: dir });
           break;
         case 'lastactive':
-          orderBy.push({ lastScrapedAt: { sort: dir, nulls: 'last' } });
+          orderBy.push({ lastSeenLive: { sort: dir, nulls: 'last' } });
           break;
         default:
           orderBy.push({ followers: 'desc' });
@@ -181,6 +181,7 @@ export class StreamerController {
             engagementRate: true,
             lastScrapedAt: true,
             lastStreamed: true,
+            lastSeenLive: true,
           },
         }),
         db.streamer.count({ where }),
