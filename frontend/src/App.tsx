@@ -532,7 +532,7 @@ function App() {
     setLoading(true);
     try {
       const response = await fetchCreators({
-        limit: 100,
+        limit: 500,
         search: search || undefined,
         platforms: selectedPlatforms.length > 0 ? selectedPlatforms : undefined,
         regions: selectedRegions.length > 0 ? selectedRegions : undefined,
