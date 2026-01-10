@@ -518,6 +518,8 @@ function App() {
   const [maxViews, setMaxViews] = useState<number>(50000000000);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<string>('lastactive');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   // Profile modal
   const [selectedCreator, setSelectedCreator] = useState<ApiCreator | null>(null);
@@ -545,6 +547,8 @@ function App() {
         minAvgViewers: minAvgViewers > 0 ? minAvgViewers : undefined,
         maxLastActive: maxLastActive < 365 ? maxLastActive : undefined,
         favoritesOnly: favoritesOnly || undefined,
+        sort: sortBy,
+        dir: sortDir,
       });
       if (response.success) {
         setCreators(response.data);
@@ -555,7 +559,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, [search, selectedPlatforms, selectedRegions, selectedCategories, minFollowers, maxFollowers, minViews, maxViews, minEngagement, minAvgViewers, maxLastActive, favoritesOnly]);
+  }, [search, selectedPlatforms, selectedRegions, selectedCategories, minFollowers, maxFollowers, minViews, maxViews, minEngagement, minAvgViewers, maxLastActive, favoritesOnly, sortBy, sortDir]);
 
   // Debounce API calls
   useEffect(() => {
@@ -683,6 +687,31 @@ function App() {
               />
               {search && <button className="clear-btn" onClick={() => setSearch('')}>{Icons.x}</button>}
             </div>
+          </div>
+
+          {/* Sort By */}
+          <div className="filter-group">
+            <h4>Sort by</h4>
+            <select
+              className="sort-select"
+              value={`${sortBy}-${sortDir}`}
+              onChange={e => {
+                const [field, dir] = e.target.value.split('-');
+                setSortBy(field);
+                setSortDir(dir as 'asc' | 'desc');
+              }}
+            >
+              <option value="lastactive-desc">Last Active (Recent first)</option>
+              <option value="lastactive-asc">Last Active (Oldest first)</option>
+              <option value="followers-desc">Followers (High to Low)</option>
+              <option value="followers-asc">Followers (Low to High)</option>
+              <option value="avgviewers-desc">Avg Viewers (High to Low)</option>
+              <option value="avgviewers-asc">Avg Viewers (Low to High)</option>
+              <option value="name-asc">Name (A-Z)</option>
+              <option value="name-desc">Name (Z-A)</option>
+              <option value="engagement-desc">Engagement (High to Low)</option>
+              <option value="engagement-asc">Engagement (Low to High)</option>
+            </select>
           </div>
 
           {/* Favorites Filter */}
