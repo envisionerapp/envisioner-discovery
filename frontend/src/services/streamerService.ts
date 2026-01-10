@@ -46,8 +46,8 @@ class StreamerService {
     if (params?.sort) query.append('sort', params.sort);
     if (params?.dir) query.append('dir', params.dir);
     if (params?.search) query.append('search', params.search);
-    if (params?.platform) query.append('platform', params.platform);
-    if (params?.region) query.append('region', params.region);
+    if (params?.platform) query.append('platforms', params.platform);
+    if (params?.region) query.append('regions', params.region);
     const res = await axios.get(`${this.baseURL}?${query.toString()}`);
     return {
       items: res.data?.data || [],

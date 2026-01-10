@@ -19,8 +19,8 @@ const formatOrDash = (value: number | null | undefined): string => {
 // Shows available data, uses "-" for missing data
 const getApiCardMetrics = (creator: ApiCreator): { label: string; value: string }[] => {
   const platform = creator.platform.toLowerCase();
-  const lastActive = formatLastActive(creator.lastScrapedAt, creator.isLive);
-  const hasLastActive = creator.lastScrapedAt || creator.isLive;
+  const lastActive = formatLastActive(creator.lastSeenLive, creator.isLive);
+  const hasLastActive = creator.lastSeenLive || creator.isLive;
 
   // Twitch/Kick: Show followers, peak viewers, current game
   if (platform === 'twitch' || platform === 'kick') {
@@ -85,8 +85,8 @@ const calculateApiEngagement = (creator: ApiCreator): number => {
 const getAllApiMetrics = (creator: ApiCreator): { label: string; value: string }[] => {
   const platform = creator.platform.toLowerCase();
   const engagement = calculateApiEngagement(creator);
-  const lastActive = formatLastActive(creator.lastScrapedAt, creator.isLive);
-  const hasLastActive = creator.lastScrapedAt || creator.isLive;
+  const lastActive = formatLastActive(creator.lastSeenLive, creator.isLive);
+  const hasLastActive = creator.lastSeenLive || creator.isLive;
 
   if (platform === 'twitch' || platform === 'kick') {
     return [

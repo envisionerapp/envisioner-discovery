@@ -125,6 +125,7 @@ export interface ApiCreator {
   engagementRate: number;
   lastScrapedAt: string | null;
   lastStreamed: string | null;
+  lastSeenLive: string | null;
 }
 
 export interface ApiResponse<T> {
@@ -205,11 +206,12 @@ export async function toggleFavorite(streamerId: string): Promise<{ isFavorite: 
 }
 
 // Helper to format "last active" from timestamp
-export function formatLastActive(lastScrapedAt: string | null, isLive: boolean): string {
+// Uses lastSeenLive (when we actually saw them streaming) instead of lastScrapedAt
+export function formatLastActive(lastSeenLive: string | null, isLive: boolean): string {
   if (isLive) return 'Live now';
-  if (!lastScrapedAt) return 'Unknown';
+  if (!lastSeenLive) return 'Unknown';
 
-  const date = new Date(lastScrapedAt);
+  const date = new Date(lastSeenLive);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -223,11 +225,11 @@ export function formatLastActive(lastScrapedAt: string | null, isLive: boolean):
 }
 
 // Helper to get days since last active
-export function getDaysSinceActive(lastScrapedAt: string | null, isLive: boolean): number {
+export function getDaysSinceActive(lastSeenLive: string | null, isLive: boolean): number {
   if (isLive) return 0;
-  if (!lastScrapedAt) return 999;
+  if (!lastSeenLive) return 999;
 
-  const date = new Date(lastScrapedAt);
+  const date = new Date(lastSeenLive);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   return Math.floor(diffMs / (1000 * 60 * 60 * 24));
