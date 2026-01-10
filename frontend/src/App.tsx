@@ -612,37 +612,72 @@ function App() {
     return () => clearTimeout(timer);
   }, [loadCreators]);
 
-  // Toggle favorite via API
+  // Toggle favorite via API (optimistic update for instant feedback)
   const toggleFavorite = async (id: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    const wasFavorite = favorites.includes(id);
+
+    // Optimistically update UI immediately
+    if (wasFavorite) {
+      setFavorites(prev => prev.filter(x => x !== id));
+      // Instantly remove from view if in favoritesOnly mode
+      if (favoritesOnly) {
+        setCreators(prev => prev.filter(c => c.id !== id));
+      }
+    } else {
+      setFavorites(prev => [...prev, id]);
+    }
+
     try {
-      const result = await apiToggleFavorite(id);
-      if (result.isFavorite) {
+      await apiToggleFavorite(id);
+    } catch (error) {
+      // Revert on error
+      console.error('Failed to toggle favorite:', error);
+      if (wasFavorite) {
         setFavorites(prev => [...prev, id]);
+        if (favoritesOnly) loadCreators();
       } else {
         setFavorites(prev => prev.filter(x => x !== id));
       }
-    } catch (error) {
-      console.error('Failed to toggle favorite:', error);
     }
   };
 
-  // Toggle discarded via API
+  // Toggle discarded via API (optimistic update for instant feedback)
   const toggleDiscarded = async (id: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    const wasDiscarded = discarded.includes(id);
+
+    // Optimistically update UI immediately
+    if (wasDiscarded) {
+      setDiscarded(prev => prev.filter(x => x !== id));
+      // Instantly remove from view if in discardedOnly mode (restoring)
+      if (discardedOnly) {
+        setCreators(prev => prev.filter(c => c.id !== id));
+      }
+    } else {
+      setDiscarded(prev => [...prev, id]);
+      // Instantly remove from view if not in discardedOnly mode (discarding)
+      if (!discardedOnly) {
+        setCreators(prev => prev.filter(c => c.id !== id));
+      }
+    }
+
     try {
-      const result = await apiToggleDiscarded(id);
-      if (result.isDiscarded) {
+      await apiToggleDiscarded(id);
+    } catch (error) {
+      // Revert on error
+      console.error('Failed to toggle discarded:', error);
+      if (wasDiscarded) {
         setDiscarded(prev => [...prev, id]);
-        // Reload creators to hide the discarded one from view
-        loadCreators();
+        if (discardedOnly) loadCreators();
       } else {
         setDiscarded(prev => prev.filter(x => x !== id));
+        if (!discardedOnly) loadCreators();
       }
-    } catch (error) {
-      console.error('Failed to toggle discarded:', error);
     }
   };
 

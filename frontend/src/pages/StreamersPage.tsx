@@ -80,24 +80,64 @@ const StreamersPage: React.FC = () => {
   const { data: favoriteIds = [] } = useQuery(['favoriteIds'], fetchFavoriteIds);
   const { data: discardedIds = [] } = useQuery(['discardedIds'], fetchDiscardedIds);
 
-  // Toggle favorite mutation
+  // Toggle favorite mutation with optimistic update
   const favoriteMutation = useMutation(
     (streamerId: string) => toggleFavorite(streamerId),
     {
-      onSuccess: () => {
+      onMutate: async (streamerId) => {
+        await queryClient.cancelQueries(['streamers']);
+        const queryKey = ['streamers', { page, limit, sort, dir, search: debouncedSearch, platform: platformFilter, region: regionFilter, favoritesOnly, discardedOnly }];
+        const previousStreamers = queryClient.getQueryData(queryKey);
+        const wasFavorite = favoriteIds.includes(streamerId);
+
+        // Optimistically remove from list if unfavoriting in favoritesOnly mode
+        if (wasFavorite && favoritesOnly) {
+          queryClient.setQueryData(queryKey, (old: any) => old ? { ...old, items: old.items.filter((s: any) => s.id !== streamerId) } : old);
+        }
+
+        return { previousStreamers };
+      },
+      onError: (err, streamerId, context: any) => {
+        if (context?.previousStreamers) {
+          queryClient.setQueryData(
+            ['streamers', { page, limit, sort, dir, search: debouncedSearch, platform: platformFilter, region: regionFilter, favoritesOnly, discardedOnly }],
+            context.previousStreamers
+          );
+        }
+      },
+      onSettled: () => {
         queryClient.invalidateQueries(['favoriteIds']);
-        queryClient.invalidateQueries(['streamers']);
       },
     }
   );
 
-  // Toggle discarded mutation
+  // Toggle discarded mutation with optimistic update
   const discardMutation = useMutation(
     (streamerId: string) => toggleDiscarded(streamerId),
     {
-      onSuccess: () => {
+      onMutate: async (streamerId) => {
+        await queryClient.cancelQueries(['streamers']);
+        const queryKey = ['streamers', { page, limit, sort, dir, search: debouncedSearch, platform: platformFilter, region: regionFilter, favoritesOnly, discardedOnly }];
+        const previousStreamers = queryClient.getQueryData(queryKey);
+        const wasDiscarded = discardedIds.includes(streamerId);
+
+        // Remove from list: if discarding (not in discardedOnly) OR restoring (in discardedOnly)
+        if ((!wasDiscarded && !discardedOnly) || (wasDiscarded && discardedOnly)) {
+          queryClient.setQueryData(queryKey, (old: any) => old ? { ...old, items: old.items.filter((s: any) => s.id !== streamerId) } : old);
+        }
+
+        return { previousStreamers };
+      },
+      onError: (err, streamerId, context: any) => {
+        if (context?.previousStreamers) {
+          queryClient.setQueryData(
+            ['streamers', { page, limit, sort, dir, search: debouncedSearch, platform: platformFilter, region: regionFilter, favoritesOnly, discardedOnly }],
+            context.previousStreamers
+          );
+        }
+      },
+      onSettled: () => {
         queryClient.invalidateQueries(['discardedIds']);
-        queryClient.invalidateQueries(['streamers']);
       },
     }
   );
