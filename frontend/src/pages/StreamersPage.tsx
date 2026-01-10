@@ -1,7 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { differenceInMinutes, formatDistanceToNow } from 'date-fns';
-import { useQuery, useQueryClient } from 'react-query';
-import { ArrowDownTrayIcon, PlusIcon, HashtagIcon, UserIcon, MapPinIcon, UsersIcon, EyeIcon, ClockIcon, ChevronUpIcon, ChevronDownIcon, TrophyIcon } from '@heroicons/react/24/outline';
+import { useQuery, useQueryClient, useMutation } from 'react-query';
+import { ArrowDownTrayIcon, PlusIcon, HashtagIcon, UserIcon, MapPinIcon, UsersIcon, EyeIcon, ClockIcon, ChevronUpIcon, ChevronDownIcon, TrophyIcon, HeartIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { PlatformIcon } from '@/components/icons/PlatformIcon';
 import { getStreamerAvatar } from '@/utils/avatars';
 import { flagFor, regionLabel } from '@/utils/geo';
@@ -11,6 +12,7 @@ import { streamerService } from '@/services/streamerService';
 import { subscribeToLiveStatusUpdates } from '@/utils/socket';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLiveCount } from '@/contexts/LiveCountContext';
+import { fetchFavoriteIds, toggleFavorite, fetchDiscardedIds, toggleDiscarded, USER_ID } from '@/api';
 
 // Compact number formatter for followers/viewers (e.g., 12.3k, 1.2m)
 const formatCount = (val: any): string => {
@@ -70,7 +72,35 @@ const StreamersPage: React.FC = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [platformFilter, setPlatformFilter] = useState<'' | 'twitch' | 'youtube' | 'kick'>('');
   const [regionFilter, setRegionFilter] = useState<string>('');
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [discardedOnly, setDiscardedOnly] = useState(false);
   const queryClient = useQueryClient();
+
+  // Fetch favorite and discarded IDs
+  const { data: favoriteIds = [] } = useQuery(['favoriteIds'], fetchFavoriteIds);
+  const { data: discardedIds = [] } = useQuery(['discardedIds'], fetchDiscardedIds);
+
+  // Toggle favorite mutation
+  const favoriteMutation = useMutation(
+    (streamerId: string) => toggleFavorite(streamerId),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['favoriteIds']);
+        queryClient.invalidateQueries(['streamers']);
+      },
+    }
+  );
+
+  // Toggle discarded mutation
+  const discardMutation = useMutation(
+    (streamerId: string) => toggleDiscarded(streamerId),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['discardedIds']);
+        queryClient.invalidateQueries(['streamers']);
+      },
+    }
+  );
 
   // Debounce search input
   useEffect(() => {
@@ -93,10 +123,21 @@ const StreamersPage: React.FC = () => {
     }
   };
   const { data: listData, isLoading } = useQuery(
-    ['streamers', { page, limit, sort, dir, search: debouncedSearch, platform: platformFilter, region: regionFilter }],
+    ['streamers', { page, limit, sort, dir, search: debouncedSearch, platform: platformFilter, region: regionFilter, favoritesOnly, discardedOnly }],
     () => {
-      console.log('Fetching streamers with filters:', { page, limit, sort, dir, search: debouncedSearch, platform: platformFilter, region: regionFilter });
-      return streamerService.getStreamers({ page, limit, sort, dir, search: debouncedSearch, platform: platformFilter || undefined, region: regionFilter || undefined });
+      console.log('Fetching streamers with filters:', { page, limit, sort, dir, search: debouncedSearch, platform: platformFilter, region: regionFilter, favoritesOnly, discardedOnly });
+      return streamerService.getStreamers({
+        page,
+        limit,
+        sort,
+        dir,
+        search: debouncedSearch,
+        platform: platformFilter || undefined,
+        region: regionFilter || undefined,
+        favoritesOnly: favoritesOnly || undefined,
+        discardedOnly: discardedOnly || undefined,
+        userId: USER_ID,
+      });
     },
     {
       keepPreviousData: false,
@@ -246,6 +287,41 @@ const StreamersPage: React.FC = () => {
                   value={search}
                   onChange={(e) => { setPage(1); setSearch(e.target.value); }}
                 />
+              </div>
+              {/* Favorites and Discarded Toggles */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setFavoritesOnly(!favoritesOnly);
+                    setDiscardedOnly(false);
+                    setPage(1);
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    favoritesOnly
+                      ? 'bg-pink-500/20 text-pink-400 border border-pink-500/30'
+                      : 'bg-gray-800/60 text-gray-400 border border-gray-700 hover:bg-gray-700/60'
+                  }`}
+                  title="Show favorites only"
+                >
+                  <HeartIcon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Favorites</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setDiscardedOnly(!discardedOnly);
+                    setFavoritesOnly(false);
+                    setPage(1);
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    discardedOnly
+                      ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                      : 'bg-gray-800/60 text-gray-400 border border-gray-700 hover:bg-gray-700/60'
+                  }`}
+                  title="Show discarded only"
+                >
+                  <TrashIcon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Discarded</span>
+                </button>
               </div>
             </div>
           </div>
@@ -425,6 +501,10 @@ const StreamersPage: React.FC = () => {
                 setSelected(s);
                 setShowDetails(true);
               }}
+              favoriteIds={favoriteIds}
+              discardedIds={discardedIds}
+              onToggleFavorite={(streamerId) => favoriteMutation.mutate(streamerId)}
+              onToggleDiscard={(streamerId) => discardMutation.mutate(streamerId)}
             />
           </div>
         </div>
@@ -891,7 +971,11 @@ const StreamerTable: React.FC<{
   activeDir: 'asc' | 'desc';
   onToggleSort: (key: string) => void;
   onRowClick: (s: any) => void;
-}> = ({ items, isLoading, page, pageSize, activeSort, activeDir, onToggleSort, onRowClick }) => {
+  favoriteIds: string[];
+  discardedIds: string[];
+  onToggleFavorite: (streamerId: string) => void;
+  onToggleDiscard: (streamerId: string) => void;
+}> = ({ items, isLoading, page, pageSize, activeSort, activeDir, onToggleSort, onRowClick, favoriteIds, discardedIds, onToggleFavorite, onToggleDiscard }) => {
   const resolveAvatar = (s: any, idx: number) => {
     return getStreamerAvatar(s, idx);
   };
@@ -900,7 +984,8 @@ const StreamerTable: React.FC<{
       <thead>
         <tr>
           <th style={{ width: '3%', paddingLeft: '8px', paddingRight: '4px' }} className="text-center"><span className="th text-primary-500">#</span></th>
-          <th style={{ width: '20%' }}>
+          <th style={{ width: '6%' }} className="text-center"><span className="th text-primary-500"></span></th>
+          <th style={{ width: '17%' }}>
             <button type="button" className="th uppercase text-white" onClick={(e) => { e.preventDefault(); onToggleSort('displayname'); }}>
               <UserIcon className="text-primary-500" /><span>STREAMER</span> {activeSort.toLowerCase()==='displayname' && (activeDir==='asc' ? <ChevronUpIcon className="h-3.5 w-3.5 text-primary-500" /> : <ChevronDownIcon className="h-3.5 w-3.5 text-primary-500" />)}
             </button>
@@ -935,9 +1020,9 @@ const StreamerTable: React.FC<{
       </thead>
       <tbody className="divide-y" style={{ borderColor: 'rgba(156, 163, 175, 0.3)' }}>
         {isLoading ? (
-          <tr><td colSpan={8} className="text-center py-8 text-gray-400">Loading streamers...</td></tr>
+          <tr><td colSpan={9} className="text-center py-8 text-gray-400">Loading streamers...</td></tr>
         ) : items.length === 0 ? (
-          <tr><td colSpan={8} className="text-center py-8 text-gray-400">No streamers available.</td></tr>
+          <tr><td colSpan={9} className="text-center py-8 text-gray-400">No streamers available.</td></tr>
         ) : (
           items.map((s, idx) => {
             const region = (s as any).region?.toLowerCase?.() || '';
@@ -1000,11 +1085,35 @@ const StreamerTable: React.FC<{
                 </span>
               );
             })();
+            const isFavorite = favoriteIds.includes(s.id);
+            const isDiscarded = discardedIds.includes(s.id);
             return (
               <tr key={s.id}>
                 <td className="align-middle text-center" style={{ paddingLeft: '8px', paddingRight: '4px' }}>
                   <div className="flex-shrink-0 w-5 h-5 rounded-md bg-gradient-to-br from-primary-600/20 to-primary-600/5 border border-primary-600/30 flex items-center justify-center mx-auto">
                     <span className="text-[9px] font-black text-primary-500">{(page - 1) * pageSize + idx + 1}</span>
+                  </div>
+                </td>
+                <td className="align-middle text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onToggleFavorite(s.id); }}
+                      className={`p-1 rounded transition-all ${isFavorite ? 'text-pink-500 hover:text-pink-400' : 'text-gray-500 hover:text-pink-400'}`}
+                      title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                      {isFavorite ? (
+                        <HeartIconSolid className="h-4 w-4" />
+                      ) : (
+                        <HeartIcon className="h-4 w-4" />
+                      )}
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onToggleDiscard(s.id); }}
+                      className={`p-1 rounded transition-all ${isDiscarded ? 'text-red-500 hover:text-red-400' : 'text-gray-500 hover:text-red-400'}`}
+                      title={isDiscarded ? 'Restore from discarded' : 'Discard'}
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
                   </div>
                 </td>
                 <td className="align-middle">

@@ -107,6 +107,7 @@ model Streamer {
   chatMessages ChatMessage[] @relation("ChatMessageStreamers")
   campaignPerformances CampaignPerformance[]
   favorites DiscoveryFavorite[]
+  discarded DiscoveryDiscarded[]
   viewerPolls DiscoveryViewerPoll[]
 
   @@unique([platform, username])
@@ -270,6 +271,22 @@ model DiscoveryFavorite {
   @@index([userId])
   @@index([streamerId])
   @@map("discovery_favorites")
+}
+
+// Discarded creators (hidden from general search)
+model DiscoveryDiscarded {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  streamerId String   @map("streamer_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  streamer Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, streamerId])
+  @@index([userId])
+  @@index([streamerId])
+  @@map("discovery_discarded")
 }
 
 // Viewer polls for calculating avg_viewers

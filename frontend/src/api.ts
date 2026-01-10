@@ -153,8 +153,11 @@ export interface FetchCreatorsParams {
   maxViews?: number;
   minEngagement?: number;
   minAvgViewers?: number;
+  maxAvgViewers?: number;
   maxLastActive?: number;
   favoritesOnly?: boolean;
+  discardedOnly?: boolean;
+  hideDiscarded?: boolean;
   sort?: string;
   dir?: 'asc' | 'desc';
 }
@@ -175,10 +178,25 @@ export async function fetchCreators(params: FetchCreatorsParams = {}): Promise<A
   if (params.maxViews) queryParams.set('maxViews', params.maxViews.toString());
   if (params.minEngagement) queryParams.set('minEngagement', params.minEngagement.toString());
   if (params.minAvgViewers) queryParams.set('minAvgViewers', params.minAvgViewers.toString());
+  if (params.maxAvgViewers) queryParams.set('maxAvgViewers', params.maxAvgViewers.toString());
   if (params.maxLastActive) queryParams.set('maxLastActive', params.maxLastActive.toString());
   if (params.favoritesOnly) {
     queryParams.set('favoritesOnly', 'true');
     queryParams.set('userId', USER_ID);
+  }
+  if (params.discardedOnly) {
+    queryParams.set('discardedOnly', 'true');
+    queryParams.set('userId', USER_ID);
+  }
+  if (params.hideDiscarded !== undefined) {
+    queryParams.set('hideDiscarded', params.hideDiscarded.toString());
+    queryParams.set('userId', USER_ID);
+  } else {
+    // Default: hide discarded unless showing discarded only
+    if (!params.discardedOnly) {
+      queryParams.set('hideDiscarded', 'true');
+      queryParams.set('userId', USER_ID);
+    }
   }
   if (params.sort) queryParams.set('sort', params.sort);
   if (params.dir) queryParams.set('dir', params.dir);
@@ -233,4 +251,22 @@ export function getDaysSinceActive(lastSeenLive: string | null, isLive: boolean)
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+}
+
+// Fetch discarded IDs
+export async function fetchDiscardedIds(): Promise<string[]> {
+  const response = await fetch(`${API_BASE_URL}/api/discards/ids?userId=${USER_ID}`);
+  const data: ApiResponse<string[]> = await response.json();
+  return data.success ? data.data : [];
+}
+
+// Toggle discarded
+export async function toggleDiscarded(streamerId: string): Promise<{ isDiscarded: boolean }> {
+  const response = await fetch(`${API_BASE_URL}/api/discards/toggle`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: USER_ID, streamerId }),
+  });
+  const data = await response.json();
+  return { isDiscarded: data.isDiscarded };
 }

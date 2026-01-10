@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import './App.css';
-import { fetchCreators, fetchFavoriteIds, toggleFavorite as apiToggleFavorite, formatLastActive, ApiCreator, validateAccess, AccessValidationResult } from './api';
+import { fetchCreators, fetchFavoriteIds, toggleFavorite as apiToggleFavorite, fetchDiscardedIds, toggleDiscarded as apiToggleDiscarded, formatLastActive, ApiCreator, validateAccess, AccessValidationResult } from './api';
 
 // ===========================================
 // API HELPER FUNCTIONS
@@ -297,6 +297,7 @@ const Icons = {
   check: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>,
   heart: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
   heartFilled: <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
+  trash: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>,
 };
 
 const PlatformIcons: Record<Platform, JSX.Element> = {
@@ -514,10 +515,13 @@ function App() {
   const [minEngagement, setMinEngagement] = useState<number>(0);
   const [maxLastActive, setMaxLastActive] = useState<number>(365); // days
   const [minAvgViewers, setMinAvgViewers] = useState<number>(0);
+  const [maxAvgViewers, setMaxAvgViewers] = useState<number>(10000000);
   const [minViews, setMinViews] = useState<number>(0);
   const [maxViews, setMaxViews] = useState<number>(50000000000);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [discardedOnly, setDiscardedOnly] = useState(false);
+  const [discarded, setDiscarded] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>('lastactive');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
@@ -530,9 +534,10 @@ function App() {
   // Profile modal
   const [selectedCreator, setSelectedCreator] = useState<ApiCreator | null>(null);
 
-  // Load favorites on mount
+  // Load favorites and discarded on mount
   useEffect(() => {
     fetchFavoriteIds().then(setFavorites).catch(console.error);
+    fetchDiscardedIds().then(setDiscarded).catch(console.error);
   }, []);
 
   // Build filter params (shared between initial load and load more)
@@ -548,11 +553,14 @@ function App() {
     maxViews: maxViews < 50000000000 ? maxViews : undefined,
     minEngagement: minEngagement > 0 ? minEngagement : undefined,
     minAvgViewers: minAvgViewers > 0 ? minAvgViewers : undefined,
+    maxAvgViewers: maxAvgViewers < 10000000 ? maxAvgViewers : undefined,
     maxLastActive: maxLastActive < 365 ? maxLastActive : undefined,
     favoritesOnly: favoritesOnly || undefined,
+    discardedOnly: discardedOnly || undefined,
+    hideDiscarded: !discardedOnly,
     sort: sortBy,
     dir: sortDir,
-  }), [search, selectedPlatforms, selectedRegions, selectedCategories, minFollowers, maxFollowers, minViews, maxViews, minEngagement, minAvgViewers, maxLastActive, favoritesOnly, sortBy, sortDir]);
+  }), [search, selectedPlatforms, selectedRegions, selectedCategories, minFollowers, maxFollowers, minViews, maxViews, minEngagement, minAvgViewers, maxAvgViewers, maxLastActive, favoritesOnly, discardedOnly, sortBy, sortDir]);
 
   // Fetch creators from API (initial load, page 1)
   const loadCreators = useCallback(async () => {
@@ -620,6 +628,24 @@ function App() {
     }
   };
 
+  // Toggle discarded via API
+  const toggleDiscarded = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const result = await apiToggleDiscarded(id);
+      if (result.isDiscarded) {
+        setDiscarded(prev => [...prev, id]);
+        // Reload creators to hide the discarded one from view
+        loadCreators();
+      } else {
+        setDiscarded(prev => prev.filter(x => x !== id));
+      }
+    } catch (error) {
+      console.error('Failed to toggle discarded:', error);
+    }
+  };
+
   // Filtered regions for search
   const filteredRegions = useMemo(() => {
     if (!regionSearch) return [...REGIONS];
@@ -660,7 +686,7 @@ function App() {
   const activeFilterCount = selectedPlatforms.length + selectedRegions.length + selectedCategories.length +
     (minFollowers > 0 ? 1 : 0) + (maxFollowers < 500000000 ? 1 : 0) +
     (minEngagement > 0 ? 1 : 0) + (maxLastActive < 365 ? 1 : 0) +
-    (minAvgViewers > 0 ? 1 : 0) + (minViews > 0 ? 1 : 0) + (maxViews < 50000000000 ? 1 : 0) +
+    (minAvgViewers > 0 ? 1 : 0) + (maxAvgViewers < 10000000 ? 1 : 0) + (minViews > 0 ? 1 : 0) + (maxViews < 50000000000 ? 1 : 0) +
     (favoritesOnly ? 1 : 0);
 
   // Access gate - show loading or error screens
@@ -751,10 +777,19 @@ function App() {
 
           {/* Favorites Filter */}
           <div className="filter-group">
-            <label className="toggle-filter" onClick={() => setFavoritesOnly(!favoritesOnly)}>
+            <label className="toggle-filter" onClick={() => { setFavoritesOnly(!favoritesOnly); setDiscardedOnly(false); }}>
               <div className={`toggle ${favoritesOnly ? 'on' : ''}`} />
               <span>Favorites only</span>
               {favorites.length > 0 && <span className="favorite-count">{favorites.length}</span>}
+            </label>
+          </div>
+
+          {/* Discarded Filter */}
+          <div className="filter-group">
+            <label className="toggle-filter" onClick={() => { setDiscardedOnly(!discardedOnly); setFavoritesOnly(false); }}>
+              <div className={`toggle ${discardedOnly ? 'on' : ''}`} style={discardedOnly ? { backgroundColor: '#ef4444' } : {}} />
+              <span>Discarded only</span>
+              {discarded.length > 0 && <span className="favorite-count" style={{ backgroundColor: '#ef4444' }}>{discarded.length}</span>}
             </label>
           </div>
 
@@ -914,16 +949,45 @@ function App() {
             </div>
           </div>
 
-          {/* Avg Viewers - Min */}
+          {/* Avg Viewers Range */}
           <div className="filter-group">
-            <h4>Min Avg Viewers</h4>
-            <div className="single-input">
-              <input
-                type="number"
-                placeholder="0"
-                value={minAvgViewers || ''}
-                onChange={e => setMinAvgViewers(Number(e.target.value) || 0)}
-              />
+            <h4>Avg Viewers</h4>
+            <div className="dual-range-slider">
+              <div className="range-values">
+                <span>{formatNumber(minAvgViewers)}</span>
+                <span>{maxAvgViewers >= 10000000 ? 'Any' : formatNumber(maxAvgViewers)}</span>
+              </div>
+              <div className="slider-track">
+                <div
+                  className="slider-fill"
+                  style={{
+                    left: `${(Math.log10(minAvgViewers + 1) / Math.log10(10000001)) * 100}%`,
+                    right: `${100 - (Math.log10(maxAvgViewers + 1) / Math.log10(10000001)) * 100}%`
+                  }}
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={(Math.log10(minAvgViewers + 1) / Math.log10(10000001)) * 100}
+                  onChange={e => {
+                    const val = Math.round(Math.pow(10, (Number(e.target.value) / 100) * Math.log10(10000001)) - 1);
+                    setMinAvgViewers(Math.min(val, maxAvgViewers - 100));
+                  }}
+                  className="range-min"
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={(Math.log10(maxAvgViewers + 1) / Math.log10(10000001)) * 100}
+                  onChange={e => {
+                    const val = Math.round(Math.pow(10, (Number(e.target.value) / 100) * Math.log10(10000001)) - 1);
+                    setMaxAvgViewers(Math.max(val, minAvgViewers + 100));
+                  }}
+                  className="range-max"
+                />
+              </div>
             </div>
           </div>
 
@@ -1004,10 +1068,17 @@ function App() {
                     >
                       {favorites.includes(creator.id) ? Icons.heartFilled : Icons.heart}
                     </button>
+                    <button
+                      className={`favorite-btn discard-btn ${discarded.includes(creator.id) ? 'active' : ''}`}
+                      onClick={(e) => toggleDiscarded(creator.id, e)}
+                      style={discarded.includes(creator.id) ? { color: '#ef4444' } : {}}
+                    >
+                      {Icons.trash}
+                    </button>
                     {platformKey !== 'twitch' && platformKey !== 'kick' && (
                       <div className="engagement-badge">
                         <div className="engagement-circle">
-                          <span>{engagement.toFixed(1)}x</span>
+                          <span>{(engagement * 100).toFixed(1)}%</span>
                         </div>
                         <span className="engagement-label">Eng. Rate</span>
                       </div>

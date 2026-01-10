@@ -22,7 +22,18 @@ class StreamerService {
     };
   }
 
-  async getStreamers(params?: { page?: number; limit?: number; sort?: string; dir?: 'asc' | 'desc'; search?: string; platform?: string; region?: string }): Promise<{
+  async getStreamers(params?: {
+    page?: number;
+    limit?: number;
+    sort?: string;
+    dir?: 'asc' | 'desc';
+    search?: string;
+    platform?: string;
+    region?: string;
+    favoritesOnly?: boolean;
+    discardedOnly?: boolean;
+    userId?: string;
+  }): Promise<{
     items: Array<{
       id: string;
       platform: string;
@@ -48,6 +59,13 @@ class StreamerService {
     if (params?.search) query.append('search', params.search);
     if (params?.platform) query.append('platforms', params.platform);
     if (params?.region) query.append('regions', params.region);
+    if (params?.favoritesOnly) query.append('favoritesOnly', 'true');
+    if (params?.discardedOnly) query.append('discardedOnly', 'true');
+    if (params?.userId) query.append('userId', params.userId);
+    // Hide discarded by default unless showing discarded only
+    if (!params?.discardedOnly && params?.userId) {
+      query.append('hideDiscarded', 'true');
+    }
     const res = await axios.get(`${this.baseURL}?${query.toString()}`);
     return {
       items: res.data?.data || [],

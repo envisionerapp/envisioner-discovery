@@ -30,11 +30,14 @@ export class StreamerController {
       const maxViews = parseInt(req.query.maxViews as string) || undefined;
       const minEngagement = parseFloat(req.query.minEngagement as string) || 0;
       const minAvgViewers = parseInt(req.query.minAvgViewers as string) || 0;
+      const maxAvgViewers = parseInt(req.query.maxAvgViewers as string) || undefined;
       const maxLastActive = parseInt(req.query.maxLastActive as string) || undefined; // days
 
-      // Favorites filter
+      // Favorites and discards filter
       const userId = req.query.userId as string | undefined;
       const favoritesOnly = req.query.favoritesOnly === 'true';
+      const discardedOnly = req.query.discardedOnly === 'true';
+      const hideDiscarded = req.query.hideDiscarded !== 'false'; // Default to true
 
       // Build where clause
       const where: any = {};
@@ -85,9 +88,11 @@ export class StreamerController {
         where.engagementRate = { gte: minEngagement };
       }
 
-      // Avg viewers filter
-      if (minAvgViewers > 0) {
-        where.avgViewers = { gte: minAvgViewers };
+      // Avg viewers filter (range)
+      if (minAvgViewers > 0 || maxAvgViewers) {
+        where.avgViewers = {};
+        if (minAvgViewers > 0) where.avgViewers.gte = minAvgViewers;
+        if (maxAvgViewers) where.avgViewers.lte = maxAvgViewers;
       }
 
       // Last active filter (days)
@@ -118,6 +123,36 @@ export class StreamerController {
           });
         }
         where.id = { in: favoriteIds };
+      }
+
+      // Discarded filter
+      let discardedIds: string[] = [];
+      if (userId) {
+        const discarded = await db.discoveryDiscarded.findMany({
+          where: { userId },
+          select: { streamerId: true },
+        });
+        discardedIds = discarded.map(d => d.streamerId);
+      }
+
+      if (discardedOnly && userId) {
+        // Show only discarded
+        if (discardedIds.length === 0) {
+          return res.status(200).json({
+            success: true,
+            data: [],
+            pagination: { page: 1, limit, total: 0, totalPages: 0 },
+          });
+        }
+        where.id = { in: discardedIds };
+      } else if (hideDiscarded && userId && discardedIds.length > 0 && !discardedOnly) {
+        // Hide discarded from general search
+        if (where.id) {
+          // Already filtering by ID (e.g., favorites), intersect with non-discarded
+          where.id = { in: (where.id.in || []).filter((id: string) => !discardedIds.includes(id)) };
+        } else {
+          where.id = { notIn: discardedIds };
+        }
       }
 
       // Build orderBy
