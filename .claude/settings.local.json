@@ -18,7 +18,9 @@
       "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd ScrapeCreators integration for social platforms\n\n- Add scrapeCreatorsService for TikTok/Instagram/X/Facebook/LinkedIn\n- Add SocialSyncQueue model for credit-efficient batch processing\n- Add admin API endpoints for social sync management\n- Add cron jobs for automated social platform syncing\n- Priority-based queue \\(higher follower streamers first\\)\n- Extract social handles from existing Twitch/Kick/YouTube streamers\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(npx prisma db execute:*)",
       "Bash(curl:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix ScrapeCreators API response parsing\n\n- Handle TikTok response structure \\(user + stats objects\\)\n- Convert string stats to numbers\n- Handle undefined values gracefully\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix ScrapeCreators API response parsing\n\n- Handle TikTok response structure \\(user + stats objects\\)\n- Convert string stats to numbers\n- Handle undefined values gracefully\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(node scripts/fix-tiktok-likes.js:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

@@ -19,6 +19,16 @@ interface TikTokProfile {
   diggCount: number | string;
 }
 
+interface TikTokSearchResult {
+  user_info: {
+    unique_id: string;
+    nickname: string;
+    follower_count: number;
+    custom_verify?: string;
+    avatar_168x168?: { url_list: string[] };
+  };
+}
+
 interface InstagramProfile {
   id: string;
   username: string;
@@ -124,14 +134,127 @@ export class ScrapeCreatorsService {
     }
   }
 
+  // ==================== SEARCH ENDPOINTS (for smart matching) ====================
+
+  async searchTikTokUsers(query: string): Promise<TikTokSearchResult[]> {
+    try {
+      const response = await this.client.get('/v1/tiktok/search/users', {
+        params: { query }
+      });
+      return response.data?.user_list || [];
+    } catch (error: any) {
+      logger.error(`TikTok search failed for "${query}":`, error.response?.data || error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Smart search: Find best matching TikTok profile by display name
+   * Uses search + verification to find the real account
+   */
+  async findTikTokByDisplayName(displayName: string, expectedFollowers: number): Promise<TikTokProfile | null> {
+    try {
+      // Search by display name
+      const results = await this.searchTikTokUsers(displayName);
+
+      if (results.length === 0) {
+        logger.info(`No TikTok results for "${displayName}"`);
+        return null;
+      }
+
+      // Score each result
+      const scored = results.map(r => {
+        const info = r.user_info;
+        let score = 0;
+
+        // Verified accounts get high priority
+        if (info.custom_verify) score += 100;
+
+        // Higher followers = higher score (log scale)
+        score += Math.log10(info.follower_count + 1) * 10;
+
+        // Name similarity bonus
+        const nameLower = displayName.toLowerCase();
+        const nickLower = info.nickname?.toLowerCase() || '';
+        const uniqueLower = info.unique_id?.toLowerCase() || '';
+        if (nickLower.includes(nameLower) || nameLower.includes(nickLower)) score += 20;
+        if (uniqueLower.includes(nameLower.replace(/\s/g, ''))) score += 15;
+
+        // Follower ratio check (if Twitch has 10M, TikTok should have at least 100k)
+        const minExpected = expectedFollowers * 0.01; // At least 1% of Twitch followers
+        if (info.follower_count >= minExpected) score += 30;
+
+        return { result: r, score, followers: info.follower_count };
+      });
+
+      // Sort by score descending
+      scored.sort((a, b) => b.score - a.score);
+
+      const best = scored[0];
+      logger.info(`Best TikTok match for "${displayName}": @${best.result.user_info.unique_id} (${best.followers.toLocaleString()} followers, score: ${best.score})`);
+
+      // Fetch full profile for the best match
+      return this.getTikTokProfile(best.result.user_info.unique_id);
+
+    } catch (error: any) {
+      logger.error(`Smart TikTok search failed for "${displayName}":`, error.message);
+      return null;
+    }
+  }
+
   async getInstagramProfile(handle: string): Promise<InstagramProfile | null> {
     try {
       const response = await this.client.get('/v1/instagram/profile', {
         params: { handle: handle.replace('@', '') }
       });
-      return response.data?.data || response.data;
+      return response.data?.data || response.data?.user || response.data;
     } catch (error: any) {
       logger.error(`Instagram profile fetch failed for ${handle}:`, error.response?.data || error.message);
+      return null;
+    }
+  }
+
+  async searchInstagramUsers(query: string): Promise<any[]> {
+    try {
+      const response = await this.client.get('/v1/instagram/search', {
+        params: { query }
+      });
+      return response.data?.users || [];
+    } catch (error: any) {
+      logger.error(`Instagram search failed for "${query}":`, error.response?.data || error.message);
+      return [];
+    }
+  }
+
+  async findInstagramByDisplayName(displayName: string, expectedFollowers: number): Promise<InstagramProfile | null> {
+    try {
+      const results = await this.searchInstagramUsers(displayName);
+
+      if (results.length === 0) {
+        return null;
+      }
+
+      // Pick best match by follower count and name similarity
+      const scored = results.map((r: any) => {
+        let score = 0;
+        if (r.is_verified) score += 100;
+        score += Math.log10((r.follower_count || 0) + 1) * 10;
+
+        const nameLower = displayName.toLowerCase();
+        if (r.full_name?.toLowerCase().includes(nameLower)) score += 20;
+        if (r.username?.toLowerCase().includes(nameLower.replace(/\s/g, ''))) score += 15;
+
+        const minExpected = expectedFollowers * 0.01;
+        if ((r.follower_count || 0) >= minExpected) score += 30;
+
+        return { result: r, score };
+      });
+
+      scored.sort((a: any, b: any) => b.score - a.score);
+      return this.getInstagramProfile(scored[0].result.username);
+
+    } catch (error: any) {
+      logger.error(`Smart Instagram search failed for "${displayName}":`, error.message);
       return null;
     }
   }
@@ -292,6 +415,103 @@ export class ScrapeCreatorsService {
     };
   }
 
+  /**
+   * Smart sync: Search by display name from existing Twitch/Kick/YouTube streamers
+   * More accurate than username matching, costs 2 credits per streamer (search + profile)
+   */
+  async smartSyncFromStreamers(
+    targetPlatform: 'TIKTOK' | 'INSTAGRAM',
+    options: {
+      minFollowers?: number;  // Only sync streamers with at least this many followers
+      limit?: number;         // Max streamers to process
+      skipExisting?: boolean; // Skip if already have this platform linked
+    } = {}
+  ): Promise<{
+    processed: number;
+    found: number;
+    notFound: number;
+    credits: number;
+  }> {
+    const { minFollowers = 100000, limit = 50, skipExisting = true } = options;
+    const platformEmoji = targetPlatform === 'TIKTOK' ? '🎵' : '📸';
+
+    console.log(`${platformEmoji} [SMART SYNC] Finding ${targetPlatform} accounts for top streamers...`);
+    console.log(`   Min followers: ${minFollowers.toLocaleString()}, Limit: ${limit}`);
+
+    // Get top streamers from Twitch/Kick/YouTube that don't have this platform yet
+    const streamers = await db.streamer.findMany({
+      where: {
+        platform: { in: ['TWITCH', 'KICK', 'YOUTUBE'] },
+        followers: { gte: minFollowers },
+      },
+      orderBy: { followers: 'desc' },
+      take: limit * 2, // Fetch extra in case some are skipped
+      select: {
+        id: true,
+        displayName: true,
+        username: true,
+        followers: true,
+        platform: true,
+        socialLinks: true,
+      },
+    });
+
+    let processed = 0;
+    let found = 0;
+    let notFound = 0;
+    let credits = 0;
+
+    for (const streamer of streamers) {
+      if (processed >= limit) break;
+
+      // Skip if already has this platform linked
+      if (skipExisting) {
+        const links = (streamer.socialLinks as string[]) || [];
+        const platformDomain = targetPlatform === 'TIKTOK' ? 'tiktok.com' : 'instagram.com';
+        if (links.some(l => l.includes(platformDomain))) {
+          continue;
+        }
+      }
+
+      processed++;
+      console.log(`\n[${processed}/${limit}] Searching ${targetPlatform} for: ${streamer.displayName} (${streamer.followers.toLocaleString()} followers on ${streamer.platform})`);
+
+      try {
+        let profile: SocialProfile | null = null;
+
+        if (targetPlatform === 'TIKTOK') {
+          profile = await this.findTikTokByDisplayName(streamer.displayName, streamer.followers);
+          credits += 2; // 1 for search, 1 for profile
+        } else if (targetPlatform === 'INSTAGRAM') {
+          profile = await this.findInstagramByDisplayName(streamer.displayName, streamer.followers);
+          credits += 2;
+        }
+
+        if (profile) {
+          await this.upsertStreamer(targetPlatform, profile, streamer.id);
+          found++;
+          console.log(`   ✅ Found and saved!`);
+        } else {
+          notFound++;
+          console.log(`   ❌ Not found`);
+        }
+
+        // Rate limiting
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+      } catch (error: any) {
+        console.log(`   ❌ Error: ${error.message}`);
+        notFound++;
+      }
+    }
+
+    console.log(`\n${platformEmoji} [SMART SYNC] Complete!`);
+    console.log(`   Processed: ${processed}, Found: ${found}, Not found: ${notFound}`);
+    console.log(`   Credits used: ~${credits}`);
+
+    return { processed, found, notFound, credits };
+  }
+
   private async fetchProfile(platform: Platform, username: string): Promise<SocialProfile | null> {
     switch (platform) {
       case 'TIKTOK':
@@ -352,8 +572,8 @@ export class ScrapeCreatorsService {
           profileUrl: `https://tiktok.com/@${p.uniqueId || ''}`,
           avatarUrl: p.avatarLarger || p.avatarMedium,
           followers: followers,
-          totalViews: BigInt(hearts),
-          totalLikes: BigInt(diggs),
+          totalLikes: BigInt(hearts),  // heartCount = likes received
+          totalViews: BigInt(videos),  // videoCount for reference
           profileDescription: p.signature || '',
           engagementRate: this.calculateEngagementRate(followers, hearts, videos),
         };

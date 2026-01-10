@@ -409,6 +409,124 @@ enum SyncStatus {
   FAILED
 }
 
+// Unified Influencer Profile - One row per person, all platforms linked
+model Influencer {
+  id            String   @id @default(cuid())
+
+  // === UNIFIED IDENTITY ===
+  displayName   String                          // Primary display name
+  country       String?                         // ISO country code (US, MX, BR, etc.)
+  language      String?                         // Primary language
+  primaryCategory String? @map("primary_category") // Gaming, IRL, Music, etc.
+  tags          String[] @default([])
+
+  // === TWITCH ===
+  twitchId          String?   @unique @map("twitch_id")
+  twitchUsername    String?   @map("twitch_username")
+  twitchDisplayName String?   @map("twitch_display_name")
+  twitchFollowers   Int?      @map("twitch_followers")
+  twitchAvatar      String?   @map("twitch_avatar")
+  twitchUrl         String?   @map("twitch_url")
+  twitchVerified    Boolean   @default(false) @map("twitch_verified")
+
+  // === YOUTUBE ===
+  youtubeId          String?   @unique @map("youtube_id")
+  youtubeUsername    String?   @map("youtube_username")
+  youtubeDisplayName String?   @map("youtube_display_name")
+  youtubeFollowers   Int?      @map("youtube_followers")
+  youtubeAvatar      String?   @map("youtube_avatar")
+  youtubeUrl         String?   @map("youtube_url")
+  youtubeVerified    Boolean   @default(false) @map("youtube_verified")
+
+  // === KICK ===
+  kickId          String?   @unique @map("kick_id")
+  kickUsername    String?   @map("kick_username")
+  kickDisplayName String?   @map("kick_display_name")
+  kickFollowers   Int?      @map("kick_followers")
+  kickAvatar      String?   @map("kick_avatar")
+  kickUrl         String?   @map("kick_url")
+  kickVerified    Boolean   @default(false) @map("kick_verified")
+
+  // === TIKTOK ===
+  tiktokId          String?   @unique @map("tiktok_id")
+  tiktokUsername    String?   @map("tiktok_username")
+  tiktokDisplayName String?   @map("tiktok_display_name")
+  tiktokFollowers   Int?      @map("tiktok_followers")
+  tiktokLikes       BigInt?   @map("tiktok_likes")
+  tiktokVideos      Int?      @map("tiktok_videos")
+  tiktokAvatar      String?   @map("tiktok_avatar")
+  tiktokUrl         String?   @map("tiktok_url")
+  tiktokVerified    Boolean   @default(false) @map("tiktok_verified")
+
+  // === INSTAGRAM ===
+  instagramId          String?   @unique @map("instagram_id")
+  instagramUsername    String?   @map("instagram_username")
+  instagramDisplayName String?   @map("instagram_display_name")
+  instagramFollowers   Int?      @map("instagram_followers")
+  instagramLikes       BigInt?   @map("instagram_likes")
+  instagramPosts       Int?      @map("instagram_posts")
+  instagramAvatar      String?   @map("instagram_avatar")
+  instagramUrl         String?   @map("instagram_url")
+  instagramVerified    Boolean   @default(false) @map("instagram_verified")
+
+  // === X (TWITTER) ===
+  xId          String?   @unique @map("x_id")
+  xUsername    String?   @map("x_username")
+  xDisplayName String?   @map("x_display_name")
+  xFollowers   Int?      @map("x_followers")
+  xAvatar      String?   @map("x_avatar")
+  xUrl         String?   @map("x_url")
+  xVerified    Boolean   @default(false) @map("x_verified")
+
+  // === FACEBOOK ===
+  facebookId          String?   @unique @map("facebook_id")
+  facebookUsername    String?   @map("facebook_username")
+  facebookDisplayName String?   @map("facebook_display_name")
+  facebookFollowers   Int?      @map("facebook_followers")
+  facebookAvatar      String?   @map("facebook_avatar")
+  facebookUrl         String?   @map("facebook_url")
+  facebookVerified    Boolean   @default(false) @map("facebook_verified")
+
+  // === LINKEDIN ===
+  linkedinId          String?   @unique @map("linkedin_id")
+  linkedinUsername    String?   @map("linkedin_username")
+  linkedinDisplayName String?   @map("linkedin_display_name")
+  linkedinFollowers   Int?      @map("linkedin_followers")
+  linkedinAvatar      String?   @map("linkedin_avatar")
+  linkedinUrl         String?   @map("linkedin_url")
+  linkedinVerified    Boolean   @default(false) @map("linkedin_verified")
+
+  // === AGGREGATED METRICS ===
+  totalReach        BigInt    @default(0) @map("total_reach")  // Sum of all followers
+  totalLikes        BigInt    @default(0) @map("total_likes")  // Sum of all likes
+  totalViews        BigInt    @default(0) @map("total_views")  // Sum of all views
+  platformCount     Int       @default(0) @map("platform_count") // Number of platforms linked
+  avgEngagementRate Float?    @map("avg_engagement_rate")
+
+  // === GDPR COMPLIANCE ===
+  dataSource        String    @default("public_api") @map("data_source") // public_api, user_submitted, manual
+  deletionRequested Boolean   @default(false) @map("deletion_requested")
+  deletionRequestedAt DateTime? @map("deletion_requested_at")
+  lastVerifiedAt    DateTime? @map("last_verified_at")  // When data was last confirmed public
+
+  // === METADATA ===
+  notes         String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // === LINK TO ORIGINAL STREAMER RECORDS ===
+  sourceStreamerIds String[] @default([]) @map("source_streamer_ids") // Original streamer IDs used to build this
+
+  @@index([country])
+  @@index([totalReach(sort: Desc)])
+  @@index([platformCount(sort: Desc)])
+  @@index([twitchUsername])
+  @@index([youtubeUsername])
+  @@index([tiktokUsername])
+  @@index([instagramUsername])
+  @@map("discovery_influencers")
+}
+
 // Queue for social platform sync (ScrapeCreators API)
 model SocialSyncQueue {
   id              String     @id @default(cuid())
