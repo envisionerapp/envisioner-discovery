@@ -7,6 +7,13 @@
 import { db, logger } from '../utils/database';
 import { Prisma } from '@prisma/client';
 
+// Helper to serialize data with BigInt support
+const serializeWithBigInt = (data: unknown): Prisma.InputJsonValue => {
+  return JSON.parse(JSON.stringify(data, (_, v) =>
+    typeof v === 'bigint' ? v.toString() : v
+  ));
+};
+
 export async function cacheStreamers() {
   try {
     logger.info('Starting streamers caching...');
@@ -25,10 +32,10 @@ export async function cacheStreamers() {
       where: { key: 'top_live_streamers' },
       create: {
         key: 'top_live_streamers',
-        value: JSON.parse(JSON.stringify(liveStreamers)) as Prisma.InputJsonValue,
+        value: serializeWithBigInt(liveStreamers),
       },
       update: {
-        value: JSON.parse(JSON.stringify(liveStreamers)) as Prisma.InputJsonValue,
+        value: serializeWithBigInt(liveStreamers),
       },
     });
 
@@ -46,10 +53,10 @@ export async function cacheStreamers() {
       where: { key: 'top_streamers' },
       create: {
         key: 'top_streamers',
-        value: JSON.parse(JSON.stringify(topStreamers)) as Prisma.InputJsonValue,
+        value: serializeWithBigInt(topStreamers),
       },
       update: {
-        value: JSON.parse(JSON.stringify(topStreamers)) as Prisma.InputJsonValue,
+        value: serializeWithBigInt(topStreamers),
       },
     });
 
