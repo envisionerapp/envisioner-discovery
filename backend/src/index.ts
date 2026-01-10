@@ -49,6 +49,8 @@ import { favoritesRoutes } from './routes/favorites';
 import { discardsRoutes } from './routes/discards';
 import { notesRoutes } from './routes/notes';
 import { accessRoutes } from './routes/access';
+import { influencerSyncRoutes } from './routes/influencerSync';
+import { influencerSyncService } from './services/influencerSyncService';
 
 // Define allowed origins before creating server/socket
 const allowedOrigins = new Set([
@@ -213,6 +215,7 @@ app.use('/api/favorites', favoritesRoutes);
 app.use('/api/discards', discardsRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/access', accessRoutes);
+app.use('/api/influencer-sync', influencerSyncRoutes);
 app.use('/dbviewer', dbViewerRoutes);
 app.use('/admin-panel', adminPanelRoutes);
 
@@ -312,6 +315,11 @@ server.listen(PORT, () => {
         logger.info('🔧 STARTUP: Starting avatar backfill process');
         const avatarResult = await backfillAvatars(500); // Backfill up to 500 missing avatars
         logger.info(`🔧 STARTUP: Avatar backfill result: ${JSON.stringify(avatarResult)}`);
+
+        // Sync influencers from external influencers table to discovery_creators
+        logger.info('🔧 STARTUP: Syncing influencers to discovery_creators');
+        const influencerSyncResult = await influencerSyncService.syncInfluencersToDiscovery();
+        logger.info(`🔧 STARTUP: Influencer sync result: ${JSON.stringify(influencerSyncResult)}`);
 
       } catch (e) {
         logger.error('🔧 STARTUP: Data tasks encountered an error', { e });
