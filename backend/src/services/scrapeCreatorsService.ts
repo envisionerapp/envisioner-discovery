@@ -551,9 +551,45 @@ export class ScrapeCreatorsService {
       }
     });
 
+    // Also update the influencers table if this username exists there
+    await this.updateInfluencersTable(platform, data.username, data.followers || 0);
+
     // If this was discovered from an existing streamer, link them in socialLinks
     if (sourceStreamerId) {
       await this.linkSocialProfile(sourceStreamerId, platform, data.username);
+    }
+  }
+
+  /**
+   * Update the influencers table with followers from ScrapeCreators API
+   */
+  private async updateInfluencersTable(platform: Platform, username: string, followers: number): Promise<void> {
+    try {
+      // Build the channel URL pattern to match
+      const platformPatterns: Record<string, string> = {
+        TIKTOK: `tiktok.com/@${username}`,
+        INSTAGRAM: `instagram.com/${username}`,
+        X: `x.com/${username}`,
+        FACEBOOK: `facebook.com/${username}`,
+        LINKEDIN: `linkedin.com/in/${username}`,
+      };
+
+      const pattern = platformPatterns[platform];
+      if (!pattern) return;
+
+      // Update influencers table where channel_url matches
+      const result = await db.$executeRawUnsafe(`
+        UPDATE influencers
+        SET subscribers = $1, stats_updated_at = NOW()
+        WHERE channel_url ILIKE $2
+           OR channel_url ILIKE $3
+      `, followers, `%${pattern}%`, `%twitter.com/${username}%`);
+
+      if (result > 0) {
+        logger.info(`📊 Updated influencers table: ${username} on ${platform} with ${followers} followers`);
+      }
+    } catch (error: any) {
+      logger.error(`Failed to update influencers table for ${username}:`, error.message);
     }
   }
 
