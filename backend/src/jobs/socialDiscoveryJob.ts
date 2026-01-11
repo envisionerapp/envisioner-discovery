@@ -404,6 +404,85 @@ async function upsertInstagramCreator(username: string, source: string): Promise
   }
 }
 
+
+/**
+ * Discover Instagram creators through related profiles
+ * Takes existing creators from our DB and finds their related accounts
+ */
+async function discoverInstagramFromRelatedProfiles(
+  maxSeedProfiles: number = 10,
+  maxRelatedPerProfile: number = 5
+): Promise<DiscoveryResult> {
+  const result: DiscoveryResult = {
+    platform: 'INSTAGRAM',
+    method: 'related_profiles',
+    query: 'existing_creators',
+    searched: 0,
+    created: 0,
+    skipped: 0,
+    credits: 0,
+  };
+
+  try {
+    // Get existing Instagram creators with good follower counts to use as seeds
+    const seedCreators = await db.streamer.findMany({
+      where: {
+        platform: Platform.INSTAGRAM,
+        followers: { gte: 10000 }, // Only use established accounts as seeds
+      },
+      orderBy: { followers: 'desc' },
+      take: maxSeedProfiles,
+      select: { username: true, followers: true },
+    });
+
+    logger.info(`Instagram related discovery: using ${seedCreators.length} seed creators`);
+
+    for (const seed of seedCreators) {
+      const hasBudget = await syncOptimization.hasBudget('scrapecreators');
+      if (!hasBudget) {
+        logger.warn('ScrapeCreators budget exhausted');
+        break;
+      }
+
+      // Fetch related profiles for this seed creator
+      const related = await scrapeCreatorsService.getInstagramRelatedProfiles(seed.username);
+      await syncOptimization.trackApiCall('scrapecreators', 'instagram/profile', 1, true);
+      result.credits++;
+      result.searched += related.length;
+
+      logger.info(`Instagram @${seed.username}: found ${related.length} related profiles`);
+
+      // Process each related profile
+      for (const relatedProfile of related.slice(0, maxRelatedPerProfile)) {
+        if (relatedProfile.is_private) continue;
+
+        const created = await upsertInstagramCreator(
+          relatedProfile.username,
+          `related:${seed.username}`
+        );
+
+        if (created === 'created') {
+          result.created++;
+          result.credits++; // Profile fetch credit
+        } else if (created === 'skipped') {
+          result.skipped++;
+        } else {
+          result.credits++; // Profile fetch credit even if not created
+        }
+
+        await new Promise(r => setTimeout(r, 150));
+      }
+
+      await new Promise(r => setTimeout(r, 200));
+    }
+  } catch (error) {
+    logger.error('Instagram related profiles discovery failed:', error);
+  }
+
+  logger.info(`Instagram related discovery complete: ${result.created} created, ${result.skipped} skipped`);
+  return result;
+}
+
 // ==================== FACEBOOK DISCOVERY (Ad Library) ====================
 
 /**
@@ -590,7 +669,7 @@ async function upsertLinkedInCompany(companyId: string, companyName: string, sou
  */
 export async function runSocialDiscovery(options: {
   platforms?: ('tiktok' | 'instagram' | 'facebook' | 'linkedin')[];
-  methods?: ('keyword' | 'hashtag' | 'trending' | 'popular' | 'ads')[];
+  methods?: ('keyword' | 'hashtag' | 'trending' | 'popular' | 'ads' | 'related')[];
   keywordSet?: 'primary' | 'secondary' | 'influencer' | 'all';
   maxResultsPerQuery?: number;
   maxCredits?: number;
@@ -677,6 +756,7 @@ export async function runSocialDiscovery(options: {
 
   // Instagram Discovery
   if (platforms.includes('instagram')) {
+    // Keyword search via reels
     if (methods.includes('keyword')) {
       for (const keyword of keywords.slice(0, 3)) {
         if (totalCredits >= maxCredits) break;
@@ -685,6 +765,16 @@ export async function runSocialDiscovery(options: {
         totalCredits += r.credits;
         byPlatform.instagram += r.created;
         await new Promise(res => setTimeout(res, 300));
+      }
+    }
+
+    // Related profiles discovery (find similar accounts to existing creators)
+    if (methods.includes('related') || methods.includes('popular')) {
+      if (totalCredits < maxCredits) {
+        const r = await discoverInstagramFromRelatedProfiles(5, maxResultsPerQuery);
+        results.push(r);
+        totalCredits += r.credits;
+        byPlatform.instagram += r.created;
       }
     }
   }

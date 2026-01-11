@@ -81,6 +81,27 @@ export const AVATARS: string[] = [
 ];
 
 /**
+ * Proxy image through weserv.nl to avoid CORS issues with Instagram/TikTok
+ * Also converts HEIF/AVIF to JPEG for browser compatibility
+ */
+const proxyImageUrl = (url: string): string => {
+  if (!url) return url;
+
+  // Check if URL needs proxying (Instagram, TikTok CDNs)
+  const needsProxy = url.includes('instagram.') ||
+                     url.includes('fbcdn.net') ||
+                     url.includes('cdninstagram.') ||
+                     url.includes('tiktokcdn.');
+
+  if (needsProxy) {
+    // Use weserv.nl image proxy - handles CORS and format conversion
+    return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=300&h=300&fit=cover&output=jpg`;
+  }
+
+  return url;
+};
+
+/**
  * Get avatar URL for a streamer
  * @param streamer - Streamer object with username and avatarUrl
  * @param fallbackIndex - Index for fallback avatar if no avatarUrl exists
@@ -88,7 +109,7 @@ export const AVATARS: string[] = [
  */
 export const getStreamerAvatar = (streamer: any, fallbackIndex: number = 0): string => {
   if (streamer?.avatarUrl && streamer.avatarUrl.trim() !== '') {
-    return streamer.avatarUrl;
+    return proxyImageUrl(streamer.avatarUrl);
   }
   // Use local avatar fallback
   return AVATARS[fallbackIndex % AVATARS.length];

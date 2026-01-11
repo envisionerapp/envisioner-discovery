@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import './App.css';
 import { fetchCreators, fetchFavoriteIds, toggleFavorite as apiToggleFavorite, fetchDiscardedIds, toggleDiscarded as apiToggleDiscarded, fetchNotesMap, saveNote as apiSaveNote, formatLastActive, ApiCreator, validateAccess, AccessValidationResult } from './api';
+import { getStreamerAvatar } from './utils/avatars';
 
 // ===========================================
 // API HELPER FUNCTIONS
@@ -52,7 +53,17 @@ const getApiCardMetrics = (creator: ApiCreator): { label: string; value: string 
     ];
   }
 
-  // Instagram, Facebook, X, LinkedIn
+  // Instagram: followers, engagement (likes if available), category
+  if (platform === 'instagram') {
+    return [
+      { label: 'Followers', value: formatOrDash(creator.followers) },
+      { label: 'Likes', value: creator.totalLikes > 0 ? formatNumber(creator.totalLikes) : '-' },
+      { label: 'Category', value: creator.primaryCategory || creator.inferredCategory || '-' },
+      { label: 'Last Active', value: hasLastActive ? lastActive : '-' },
+    ];
+  }
+
+  // Facebook, X, LinkedIn: followers, views, likes
   return [
     { label: 'Followers', value: formatOrDash(creator.followers) },
     { label: 'Views', value: creator.totalViews > 0 ? formatNumber(creator.totalViews) : '-' },
@@ -1155,7 +1166,7 @@ function App() {
                       style={!creator.avatarUrl ? { background: getAvatarColor(creator.username) } : undefined}
                     >
                       {creator.avatarUrl ? (
-                        <img src={creator.avatarUrl} alt={displayName} />
+                        <img src={getStreamerAvatar(creator)} alt={displayName} />
                       ) : (
                         <span>{displayName.charAt(0).toUpperCase()}</span>
                       )}
@@ -1305,7 +1316,7 @@ function App() {
                   style={!selectedCreator.avatarUrl ? { background: getAvatarColor(selectedCreator.username) } : undefined}
                 >
                   {selectedCreator.avatarUrl ? (
-                    <img src={selectedCreator.avatarUrl} alt={modalDisplayName} />
+                    <img src={getStreamerAvatar(selectedCreator)} alt={modalDisplayName} />
                   ) : (
                     <span>{modalDisplayName.charAt(0).toUpperCase()}</span>
                   )}

@@ -43,6 +43,15 @@ interface InstagramProfile {
   total_likes?: number;
   total_comments?: number;
 }
+interface InstagramRelatedProfile {
+  id: string;
+  username: string;
+  full_name: string;
+  is_verified: boolean;
+  is_private: boolean;
+  profile_pic_url: string;
+}
+
 
 interface XProfile {
   id: string;
@@ -407,6 +416,37 @@ export class ScrapeCreatorsService {
       return { profile: null, debug: { error: error.response?.data || error.message } };
     }
   }
+
+  /**
+   * Get related profiles for an Instagram user
+   * These are accounts Instagram suggests as similar
+   */
+  async getInstagramRelatedProfiles(handle: string): Promise<InstagramRelatedProfile[]> {
+    try {
+      if (!await this.ensureApiKey()) return [];
+
+      const response = await this.client.get('/v1/instagram/profile', {
+        params: { handle: handle.replace('@', '') }
+      });
+
+      const user = response.data?.data?.user || response.data?.user;
+      if (!user) return [];
+
+      const edges = user.edge_related_profiles?.edges || [];
+      return edges.map((edge: any) => ({
+        id: edge.node?.id || '',
+        username: edge.node?.username || '',
+        full_name: edge.node?.full_name || '',
+        is_verified: edge.node?.is_verified || false,
+        is_private: edge.node?.is_private || false,
+        profile_pic_url: edge.node?.profile_pic_url || '',
+      })).filter((p: InstagramRelatedProfile) => p.username && !p.is_private);
+    } catch (error: any) {
+      logger.error(`Failed to get related profiles for ${handle}:`, error.response?.data || error.message);
+      return [];
+    }
+  }
+
 
   async getInstagramProfile(handle: string): Promise<InstagramProfile | null> {
     try {

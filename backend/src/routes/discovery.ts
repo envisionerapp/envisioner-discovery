@@ -1021,6 +1021,114 @@ function toInt(val: string | number | null | undefined): number | null {
   return Number.isFinite(n) ? Math.round(n) : null;
 }
 
+
+/**
+ * GET /api/discovery/instagram/related/:username
+ * Discover new creators from a user's related profiles
+ */
+router.get('/instagram/related/:username', asyncHandler(async (req: Request, res: Response) => {
+  const { username } = req.params;
+  const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
+
+  logger.info(`Discovering related profiles for Instagram @${username}`);
+
+  // Get related profiles
+  const related = await scrapeCreatorsService.getInstagramRelatedProfiles(username);
+
+  if (related.length === 0) {
+    return res.json({
+      success: true,
+      data: {
+        seed: username,
+        message: 'No related profiles found',
+        related: [],
+        discovered: 0,
+      },
+    });
+  }
+
+  // Try to add each related profile to our database
+  const results = [];
+  let discovered = 0;
+  let skipped = 0;
+
+  for (const profile of related.slice(0, limit)) {
+    if (profile.is_private) {
+      results.push({ username: profile.username, status: 'private' });
+      continue;
+    }
+
+    // Check if already exists
+    const existing = await db.streamer.findUnique({
+      where: { platform_username: { platform: Platform.INSTAGRAM, username: profile.username } },
+    });
+
+    if (existing) {
+      results.push({ username: profile.username, status: 'exists', followers: existing.followers });
+      skipped++;
+      continue;
+    }
+
+    // Fetch full profile
+    const fullProfile = await scrapeCreatorsService.getInstagramProfile(profile.username);
+    if (!fullProfile) {
+      results.push({ username: profile.username, status: 'fetch_failed' });
+      continue;
+    }
+
+    if (fullProfile.follower_count < 1000) {
+      results.push({ username: profile.username, status: 'low_followers', followers: fullProfile.follower_count });
+      continue;
+    }
+
+    // Create in database
+    try {
+      await db.streamer.create({
+        data: {
+          platform: Platform.INSTAGRAM,
+          username: profile.username,
+          displayName: fullProfile.full_name || profile.username,
+          profileUrl: `https://instagram.com/${profile.username}`,
+          avatarUrl: fullProfile.profile_pic_url,
+          followers: fullProfile.follower_count,
+          totalLikes: BigInt(fullProfile.total_likes || 0),
+          profileDescription: fullProfile.biography,
+          isLive: false,
+          language: 'en',
+          region: Region.WORLDWIDE,
+          tags: ['related'],
+          socialLinks: [],
+          discoveredVia: `scrapecreators:instagram:related:${username}`,
+        },
+      });
+      results.push({
+        username: profile.username,
+        status: 'created',
+        followers: fullProfile.follower_count,
+        verified: fullProfile.is_verified,
+      });
+      discovered++;
+    } catch (error: any) {
+      results.push({ username: profile.username, status: 'db_error', error: error.message });
+    }
+
+    // Rate limit
+    await new Promise(r => setTimeout(r, 200));
+  }
+
+  res.json({
+    success: true,
+    data: {
+      seed: username,
+      totalRelated: related.length,
+      processed: results.length,
+      discovered,
+      skipped,
+      results,
+    },
+  });
+}));
+
 /**
  * GET /api/discovery/debug/instagram/:username
  * Debug endpoint to test Instagram profile fetching
