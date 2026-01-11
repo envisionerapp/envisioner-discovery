@@ -44,6 +44,7 @@ import { SocketService } from './services/socketService';
 import { liveStatusService } from './services/liveStatusService';
 import { twitchSyncJob } from './jobs/twitchSync';
 import { kickSyncJob } from './jobs/kickSync';
+import { avatarBackfillJob } from './jobs/avatarBackfillJob';
 import { performanceSyncRoutes } from './routes/performanceSync';
 import { discoveryRoutes } from './routes/discovery';
 import { favoritesRoutes } from './routes/favorites';
@@ -339,9 +340,11 @@ server.listen(PORT, () => {
     // Start cron jobs
   twitchSyncJob.start();
   kickSyncJob.start();
-  
+  avatarBackfillJob.start();
+
   logger.info('✅ Twitch sync: every 3 minutes');
   logger.info('✅ Kick sync: every 3 minutes');
+  logger.info('✅ Avatar backfill: every 10 minutes');
   
 });
 
