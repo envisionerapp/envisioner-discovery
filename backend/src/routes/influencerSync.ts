@@ -106,4 +106,27 @@ router.get('/debug-linkedin', async (req, res) => {
   }
 });
 
+// Reset LinkedIn profiles to re-enrich them
+router.post('/reset-linkedin', async (req, res) => {
+  try {
+    const result = await db.streamer.updateMany({
+      where: {
+        platform: Platform.LINKEDIN,
+        followers: 0, // Only reset those that didn't get enriched properly
+      },
+      data: { lastScrapedAt: null }
+    });
+    res.json({
+      success: true,
+      message: `Reset ${result.count} LinkedIn profiles for re-enrichment`,
+      data: { resetCount: result.count },
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 export { router as influencerSyncRoutes };
