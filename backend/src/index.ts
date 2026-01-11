@@ -39,6 +39,7 @@ import { adminPanelRoutes } from './routes/adminPanel';
 import { bootstrapAdminUser } from './utils/bootstrapAdmin';
 import { backfillAvatars } from './utils/avatarBackfill';
 import { syncAvatarsFromLocal } from './utils/syncAvatarsFromLocal';
+import { StreamerService } from './services/streamerService';
 import { SocketService } from './services/socketService';
 import { liveStatusService } from './services/liveStatusService';
 import { twitchSyncJob } from './jobs/twitchSync';
@@ -312,9 +313,14 @@ server.listen(PORT, () => {
         const syncResult = await syncAvatarsFromLocal();
         logger.info(`🔧 STARTUP: Avatar sync result: ${JSON.stringify(syncResult)}`);
 
-        logger.info('🔧 STARTUP: Starting avatar backfill process');
-        const avatarResult = await backfillAvatars(500); // Backfill up to 500 missing avatars
-        logger.info(`🔧 STARTUP: Avatar backfill result: ${JSON.stringify(avatarResult)}`);
+        logger.info('🔧 STARTUP: Starting avatar backfill process (platform APIs)');
+        const streamerServiceInstance = new StreamerService();
+        const twitchResult = await streamerServiceInstance.backfillTwitchAvatars(200);
+        logger.info(`🔧 STARTUP: Twitch avatar backfill: ${JSON.stringify(twitchResult)}`);
+        const youtubeResult = await streamerServiceInstance.backfillYouTubeAvatars(200);
+        logger.info(`🔧 STARTUP: YouTube avatar backfill: ${JSON.stringify(youtubeResult)}`);
+        const kickResult = await streamerServiceInstance.backfillKickAvatars(200);
+        logger.info(`🔧 STARTUP: Kick avatar backfill: ${JSON.stringify(kickResult)}`);
 
         // Sync influencers from external influencers table to discovery_creators
         logger.info('🔧 STARTUP: Syncing influencers to discovery_creators');
