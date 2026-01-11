@@ -85,10 +85,14 @@ interface LinkedInProfile {
   first_name: string;
   last_name: string;
   headline: string;
-  profile_pic_url: string;
+  image: string;  // API returns 'image', not 'profile_pic_url'
   summary?: string;
-  follower_count: number;
+  about?: string;
+  follower_count?: number;
+  followers?: number;
   connections_count?: number;
+  location?: string;
+  name?: string;  // Full name from API
 }
 
 type SocialProfile = TikTokProfile | InstagramProfile | XProfile | FacebookProfile | LinkedInProfile;
@@ -567,10 +571,17 @@ export class ScrapeCreatorsService {
 
   async getLinkedInProfile(handle: string): Promise<LinkedInProfile | null> {
     try {
+      // API requires full URL, not just handle
+      const url = `https://www.linkedin.com/in/${handle}`;
       const response = await this.client.get('/v1/linkedin/profile', {
-        params: { handle }
+        params: { url }
       });
-      return response.data?.data || response.data;
+      const data = response.data?.data || response.data;
+      if (data) {
+        // Add public_identifier from handle since API doesn't return it
+        data.public_identifier = handle;
+      }
+      return data;
     } catch (error: any) {
       logger.error(`LinkedIn profile fetch failed for ${handle}:`, error.response?.data || error.message);
       return null;
@@ -959,11 +970,11 @@ export class ScrapeCreatorsService {
         const p = profile as LinkedInProfile;
         return {
           username: p.public_identifier,
-          displayName: `${p.first_name} ${p.last_name}`.trim(),
+          displayName: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
           profileUrl: `https://linkedin.com/in/${p.public_identifier}`,
-          avatarUrl: p.profile_pic_url,
-          followers: p.follower_count || 0,
-          profileDescription: p.headline,
+          avatarUrl: p.image,
+          followers: p.followers || p.follower_count || 0,
+          profileDescription: p.headline || p.about,
         };
       }
       default:
