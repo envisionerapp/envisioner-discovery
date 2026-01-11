@@ -427,6 +427,32 @@ export class ScrapingJobQueue {
         streamerRecord.inferredCategorySource = platform;
 
         if (existingStreamer) {
+          // Update highestViewers if current viewers exceeds previous peak
+          if (streamerData.isLive && streamerData.currentViewers) {
+            const currentPeak = existingStreamer.highestViewers || 0;
+            if (streamerData.currentViewers > currentPeak) {
+              streamerRecord.highestViewers = streamerData.currentViewers;
+            }
+          }
+
+          // Update lastSeenLive when streamer is live
+          if (streamerData.isLive) {
+            streamerRecord.lastSeenLive = new Date();
+          }
+
+          // Update avgViewers using exponential moving average (EMA)
+          // Weight: 90% old average, 10% new value - smooths out fluctuations
+          if (streamerData.isLive && streamerData.currentViewers && streamerData.currentViewers > 0) {
+            const currentAvg = existingStreamer.avgViewers || 0;
+            if (currentAvg === 0) {
+              // First viewer count - use as initial average
+              streamerRecord.avgViewers = streamerData.currentViewers;
+            } else {
+              // EMA: newAvg = oldAvg * 0.9 + newValue * 0.1
+              streamerRecord.avgViewers = Math.round(currentAvg * 0.9 + streamerData.currentViewers * 0.1);
+            }
+          }
+
           await db.streamer.update({
             where: { id: existingStreamer.id },
             data: streamerRecord

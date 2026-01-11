@@ -1063,14 +1063,15 @@ router.get('/debug/instagram/:username', asyncHandler(async (req: Request, res: 
         } : null,
       },
       profileFetch: profile ? {
+        rawProfile: profile,
         username: profile.username,
         full_name: profile.full_name,
         follower_count: profile.follower_count,
         following_count: profile.following_count,
         media_count: profile.media_count,
         is_verified: profile.is_verified,
-        meetsThreshold: profile.follower_count >= 1000,
-      } : null,
+        meetsThreshold: (profile.follower_count || 0) >= 1000,
+      } : { error: 'Profile fetch returned null' },
       existingInDb: existing,
     },
   });

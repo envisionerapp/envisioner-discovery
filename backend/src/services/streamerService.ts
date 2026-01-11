@@ -8,6 +8,7 @@ interface StreamerData {
   platform: string;
   profileUrl?: string;
   highestViewers: number | null;
+  avgViewers: number;
   streamTitles: any;
 }
 
@@ -73,6 +74,7 @@ export class StreamerService {
           platform: true,
           profileUrl: true,
           highestViewers: true,
+          avgViewers: true,
           streamTitles: true
         }
       });
@@ -225,6 +227,7 @@ export class StreamerService {
           platform: true,
           profileUrl: true,
           highestViewers: true,
+          avgViewers: true,
           streamTitles: true
         }
       });
@@ -375,7 +378,8 @@ export class StreamerService {
       lastScrapedAt: new Date(), // Always update lastScrapedAt
     };
 
-    if (status.isLive && status.viewers && streamer.highestViewers) {
+    // Update highestViewers if current viewers exceeds previous peak
+    if (status.isLive && status.viewers) {
       const currentPeak = streamer.highestViewers || 0;
       if (status.viewers > currentPeak) {
         updateData.highestViewers = status.viewers;
@@ -384,6 +388,24 @@ export class StreamerService {
 
     if (status.isLive && status.startedAt && !isNaN(status.startedAt.getTime())) {
       updateData.lastStreamed = status.startedAt;
+    }
+
+    // Update lastSeenLive when streamer is live
+    if (status.isLive) {
+      updateData.lastSeenLive = new Date();
+    }
+
+    // Update avgViewers using exponential moving average (EMA)
+    // Weight: 90% old average, 10% new value - smooths out fluctuations
+    if (status.isLive && status.viewers && status.viewers > 0) {
+      const currentAvg = streamer.avgViewers || 0;
+      if (currentAvg === 0) {
+        // First viewer count - use as initial average
+        updateData.avgViewers = status.viewers;
+      } else {
+        // EMA: newAvg = oldAvg * 0.9 + newValue * 0.1
+        updateData.avgViewers = Math.round(currentAvg * 0.9 + status.viewers * 0.1);
+      }
     }
 
     return {
