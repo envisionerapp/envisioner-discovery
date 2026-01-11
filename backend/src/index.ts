@@ -46,6 +46,7 @@ import { twitchSyncJob } from './jobs/twitchSync';
 import { kickSyncJob } from './jobs/kickSync';
 import { avatarBackfillJob } from './jobs/avatarBackfillJob';
 import { influencerSyncJob } from './jobs/influencerSyncJob';
+import { linkedinEnrichJob, enrichLinkedInProfiles } from './jobs/linkedinEnrichJob';
 import { performanceSyncRoutes } from './routes/performanceSync';
 import { discoveryRoutes } from './routes/discovery';
 import { favoritesRoutes } from './routes/favorites';
@@ -329,6 +330,11 @@ server.listen(PORT, () => {
         const influencerSyncResult = await influencerSyncService.syncInfluencersToDiscovery();
         logger.info(`🔧 STARTUP: Influencer sync result: ${JSON.stringify(influencerSyncResult)}`);
 
+        // Enrich LinkedIn profiles with followers data from ScrapeCreators
+        logger.info('🔧 STARTUP: Enriching LinkedIn profiles');
+        const linkedinResult = await enrichLinkedInProfiles(50);
+        logger.info(`🔧 STARTUP: LinkedIn enrichment result: ${JSON.stringify(linkedinResult)}`);
+
       } catch (e) {
         logger.error('🔧 STARTUP: Data tasks encountered an error', { e });
       }
@@ -343,11 +349,13 @@ server.listen(PORT, () => {
   kickSyncJob.start();
   avatarBackfillJob.start();
   influencerSyncJob.start();
+  linkedinEnrichJob.start();
 
   logger.info('✅ Twitch sync: every 3 minutes');
   logger.info('✅ Kick sync: every 3 minutes');
   logger.info('✅ Avatar backfill: every 10 minutes');
   logger.info('✅ Influencer sync: every 5 minutes');
+  logger.info('✅ LinkedIn enrich: every 5 minutes');
   
 });
 
