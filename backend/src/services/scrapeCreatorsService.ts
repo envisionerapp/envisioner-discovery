@@ -241,14 +241,14 @@ export class ScrapeCreatorsService {
 
   /**
    * Search Instagram Reels by keyword (uses Google search internally)
-   * Endpoint: GET /v1/instagram/search/reels?keyword=xxx
+   * Endpoint: GET /v1/instagram/reels/search?query=xxx
    */
   async searchInstagramReels(query: string): Promise<any[]> {
     try {
       if (!await this.ensureApiKey()) return [];
 
-      const response = await this.client.get('/v1/instagram/search/reels', {
-        params: { keyword: query }
+      const response = await this.client.get('/v1/instagram/reels/search', {
+        params: { query }
       });
       return response.data?.reels || response.data?.results || response.data?.data || [];
     } catch (error: any) {
@@ -259,19 +259,16 @@ export class ScrapeCreatorsService {
 
   /**
    * Search Facebook Ad Library - find advertisers
-   * Endpoint: GET /v1/facebook/adLibrary/search/ads
+   * Endpoint: GET /v1/facebook/adLibrary/search/ads?query=xxx
    */
   async searchFacebookAds(query: string, country: string = 'US'): Promise<any[]> {
     try {
       if (!await this.ensureApiKey()) return [];
 
       const response = await this.client.get('/v1/facebook/adLibrary/search/ads', {
-        params: {
-          search_terms: query,
-          ad_reached_countries: country,
-        }
+        params: { query }
       });
-      return response.data?.ads || response.data?.results || response.data?.data || [];
+      return response.data?.searchResults || response.data?.ads || response.data?.data || [];
     } catch (error: any) {
       logger.error(`Facebook ads search failed for "${query}":`, error.response?.data || error.message);
       return [];
@@ -280,14 +277,14 @@ export class ScrapeCreatorsService {
 
   /**
    * Search LinkedIn Ad Library - find B2B advertisers
-   * Endpoint: GET /v1/linkedin/ads/search
+   * Endpoint: GET /v1/linkedin/ads/search?keyword=xxx
    */
   async searchLinkedInAds(query: string): Promise<any[]> {
     try {
       if (!await this.ensureApiKey()) return [];
 
       const response = await this.client.get('/v1/linkedin/ads/search', {
-        params: { search: query }
+        params: { keyword: query }
       });
       return response.data?.ads || response.data?.results || response.data?.data || [];
     } catch (error: any) {

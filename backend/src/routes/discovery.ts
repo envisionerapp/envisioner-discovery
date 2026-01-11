@@ -5,6 +5,8 @@ import { Platform, Region, FraudStatus } from '@prisma/client';
 import { discoveryService } from '../services/discoveryService';
 import { runDiscovery, runQuickDiscovery, runFullDiscovery } from '../jobs/discoveryJob';
 import { runSocialDiscovery, runQuickSocialDiscovery, runFullSocialDiscovery, runInfluencerDiscovery, runPlatformDiscovery } from '../jobs/socialDiscoveryJob';
+import { runEnhancedTwitchDiscovery, runQuickTwitchDiscovery } from '../jobs/enhancedTwitchDiscovery';
+import { runYouTubeDiscovery, runQuickYouTubeDiscovery } from '../jobs/youtubeDiscoveryJob';
 import multer from 'multer';
 import { parse } from 'csv-parse/sync';
 
@@ -640,6 +642,116 @@ router.post('/run', asyncHandler(async (req: Request, res: Response) => {
   res.json({
     success: true,
     data: result
+  });
+}));
+
+// ==================== ENHANCED DISCOVERY ENDPOINTS ====================
+
+/**
+ * POST /api/discovery/enhanced/twitch
+ * Run enhanced Twitch discovery with pagination and 50+ categories
+ */
+router.post('/enhanced/twitch', asyncHandler(async (req: Request, res: Response) => {
+  const { mode = 'quick', targetNew = 100 } = req.body;
+
+  logger.info('Enhanced Twitch discovery requested', { mode, targetNew });
+
+  const startTime = Date.now();
+  let result;
+
+  if (mode === 'quick') {
+    result = await runQuickTwitchDiscovery();
+  } else {
+    result = await runEnhancedTwitchDiscovery({ targetNew });
+  }
+
+  res.json({
+    success: true,
+    data: {
+      ...result,
+      duration: Date.now() - startTime,
+    }
+  });
+}));
+
+/**
+ * POST /api/discovery/enhanced/youtube
+ * Run YouTube discovery using YouTube Data API
+ */
+router.post('/enhanced/youtube', asyncHandler(async (req: Request, res: Response) => {
+  const { mode = 'quick', targetNew = 100, keywordsLimit = 10 } = req.body;
+
+  logger.info('YouTube discovery requested', { mode, targetNew, keywordsLimit });
+
+  const startTime = Date.now();
+  let result;
+
+  if (mode === 'quick') {
+    result = await runQuickYouTubeDiscovery();
+  } else {
+    result = await runYouTubeDiscovery({ targetNew, keywordsLimit });
+  }
+
+  res.json({
+    success: true,
+    data: {
+      ...result,
+      duration: Date.now() - startTime,
+    }
+  });
+}));
+
+/**
+ * POST /api/discovery/enhanced/all
+ * Run all enhanced discovery jobs (Twitch + YouTube + Kick + Social)
+ */
+router.post('/enhanced/all', asyncHandler(async (req: Request, res: Response) => {
+  const { targetPerPlatform = 50 } = req.body;
+
+  logger.info('Full enhanced discovery requested', { targetPerPlatform });
+
+  const startTime = Date.now();
+  const results: Record<string, any> = {};
+
+  // Run Twitch enhanced discovery
+  try {
+    results.twitch = await runQuickTwitchDiscovery();
+  } catch (error) {
+    results.twitch = { error: String(error) };
+  }
+
+  // Run YouTube discovery
+  try {
+    results.youtube = await runQuickYouTubeDiscovery();
+  } catch (error) {
+    results.youtube = { error: String(error) };
+  }
+
+  // Run Kick discovery (from existing job)
+  try {
+    results.kick = await runQuickDiscovery();
+  } catch (error) {
+    results.kick = { error: String(error) };
+  }
+
+  // Run social discovery (TikTok + Instagram)
+  try {
+    results.social = await runQuickSocialDiscovery();
+  } catch (error) {
+    results.social = { error: String(error) };
+  }
+
+  const totalDiscovered = Object.values(results)
+    .filter(r => r && !r.error)
+    .reduce((sum: number, r: any) => sum + (r.discovered || r.totalDiscovered || 0), 0);
+
+  res.json({
+    success: true,
+    data: {
+      totalDiscovered,
+      byPlatform: results,
+      duration: Date.now() - startTime,
+    }
   });
 }));
 
