@@ -159,10 +159,10 @@ async function discoverTwitchCategory(
     let created = 0;
 
     for (const stream of streams) {
-      const user = userMap.get(stream.user_id);
+      const user: any = userMap.get(stream.user_id);
       if (!user) continue;
 
-      const username = user.login.toLowerCase();
+      const username = (user.login || '').toLowerCase();
 
       // Check if already exists
       const existing = await db.streamer.findUnique({
@@ -178,10 +178,10 @@ async function discoverTwitchCategory(
 
       // Determine region from language
       const langToRegion: Record<string, Region> = {
-        en: 'NA', es: 'LATAM', pt: 'LATAM', de: 'EU', fr: 'EU',
-        it: 'EU', ru: 'EU', ja: 'ASIA', ko: 'ASIA', zh: 'ASIA',
+        en: Region.USA, es: Region.MEXICO, pt: Region.BRAZIL, de: Region.GERMANY, fr: Region.FRANCE,
+        it: Region.ITALY, ru: Region.RUSSIA, ja: Region.JAPAN, ko: Region.KOREA, zh: Region.CHINA,
       };
-      const region = langToRegion[stream.language] || 'OTHER';
+      const region = langToRegion[stream.language] || Region.OTHER;
 
       try {
         await db.streamer.create({
