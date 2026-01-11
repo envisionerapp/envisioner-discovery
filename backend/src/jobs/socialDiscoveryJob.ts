@@ -339,6 +339,8 @@ async function discoverInstagramByReels(
       if (username) usernames.add(username.toLowerCase());
     }
 
+    logger.info(`Instagram reels search "${query}": found ${reels.length} reels, extracted ${usernames.size} unique usernames: ${Array.from(usernames).join(', ')}`);
+
     for (const username of Array.from(usernames).slice(0, maxResults)) {
       const created = await upsertInstagramCreator(username, `reels:${query}`);
       if (created === 'created') result.created++;
@@ -359,12 +361,21 @@ async function upsertInstagramCreator(username: string, source: string): Promise
     where: { platform_username: { platform: Platform.INSTAGRAM, username } },
   });
 
-  if (existing) return 'skipped';
+  if (existing) {
+    logger.debug(`Instagram @${username}: already exists, skipping`);
+    return 'skipped';
+  }
 
   const profile = await scrapeCreatorsService.getInstagramProfile(username);
-  if (!profile) return 'fetched';
+  if (!profile) {
+    logger.warn(`Instagram @${username}: profile fetch FAILED (null response)`);
+    return 'fetched';
+  }
 
-  if (profile.follower_count < 1000) return 'fetched';
+  if (profile.follower_count < 1000) {
+    logger.debug(`Instagram @${username}: only ${profile.follower_count} followers (< 1000 threshold)`);
+    return 'fetched';
+  }
 
   try {
     await db.streamer.create({
@@ -387,7 +398,8 @@ async function upsertInstagramCreator(username: string, source: string): Promise
     });
     logger.info(`Discovered Instagram: @${username} (${profile.follower_count.toLocaleString()} followers)`);
     return 'created';
-  } catch (error) {
+  } catch (error: any) {
+    logger.error(`Instagram @${username}: DB create failed: ${error.message}`);
     return 'skipped';
   }
 }

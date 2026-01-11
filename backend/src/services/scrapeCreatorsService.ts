@@ -349,10 +349,14 @@ export class ScrapeCreatorsService {
 
   async getInstagramProfile(handle: string): Promise<InstagramProfile | null> {
     try {
+      if (!await this.ensureApiKey()) return null;
+
       const response = await this.client.get('/v1/instagram/profile', {
         params: { handle: handle.replace('@', '') }
       });
-      return response.data?.data || response.data?.user || response.data;
+      const profile = response.data?.data || response.data?.user || response.data;
+      logger.debug(`Instagram profile for ${handle}: ${profile?.follower_count || 0} followers`);
+      return profile;
     } catch (error: any) {
       logger.error(`Instagram profile fetch failed for ${handle}:`, error.response?.data || error.message);
       return null;
