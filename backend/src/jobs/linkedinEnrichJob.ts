@@ -94,10 +94,14 @@ export async function enrichLinkedInProfiles(limit: number = 50): Promise<{ upda
 
   for (const creator of creators) {
     try {
+      logger.info(`🔗 Fetching LinkedIn profile for: ${creator.username}`);
       const profile = await scrapeCreatorsService.getLinkedInProfile(creator.username);
+      logger.info(`🔗 API result for ${creator.username}: ${profile ? 'found' : 'null'}`);
+
       if (profile) {
         const followers = profile.followers || profile.follower_count || 0;
         let avatarUrl = profile.image;
+        logger.info(`🔗 Profile data: followers=${followers}, hasImage=${!!avatarUrl}`);
 
         // Upload avatar to Bunny CDN
         if (avatarUrl) {
@@ -115,6 +119,14 @@ export async function enrichLinkedInProfiles(limit: number = 50): Promise<{ upda
           }
         });
         updated++;
+        logger.info(`🔗 Updated ${creator.username} with ${followers} followers`);
+      } else {
+        // Mark as scraped even if API returns null to avoid repeated attempts
+        await db.streamer.update({
+          where: { id: creator.id },
+          data: { lastScrapedAt: new Date() }
+        });
+        logger.warn(`🔗 No data found for ${creator.username}, marking as scraped`);
       }
 
       // Rate limit
