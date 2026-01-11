@@ -120,8 +120,8 @@ const DashboardPage: React.FC = () => {
         const platformParam = platformFilter ? `&platform=${platformFilter}` : '';
         const [liveResponse, topStreamersResponse, topCategoriesResponse] = await Promise.all([
           fetch(withBase(`/api/chat/dashboard/live?page=${page}&limit=${limit}&sort=${sort}&dir=${dir}${platformParam}`)),
-          fetch(withBase(`/api/chat/dashboard/top-streamers?limit=100${platformParam}`)),
-          fetch(withBase('/api/chat/dashboard/top-categories?limit=100'))
+          fetch(withBase(`/api/chat/dashboard/top-streamers?limit=25${platformParam}`)),
+          fetch(withBase('/api/chat/dashboard/top-categories?limit=10'))
         ]);
 
         if (liveResponse.ok) {

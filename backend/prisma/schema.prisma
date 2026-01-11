@@ -140,6 +140,16 @@ model Streamer {
   @@index([inferredCategory])
   @@index([syncTier])
   @@index([socialSyncedAt(sort: Asc)])
+  // Performance optimization indexes
+  @@index([igamingScore(sort: Desc)])
+  @@index([brandSafetyScore(sort: Desc)])
+  @@index([historicalConversions(sort: Desc)])
+  @@index([avgRoi(sort: Desc)])
+  @@index([gamblingCompatibility])
+  // Composite indexes for common query patterns
+  @@index([platform, region, followers(sort: Desc)])
+  @@index([fraudCheck, followers(sort: Desc)])
+  @@index([gamblingCompatibility, igamingScore(sort: Desc)])
   @@map("discovery_creators")
 }
 

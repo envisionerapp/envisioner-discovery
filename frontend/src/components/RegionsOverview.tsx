@@ -8,8 +8,8 @@ export const RegionsOverview: React.FC<{ onRegionClick?: (region: string) => voi
     ['region-stats'],
     () => streamerService.getRegionStats(),
     {
-      staleTime: 0,
-      cacheTime: 30000
+      staleTime: 60000,
+      cacheTime: 120000
     }
   );
 

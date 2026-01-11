@@ -32,10 +32,42 @@ export const LiveCountProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // Initial fetch
     refreshCounts();
 
-    // Refresh every 30 seconds
-    const interval = setInterval(refreshCounts, 30000);
+    // Only poll when page is visible
+    let interval: NodeJS.Timeout | null = null;
 
-    return () => clearInterval(interval);
+    const startPolling = () => {
+      if (!interval) {
+        interval = setInterval(refreshCounts, 30000);
+      }
+    };
+
+    const stopPolling = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopPolling();
+      } else {
+        refreshCounts(); // Refresh immediately when visible
+        startPolling();
+      }
+    };
+
+    // Start polling if page is visible
+    if (!document.hidden) {
+      startPolling();
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      stopPolling();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   return (

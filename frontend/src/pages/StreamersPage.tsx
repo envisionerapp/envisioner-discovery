@@ -214,9 +214,9 @@ const StreamersPage: React.FC = () => {
       });
     },
     {
-      keepPreviousData: false,
-      staleTime: 0,
-      cacheTime: 30000
+      keepPreviousData: true,
+      staleTime: 30000,
+      cacheTime: 60000
     }
   );
 
