@@ -8,11 +8,11 @@ import { Platform } from '@prisma/client';
 export const linkedinEnrichJob = cron.schedule('*/5 * * * *', async () => {
   console.log('\n🔗 [CRON] LinkedIn enrichment triggered');
   try {
-    // Find LinkedIn creators without followers data (followers = 0)
+    // Find LinkedIn creators that haven't been enriched yet
     const creators = await db.streamer.findMany({
       where: {
         platform: Platform.LINKEDIN,
-        followers: 0,
+        lastScrapedAt: null, // Not yet enriched
       },
       select: { id: true, username: true },
       take: 20, // Process 20 per run to stay within rate limits
@@ -76,7 +76,7 @@ export async function enrichLinkedInProfiles(limit: number = 50): Promise<{ upda
   const creators = await db.streamer.findMany({
     where: {
       platform: Platform.LINKEDIN,
-      followers: 0,
+      lastScrapedAt: null, // Not yet enriched
     },
     select: { id: true, username: true },
     take: limit,
