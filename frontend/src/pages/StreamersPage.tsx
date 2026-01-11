@@ -5,7 +5,7 @@ import { ArrowDownTrayIcon, PlusIcon, HashtagIcon, UserIcon, MapPinIcon, UsersIc
 import { HeartIcon as HeartIconSolid, PencilSquareIcon as PencilSquareIconSolid } from '@heroicons/react/24/solid';
 import { PlatformIcon } from '@/components/icons/PlatformIcon';
 import { getStreamerAvatar } from '@/utils/avatars';
-import { flagFor, regionLabel } from '@/utils/geo';
+import { flagFor, regionLabel, getCountryDisplay } from '@/utils/geo';
 import { RegionsOverview } from '@/components/RegionsOverview';
 import { SearchInput } from '@/components/SearchInput';
 import { streamerService } from '@/services/streamerService';
@@ -411,7 +411,8 @@ const StreamersPage: React.FC = () => {
               </div>
             ) : (
               items.map((s, idx) => {
-                const region = (s as any).region?.toLowerCase?.() || '';
+                // Use inferredCountry (from cross-platform unification) if available, otherwise fall back to region
+                const countryInfo = getCountryDisplay(s as any);
                 const platform = (s as any).platform?.toLowerCase?.();
                 const isLive = !!(s as any).isLive;
                 // YouTube has no scraper, so don't show viewer data
@@ -468,7 +469,7 @@ const StreamersPage: React.FC = () => {
                         <div className="text-xs text-gray-400 truncate">@{(s as any).username}</div>
                       </div>
                       <div className="flex-shrink-0">
-                        <span className="region-chip"><span className="text-sm" aria-hidden>{flagFor(region)}</span><span>{regionLabel(region)}</span></span>
+                        <span className="region-chip"><span className="text-sm" aria-hidden>{countryInfo.flag}</span><span>{countryInfo.label}</span></span>
                       </div>
                     </div>
 
@@ -667,12 +668,15 @@ const StreamersPage: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <h3 className="text-xl font-bold text-gray-100 mb-1">{selected.displayName}</h3>
                   <div className="flex flex-wrap items-center gap-2 text-xs">
-                    {selected.region && (
-                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-800/60 text-gray-300 border border-gray-700">
-                        <span className="text-sm">{flagFor(String(selected.region).toLowerCase())}</span>
-                        <span>{regionLabel(String(selected.region))}</span>
-                      </span>
-                    )}
+                    {(selected.inferredCountry || selected.region) && (() => {
+                      const countryDisplay = getCountryDisplay(selected as any);
+                      return (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-800/60 text-gray-300 border border-gray-700">
+                          <span className="text-sm">{countryDisplay.flag}</span>
+                          <span>{countryDisplay.label}</span>
+                        </span>
+                      );
+                    })()}
                     {selected.language && (
                       <span className="inline-flex items-center px-2 py-1 rounded-lg bg-gray-800/60 text-gray-300 border border-gray-700 uppercase">
                         {selected.language}
@@ -1147,7 +1151,8 @@ const StreamerTable: React.FC<{
           <tr><td colSpan={9} className="text-center py-8 text-gray-400">No streamers available.</td></tr>
         ) : (
           items.map((s, idx) => {
-            const region = (s as any).region?.toLowerCase?.() || '';
+            // Use inferredCountry (from cross-platform unification) if available, otherwise fall back to region
+            const countryInfo = getCountryDisplay(s as any);
             const platform = (s as any).platform?.toLowerCase?.();
             const isLive = !!(s as any).isLive;
             // YouTube has no scraper, so don't show viewer data
@@ -1292,7 +1297,7 @@ const StreamerTable: React.FC<{
                   </div>
                 </td>
                 <td className="align-middle">
-                  <span className="region-chip truncate block max-w-full"><span className="text-sm" aria-hidden>{flagFor(region)}</span><span className="truncate">{regionLabel(region)}</span></span>
+                  <span className="region-chip truncate block max-w-full"><span className="text-sm" aria-hidden>{countryInfo.flag}</span><span className="truncate">{countryInfo.label}</span></span>
                 </td>
                 <td className="text-left text-gray-300 align-middle">
                   {(() => {

@@ -19,6 +19,8 @@ interface YouTubeStreamData {
   isVtuber: boolean;
   socialLinks: any[];
   streamTitle?: string;
+  // Direct country code from YouTube API (ISO format: MX, CO, AR, etc.)
+  countryCode?: string;
 }
 
 interface YouTubeApiResponse {
@@ -349,7 +351,9 @@ export class YouTubeScraper {
             usesCamera: true,
             isVtuber: (channel?.description || '').toLowerCase().includes('vtuber'),
             socialLinks: [],
-            streamTitle: liveStream?.title
+            streamTitle: liveStream?.title,
+            // Store the raw country code from YouTube API for cross-platform unification
+            countryCode: channel?.country,
           };
 
           results.push(streamData);

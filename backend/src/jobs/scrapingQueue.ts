@@ -385,7 +385,7 @@ export class ScrapingJobQueue {
           }
         }
 
-        const streamerRecord = {
+        const streamerRecord: Record<string, any> = {
           platform,
           username: streamerData.username,
           displayName: streamerData.displayName,
@@ -406,6 +406,13 @@ export class ScrapingJobQueue {
           lastScrapedAt: new Date(),
           updatedAt: new Date()
         };
+
+        // For YouTube, store the direct country code from the API
+        // This is the most reliable country source and will be used for cross-platform unification
+        if (platform === Platform.YOUTUBE && streamerData.countryCode) {
+          streamerRecord.inferredCountry = streamerData.countryCode;
+          streamerRecord.inferredCountrySource = 'YOUTUBE';
+        }
 
         if (existingStreamer) {
           await db.streamer.update({
@@ -480,6 +487,39 @@ export class ScrapingJobQueue {
     });
 
     logger.info(`Added specific streamer job for ${usernames.length} ${platform} streamers`);
+  }
+
+  /**
+   * Add a scraping job for specific streamer IDs (used by tiered sync)
+   */
+  async addSpecificScrapingJob(streamerIds: string[], description: string = 'Specific scraping'): Promise<void> {
+    // Group streamers by platform
+    const streamers = await db.streamer.findMany({
+      where: { id: { in: streamerIds } },
+      select: { id: true, platform: true, username: true }
+    });
+
+    const byPlatform = new Map<Platform, string[]>();
+    for (const s of streamers) {
+      if (!byPlatform.has(s.platform)) {
+        byPlatform.set(s.platform, []);
+      }
+      byPlatform.get(s.platform)!.push(s.username);
+    }
+
+    // Add a job for each platform
+    for (const [platform, usernames] of byPlatform) {
+      await this.queue.add('specific-scraping', {
+        platform,
+        type: 'specific',
+        usernames
+      }, {
+        priority: 8,
+        delay: 0
+      });
+    }
+
+    logger.info(`${description}: Added jobs for ${streamerIds.length} streamers across ${byPlatform.size} platforms`);
   }
 
   async addTrendingScrapingJob(platform: Platform, limit: number = 50): Promise<void> {

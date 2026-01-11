@@ -14,14 +14,18 @@ interface StreamerData {
   tags: string[];
   socialLinks: any;
   primaryCategory: string | null;
+  // Cross-platform demographics
+  inferredCountry: string | null;
+  inferredCountrySource: string | null;
 }
 
 interface UnifiedInfluencer {
   displayName: string;
   country: string | null;
+  countrySource: string | null;  // Platform that provided the country (YOUTUBE, TWITCH, etc.)
   language: string | null;
   primaryCategory: string | null;
-  tags: string[];
+  tags: string[];  // Merged from all linked platforms
   sourceStreamerIds: string[];
 
   // Platform-specific data
@@ -173,27 +177,141 @@ export class InfluencerUnificationService {
     console.log(`\n✅ Unification complete!`);
     console.log(`   Created: ${created}, Updated: ${updated}, Errors: ${errors}`);
 
+    // Step 5: Backfill inferred country to source streamers
+    console.log('\n🔄 Backfilling inferred country to source streamers...');
+    const backfillResult = await this.backfillInferredCountry(unifiedProfiles);
+    console.log(`   Backfilled ${backfillResult.updated} streamers with inferred country`);
+
     return { created, updated, errors };
   }
 
   /**
+   * Backfill inferred country and unified tags to source streamers
+   * This propagates YouTube's country data to linked Twitch/Kick/social accounts
+   */
+  async backfillInferredCountry(unifiedProfiles: UnifiedInfluencer[]): Promise<{ updated: number }> {
+    let updated = 0;
+
+    for (const unified of unifiedProfiles) {
+      if (!unified.country || !unified.countrySource) continue;
+
+      // Get all source streamer IDs that don't have inferredCountry
+      // or have a lower-priority source
+      for (const streamerId of unified.sourceStreamerIds) {
+        try {
+          const streamer = await db.streamer.findUnique({
+            where: { id: streamerId },
+            select: {
+              id: true,
+              inferredCountry: true,
+              inferredCountrySource: true,
+            }
+          });
+
+          if (!streamer) continue;
+
+          // Update if streamer doesn't have inferred country, or if unified has a better source
+          const currentPriority = streamer.inferredCountrySource
+            ? (this.COUNTRY_SOURCE_PRIORITY[streamer.inferredCountrySource] || 0)
+            : -1;
+          const newPriority = this.COUNTRY_SOURCE_PRIORITY[unified.countrySource] || 0;
+
+          if (!streamer.inferredCountry || newPriority > currentPriority) {
+            await db.streamer.update({
+              where: { id: streamerId },
+              data: {
+                inferredCountry: unified.country,
+                inferredCountrySource: unified.countrySource,
+                unifiedTags: unified.tags,
+              }
+            });
+            updated++;
+          }
+        } catch (error) {
+          // Skip errors for individual streamers
+        }
+      }
+    }
+
+    return { updated };
+  }
+
+  /**
+   * Country source priority (higher = more reliable)
+   * YouTube is most reliable as it gets country from API
+   */
+  private readonly COUNTRY_SOURCE_PRIORITY: Record<string, number> = {
+    'YOUTUBE': 100,    // Direct from API - most reliable
+    'TWITCH': 50,      // Inferred from description/language
+    'KICK': 40,        // Inferred from bio/language
+    'TIKTOK': 30,      // Social platform
+    'INSTAGRAM': 30,
+    'X': 30,
+    'FACEBOOK': 30,
+    'LINKEDIN': 30,
+  };
+
+  /**
+   * Get the best country from all linked streamers
+   * Prioritizes platforms with direct API country data (YouTube)
+   */
+  private getBestCountry(streamers: StreamerData[]): { country: string | null; source: string | null } {
+    let bestCountry: string | null = null;
+    let bestSource: string | null = null;
+    let bestPriority = -1;
+
+    for (const streamer of streamers) {
+      // First check if streamer has direct inferredCountry (from YouTube API or previous unification)
+      if (streamer.inferredCountry && streamer.inferredCountrySource) {
+        const priority = this.COUNTRY_SOURCE_PRIORITY[streamer.inferredCountrySource] || 0;
+        if (priority > bestPriority) {
+          bestCountry = streamer.inferredCountry;
+          bestSource = streamer.inferredCountrySource;
+          bestPriority = priority;
+        }
+      }
+
+      // Fall back to region-based country for this platform
+      const regionCountry = this.regionToCountry(streamer.region);
+      if (regionCountry) {
+        const priority = this.COUNTRY_SOURCE_PRIORITY[streamer.platform] || 0;
+        // Only use if we don't have a better source already
+        if (priority > bestPriority && !bestCountry) {
+          bestCountry = regionCountry;
+          bestSource = streamer.platform;
+          bestPriority = priority;
+        }
+      }
+    }
+
+    return { country: bestCountry, source: bestSource };
+  }
+
+  /**
+   * Merge tags from all linked streamers (deduplicated)
+   */
+  private mergeTags(streamers: StreamerData[]): string[] {
+    const allTags = new Set<string>();
+    for (const streamer of streamers) {
+      if (streamer.tags && Array.isArray(streamer.tags)) {
+        for (const tag of streamer.tags) {
+          allTags.add(tag);
+        }
+      }
+    }
+    return Array.from(allTags);
+  }
+
+  /**
    * Synchronous version of buildUnifiedProfile (no DB queries)
+   * Now properly handles country propagation and tag merging across platforms
    */
   private buildUnifiedProfileSync(
     baseStreamer: StreamerData,
     socialByUsername: Map<string, StreamerData[]>
   ): UnifiedInfluencer {
-    const unified: UnifiedInfluencer = {
-      displayName: baseStreamer.displayName,
-      country: this.regionToCountry(baseStreamer.region),
-      language: baseStreamer.language,
-      primaryCategory: baseStreamer.primaryCategory,
-      tags: baseStreamer.tags || [],
-      sourceStreamerIds: [baseStreamer.id],
-    };
-
-    // Add base platform data
-    this.addPlatformData(unified, baseStreamer);
+    // Collect all linked streamers
+    const linkedStreamers: StreamerData[] = [baseStreamer];
 
     // Try to find matching social accounts
     const possibleMatches = [
@@ -205,8 +323,7 @@ export class InfluencerUnificationService {
       const matches = socialByUsername.get(key);
       if (matches) {
         for (const match of matches) {
-          this.addPlatformData(unified, match);
-          unified.sourceStreamerIds.push(match.id);
+          linkedStreamers.push(match);
         }
       }
     }
@@ -219,12 +336,32 @@ export class InfluencerUnificationService {
         const matches = socialByUsername.get(parsed.username.toLowerCase());
         if (matches) {
           const match = matches.find(m => m.platform === parsed.platform);
-          if (match && !unified.sourceStreamerIds.includes(match.id)) {
-            this.addPlatformData(unified, match);
-            unified.sourceStreamerIds.push(match.id);
+          if (match && !linkedStreamers.some(s => s.id === match.id)) {
+            linkedStreamers.push(match);
           }
         }
       }
+    }
+
+    // Get best country from all linked profiles (prioritizes YouTube API data)
+    const { country, source: countrySource } = this.getBestCountry(linkedStreamers);
+
+    // Merge tags from all linked platforms
+    const mergedTags = this.mergeTags(linkedStreamers);
+
+    const unified: UnifiedInfluencer = {
+      displayName: baseStreamer.displayName,
+      country,
+      countrySource,
+      language: baseStreamer.language,
+      primaryCategory: baseStreamer.primaryCategory,
+      tags: mergedTags,
+      sourceStreamerIds: linkedStreamers.map(s => s.id),
+    };
+
+    // Add platform data for all linked streamers
+    for (const streamer of linkedStreamers) {
+      this.addPlatformData(unified, streamer);
     }
 
     return unified;
@@ -251,6 +388,7 @@ export class InfluencerUnificationService {
     return {
       displayName: unified.displayName,
       country: unified.country,
+      countrySource: unified.countrySource,
       language: unified.language,
       primaryCategory: unified.primaryCategory,
       tags: unified.tags,
@@ -390,9 +528,14 @@ export class InfluencerUnificationService {
   }
 
   private createStandaloneInfluencer(streamer: StreamerData): UnifiedInfluencer {
+    // Use inferredCountry if available (from YouTube API), otherwise fall back to region
+    const country = streamer.inferredCountry || this.regionToCountry(streamer.region);
+    const countrySource = streamer.inferredCountrySource || (country ? streamer.platform : null);
+
     const unified: UnifiedInfluencer = {
       displayName: streamer.displayName,
-      country: this.regionToCountry(streamer.region),
+      country,
+      countrySource,
       language: streamer.language,
       primaryCategory: streamer.primaryCategory,
       tags: streamer.tags || [],
@@ -465,6 +608,7 @@ export class InfluencerUnificationService {
     const data = {
       displayName: unified.displayName,
       country: unified.country,
+      countrySource: unified.countrySource,
       language: unified.language,
       primaryCategory: unified.primaryCategory,
       tags: unified.tags,

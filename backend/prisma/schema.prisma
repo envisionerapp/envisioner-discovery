@@ -54,6 +54,11 @@ model Streamer {
   lastScrapedAt DateTime?
   lastSeenLive  DateTime? @map("last_seen_live")
 
+  // Sync Optimization
+  syncTier       SyncTier  @default(STANDARD) @map("sync_tier")
+  lastSyncedBy   String?   @map("last_synced_by")  // 'discovery' or 'redtrack-api'
+  socialSyncedAt DateTime? @map("social_synced_at") // Last ScrapeCreators sync
+
   // Social Metrics (Instagram/TikTok/FB/X/LinkedIn)
   totalViews    BigInt    @default(0) @map("total_views")
   totalLikes    BigInt    @default(0) @map("total_likes")
@@ -70,6 +75,11 @@ model Streamer {
 
   // Content Category
   primaryCategory String? @map("primary_category")
+
+  // Inferred Demographics (from cross-platform unification)
+  inferredCountry       String?  @map("inferred_country")       // ISO code inferred from linked profiles
+  inferredCountrySource String?  @map("inferred_country_source") // Platform that provided the country (e.g., "YOUTUBE", "TWITCH")
+  unifiedTags           String[] @default([]) @map("unified_tags") // Merged tags from all linked platforms
 
   // iGaming Intelligence Fields
   igamingIntelligence   Json? @map("igaming_intelligence")
@@ -126,6 +136,9 @@ model Streamer {
   @@index([engagementRate(sort: Desc)])
   @@index([primaryCategory])
   @@index([lastScrapedAt(sort: Desc)])
+  @@index([inferredCountry])
+  @@index([syncTier])
+  @@index([socialSyncedAt(sort: Asc)])
   @@map("discovery_creators")
 }
 
@@ -445,6 +458,13 @@ enum SyncStatus {
   FAILED
 }
 
+enum SyncTier {
+  HOT      // Currently live OR >10k avg viewers - sync every 5 min
+  ACTIVE   // Posted in last 7 days OR >1k followers - sync every 30 min
+  STANDARD // Posted in last 30 days - sync every 2 hours
+  COLD     // No activity 30+ days - sync every 24 hours
+}
+
 // Unified Influencer Profile - One row per person, all platforms linked
 model Influencer {
   id            String   @id @default(cuid())
@@ -452,9 +472,10 @@ model Influencer {
   // === UNIFIED IDENTITY ===
   displayName   String                          // Primary display name
   country       String?                         // ISO country code (US, MX, BR, etc.)
+  countrySource String? @map("country_source")  // Platform that provided country (YOUTUBE, TWITCH, etc.)
   language      String?                         // Primary language
   primaryCategory String? @map("primary_category") // Gaming, IRL, Music, etc.
-  tags          String[] @default([])
+  tags          String[] @default([])           // Merged tags from all linked platforms
 
   // === TWITCH ===
   twitchId          String?   @unique @map("twitch_id")
@@ -616,4 +637,21 @@ model CampaignPerformance {
   streamer Streamer         @relation(fields: [streamerId], references: [id], onDelete: Cascade)
 
   @@map("discovery_campaign_performance")
+}
+
+// API Usage Tracking - Credit monitoring across projects
+model ApiUsage {
+  id          String   @id @default(cuid())
+  provider    String   // 'scrapecreators', 'youtube', 'twitch', 'kick'
+  endpoint    String?  // Specific endpoint called
+  creditsUsed Int      @default(1) @map("credits_used")
+  project     String   // 'discovery', 'redtrack-api'
+  success     Boolean  @default(true)
+  errorCode   String?  @map("error_code")
+  recordedAt  DateTime @default(now()) @map("recorded_at")
+
+  @@index([provider, recordedAt(sort: Desc)])
+  @@index([project, recordedAt(sort: Desc)])
+  @@index([recordedAt(sort: Desc)])
+  @@map("api_usage")
 }

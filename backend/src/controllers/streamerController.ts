@@ -217,6 +217,10 @@ export class StreamerController {
             lastScrapedAt: true,
             lastStreamed: true,
             lastSeenLive: true,
+            // Cross-platform unified demographics
+            inferredCountry: true,
+            inferredCountrySource: true,
+            unifiedTags: true,
           },
         }),
         db.streamer.count({ where }),
