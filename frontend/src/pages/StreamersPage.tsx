@@ -359,17 +359,12 @@ const StreamersPage: React.FC = () => {
                   value={categoryFilter}
                   onChange={(e) => { setPage(1); setCategoryFilter(e.target.value); }}
                   className="appearance-none px-3 py-1.5 pr-8 rounded-lg text-xs font-semibold bg-gray-800/60 text-gray-300 border border-gray-700 hover:bg-gray-700/60 focus:outline-none focus:ring-1 focus:ring-primary-500 cursor-pointer"
-                  style={{ minWidth: '110px' }}
+                  style={{ minWidth: '100px' }}
                 >
-                  <option value="">All Categories</option>
+                  <option value="">All</option>
                   <option value="Gaming">Gaming</option>
                   <option value="iGaming">iGaming</option>
                   <option value="IRL">IRL</option>
-                  <option value="Music">Music</option>
-                  <option value="Creative">Creative</option>
-                  <option value="Sports">Sports</option>
-                  <option value="Education">Education</option>
-                  <option value="Variety">Variety</option>
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                   <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
