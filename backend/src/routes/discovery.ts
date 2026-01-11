@@ -3,6 +3,7 @@ import { asyncHandler } from '../middleware/errorHandler';
 import { db, logger } from '../utils/database';
 import { Platform, Region, FraudStatus } from '@prisma/client';
 import { discoveryService } from '../services/discoveryService';
+import { runDiscovery, runQuickDiscovery, runFullDiscovery } from '../jobs/discoveryJob';
 import multer from 'multer';
 import { parse } from 'csv-parse/sync';
 
@@ -464,6 +465,48 @@ function getRecommendationReasons(creator: any, campaignType?: string): string[]
 }
 
 // ==================== DISCOVERY ENDPOINTS ====================
+
+/**
+ * POST /api/discovery/populate
+ * Run multi-category discovery to populate new creators (Twitch + Kick)
+ * Categories: Slots, Poker, Just Chatting, Sports, Gaming, etc.
+ */
+router.post('/populate', asyncHandler(async (req: Request, res: Response) => {
+  const { mode = 'quick', platforms, limitPerCategory = 100 } = req.body;
+
+  logger.info('Discovery populate requested', { mode, platforms, limitPerCategory });
+
+  let result;
+
+  switch (mode) {
+    case 'quick':
+      // Priority categories only (Slots, Poker, Just Chatting)
+      result = await runQuickDiscovery();
+      break;
+    case 'full':
+      // All categories
+      result = await runFullDiscovery();
+      break;
+    case 'custom':
+      // Custom options
+      result = await runDiscovery({
+        platforms: platforms || ['twitch', 'kick'],
+        priorityOnly: false,
+        limitPerCategory,
+      });
+      break;
+    default:
+      return res.status(400).json({ success: false, error: 'Invalid mode. Use: quick, full, or custom' });
+  }
+
+  res.json({
+    success: true,
+    data: {
+      ...result,
+      mode,
+    }
+  });
+}));
 
 /**
  * POST /api/discovery/run

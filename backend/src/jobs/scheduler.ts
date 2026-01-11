@@ -6,6 +6,7 @@ import { TwitchScraper } from '../scrapers/twitchScraper';
 import { YouTubeScraper } from '../scrapers/youtubeScraper';
 import { KickScraper } from '../scrapers/kickScraper';
 import { syncOptimization } from '../services/syncOptimizationService';
+import { runDiscovery, runQuickDiscovery, runFullDiscovery } from './discoveryJob';
 
 const scrapingQueue = new ScrapingJobQueue();
 let healthCheckScrapers: {
@@ -234,7 +235,48 @@ export const startScheduledJobs = async () => {
     }
   });
 
-  logger.info('Scheduled jobs initialized (with tiered sync optimization)');
+  // ============================================
+  // DISCOVERY JOBS - Find NEW creators
+  // ============================================
+
+  // Quick discovery every 2 hours - priority categories (Slots, Poker, Just Chatting)
+  cron.schedule('15 */2 * * *', async () => {
+    try {
+      logger.info('Starting quick discovery (priority categories)...');
+      const result = await runQuickDiscovery();
+      logger.info('Quick discovery complete', result);
+    } catch (error) {
+      logger.error('Error in quick discovery:', error);
+    }
+  });
+
+  // Full discovery every 6 hours - all categories
+  cron.schedule('45 */6 * * *', async () => {
+    try {
+      logger.info('Starting full discovery (all categories)...');
+      const result = await runFullDiscovery();
+      logger.info('Full discovery complete', result);
+    } catch (error) {
+      logger.error('Error in full discovery:', error);
+    }
+  });
+
+  // iGaming-focused discovery every 4 hours - specifically Slots/Poker/Gambling
+  cron.schedule('30 */4 * * *', async () => {
+    try {
+      logger.info('Starting iGaming discovery...');
+      const result = await runDiscovery({
+        platforms: ['twitch', 'kick'],
+        priorityOnly: true, // Only priority=1 categories (Slots, Poker, Gambling)
+        limitPerCategory: 100,
+      });
+      logger.info('iGaming discovery complete', result);
+    } catch (error) {
+      logger.error('Error in iGaming discovery:', error);
+    }
+  });
+
+  logger.info('Scheduled jobs initialized (with tiered sync + discovery)');
 };
 
 const performHealthCheck = async (): Promise<void> => {

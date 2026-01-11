@@ -77,6 +77,8 @@ model Streamer {
   // Inferred Demographics (from cross-platform unification)
   inferredCountry       String?  @map("inferred_country")       // ISO code inferred from linked profiles
   inferredCountrySource String?  @map("inferred_country_source") // Platform that provided the country (e.g., "YOUTUBE", "TWITCH")
+  inferredCategory      String?  @map("inferred_category")       // Category inferred from game/content (Gaming, iGaming, IRL, etc.)
+  inferredCategorySource String? @map("inferred_category_source") // Platform that provided the category
   unifiedTags           String[] @default([]) @map("unified_tags") // Merged tags from all linked platforms
 
   // iGaming Intelligence Fields
@@ -134,6 +136,7 @@ model Streamer {
   @@index([primaryCategory])
   @@index([lastScrapedAt(sort: Desc)])
   @@index([inferredCountry])
+  @@index([inferredCategory])
   @@index([syncTier])
   @@index([socialSyncedAt(sort: Asc)])
   @@map("discovery_creators")

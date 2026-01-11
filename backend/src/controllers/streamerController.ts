@@ -60,12 +60,18 @@ export class StreamerController {
         where.region = { in: regions };
       }
 
-      // Multi-category filter (primaryCategory or currentGame)
+      // Multi-category filter - uses inferredCategory which properly maps games to categories
+      // e.g., "Gaming" includes all video games, "iGaming" includes slots/casino
       if (categories && categories.length > 0) {
-        where.OR = [
-          ...(where.OR || []),
-          { primaryCategory: { in: categories, mode: 'insensitive' } },
-          { currentGame: { in: categories, mode: 'insensitive' } },
+        // Use AND with OR for category matching (doesn't conflict with other OR clauses)
+        where.AND = [
+          ...(where.AND || []),
+          {
+            OR: [
+              { inferredCategory: { in: categories, mode: 'insensitive' } },
+              { primaryCategory: { in: categories, mode: 'insensitive' } },
+            ]
+          }
         ];
       }
 
@@ -220,6 +226,8 @@ export class StreamerController {
             // Cross-platform unified demographics
             inferredCountry: true,
             inferredCountrySource: true,
+            inferredCategory: true,
+            inferredCategorySource: true,
             unifiedTags: true,
           },
         }),

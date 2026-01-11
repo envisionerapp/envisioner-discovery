@@ -503,8 +503,7 @@ export class IGamingIntelligenceService {
             ctr: this.predictCTR(intelligence, score),
             conversionRate: this.predictConversions(intelligence, score),
             roi: this.predictROI(intelligence, score)
-          } as any,
-          lastIntelligenceUpdate: new Date()
+          } as any
         }
       });
     } catch (error) {

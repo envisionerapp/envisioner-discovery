@@ -4,6 +4,7 @@ import { TwitchScraper } from '../scrapers/twitchScraper';
 import { YouTubeScraper } from '../scrapers/youtubeScraper';
 import { KickScraper } from '../scrapers/kickScraper';
 import { Platform, Streamer } from '@prisma/client';
+import { inferCategory } from '../utils/categoryMapper';
 
 interface ScrapingJobData {
   platform?: Platform;
@@ -413,6 +414,17 @@ export class ScrapingJobQueue {
           streamerRecord.inferredCountry = streamerData.countryCode;
           streamerRecord.inferredCountrySource = 'YOUTUBE';
         }
+
+        // Infer category from game/content - this makes "Gaming" cover all games
+        const category = inferCategory(
+          streamerData.currentGame,
+          streamerData.topGames,
+          streamerData.tags,
+          streamerData.description
+        );
+        streamerRecord.primaryCategory = category;
+        streamerRecord.inferredCategory = category;
+        streamerRecord.inferredCategorySource = platform;
 
         if (existingStreamer) {
           await db.streamer.update({

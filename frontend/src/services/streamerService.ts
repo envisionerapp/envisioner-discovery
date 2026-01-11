@@ -30,6 +30,7 @@ class StreamerService {
     search?: string;
     platform?: string;
     region?: string;
+    category?: string;  // Category filter (Gaming, iGaming, IRL, Music, etc.)
     favoritesOnly?: boolean;
     discardedOnly?: boolean;
     userId?: string;
@@ -47,6 +48,9 @@ class StreamerService {
       isLive: boolean;
       region: string;
       language: string;
+      inferredCountry?: string | null;
+      inferredCategory?: string | null;
+      primaryCategory?: string | null;
       updatedAt: string;
     }>;
     pagination: { page: number; limit: number; total: number; totalPages: number };
@@ -59,6 +63,7 @@ class StreamerService {
     if (params?.search) query.append('search', params.search);
     if (params?.platform) query.append('platforms', params.platform);
     if (params?.region) query.append('regions', params.region);
+    if (params?.category) query.append('categories', params.category);
     if (params?.favoritesOnly) query.append('favoritesOnly', 'true');
     if (params?.discardedOnly) query.append('discardedOnly', 'true');
     if (params?.userId) query.append('userId', params.userId);

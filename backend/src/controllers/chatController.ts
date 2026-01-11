@@ -184,7 +184,6 @@ export class ChatController {
               roi: analysis.campaignPredictions.predictedROI
             },
             gamblingCompatibility: analysis.overallScore >= 60,
-            lastIntelligenceUpdate: new Date(),
             riskAssessment: {
               score: analysis.overallScore,
               tier: analysis.tier,

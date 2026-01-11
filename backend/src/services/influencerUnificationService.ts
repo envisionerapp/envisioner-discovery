@@ -14,9 +14,12 @@ interface StreamerData {
   tags: string[];
   socialLinks: any;
   primaryCategory: string | null;
+  currentGame: string | null;
   // Cross-platform demographics
   inferredCountry: string | null;
   inferredCountrySource: string | null;
+  inferredCategory: string | null;
+  inferredCategorySource: string | null;
 }
 
 interface UnifiedInfluencer {
@@ -25,6 +28,7 @@ interface UnifiedInfluencer {
   countrySource: string | null;  // Platform that provided the country (YOUTUBE, TWITCH, etc.)
   language: string | null;
   primaryCategory: string | null;
+  categorySource: string | null;  // Platform that provided the category
   tags: string[];  // Merged from all linked platforms
   sourceStreamerIds: string[];
 
@@ -186,17 +190,16 @@ export class InfluencerUnificationService {
   }
 
   /**
-   * Backfill inferred country and unified tags to source streamers
-   * This propagates YouTube's country data to linked Twitch/Kick/social accounts
+   * Backfill inferred demographics (country, category, tags) to source streamers
+   * This propagates data from platforms with better sources to linked accounts
    */
   async backfillInferredCountry(unifiedProfiles: UnifiedInfluencer[]): Promise<{ updated: number }> {
     let updated = 0;
 
     for (const unified of unifiedProfiles) {
-      if (!unified.country || !unified.countrySource) continue;
+      // Skip if no useful data to propagate
+      if (!unified.country && !unified.primaryCategory) continue;
 
-      // Get all source streamer IDs that don't have inferredCountry
-      // or have a lower-priority source
       for (const streamerId of unified.sourceStreamerIds) {
         try {
           const streamer = await db.streamer.findUnique({
@@ -205,25 +208,51 @@ export class InfluencerUnificationService {
               id: true,
               inferredCountry: true,
               inferredCountrySource: true,
+              inferredCategory: true,
+              inferredCategorySource: true,
             }
           });
 
           if (!streamer) continue;
 
-          // Update if streamer doesn't have inferred country, or if unified has a better source
-          const currentPriority = streamer.inferredCountrySource
-            ? (this.COUNTRY_SOURCE_PRIORITY[streamer.inferredCountrySource] || 0)
-            : -1;
-          const newPriority = this.COUNTRY_SOURCE_PRIORITY[unified.countrySource] || 0;
+          const updateData: Record<string, any> = {
+            unifiedTags: unified.tags,
+          };
+          let shouldUpdate = false;
 
-          if (!streamer.inferredCountry || newPriority > currentPriority) {
+          // Check if we should update country
+          if (unified.country && unified.countrySource) {
+            const currentCountryPriority = streamer.inferredCountrySource
+              ? (this.COUNTRY_SOURCE_PRIORITY[streamer.inferredCountrySource] || 0)
+              : -1;
+            const newCountryPriority = this.COUNTRY_SOURCE_PRIORITY[unified.countrySource] || 0;
+
+            if (!streamer.inferredCountry || newCountryPriority > currentCountryPriority) {
+              updateData.inferredCountry = unified.country;
+              updateData.inferredCountrySource = unified.countrySource;
+              shouldUpdate = true;
+            }
+          }
+
+          // Check if we should update category
+          if (unified.primaryCategory && unified.categorySource) {
+            const currentCategoryPriority = streamer.inferredCategorySource
+              ? (this.CATEGORY_SOURCE_PRIORITY[streamer.inferredCategorySource] || 0)
+              : -1;
+            const newCategoryPriority = this.CATEGORY_SOURCE_PRIORITY[unified.categorySource] || 0;
+
+            if (!streamer.inferredCategory || newCategoryPriority > currentCategoryPriority) {
+              updateData.inferredCategory = unified.primaryCategory;
+              updateData.inferredCategorySource = unified.categorySource;
+              updateData.primaryCategory = unified.primaryCategory; // Also update primaryCategory
+              shouldUpdate = true;
+            }
+          }
+
+          if (shouldUpdate || unified.tags.length > 0) {
             await db.streamer.update({
               where: { id: streamerId },
-              data: {
-                inferredCountry: unified.country,
-                inferredCountrySource: unified.countrySource,
-                unifiedTags: unified.tags,
-              }
+              data: updateData
             });
             updated++;
           }
@@ -288,6 +317,55 @@ export class InfluencerUnificationService {
   }
 
   /**
+   * Category source priority (higher = more reliable)
+   * Streaming platforms are more reliable as they have game/category data
+   */
+  private readonly CATEGORY_SOURCE_PRIORITY: Record<string, number> = {
+    'TWITCH': 100,     // Has actual game categories from API
+    'KICK': 90,        // Has category data
+    'YOUTUBE': 80,     // Has some category info
+    'TIKTOK': 40,      // Social platform - less reliable
+    'INSTAGRAM': 30,
+    'X': 30,
+    'FACEBOOK': 30,
+    'LINKEDIN': 20,
+  };
+
+  /**
+   * Get the best category from all linked streamers
+   * Prioritizes streaming platforms that have actual game/category data
+   */
+  private getBestCategory(streamers: StreamerData[]): { category: string | null; source: string | null } {
+    let bestCategory: string | null = null;
+    let bestSource: string | null = null;
+    let bestPriority = -1;
+
+    for (const streamer of streamers) {
+      // Check if streamer has inferred category
+      if (streamer.inferredCategory && streamer.inferredCategorySource) {
+        const priority = this.CATEGORY_SOURCE_PRIORITY[streamer.inferredCategorySource] || 0;
+        if (priority > bestPriority) {
+          bestCategory = streamer.inferredCategory;
+          bestSource = streamer.inferredCategorySource;
+          bestPriority = priority;
+        }
+      }
+
+      // Fall back to primaryCategory
+      if (streamer.primaryCategory) {
+        const priority = this.CATEGORY_SOURCE_PRIORITY[streamer.platform] || 0;
+        if (priority > bestPriority) {
+          bestCategory = streamer.primaryCategory;
+          bestSource = streamer.platform;
+          bestPriority = priority;
+        }
+      }
+    }
+
+    return { category: bestCategory, source: bestSource };
+  }
+
+  /**
    * Merge tags from all linked streamers (deduplicated)
    */
   private mergeTags(streamers: StreamerData[]): string[] {
@@ -346,6 +424,9 @@ export class InfluencerUnificationService {
     // Get best country from all linked profiles (prioritizes YouTube API data)
     const { country, source: countrySource } = this.getBestCountry(linkedStreamers);
 
+    // Get best category from all linked profiles (prioritizes streaming platforms)
+    const { category, source: categorySource } = this.getBestCategory(linkedStreamers);
+
     // Merge tags from all linked platforms
     const mergedTags = this.mergeTags(linkedStreamers);
 
@@ -354,7 +435,8 @@ export class InfluencerUnificationService {
       country,
       countrySource,
       language: baseStreamer.language,
-      primaryCategory: baseStreamer.primaryCategory,
+      primaryCategory: category,
+      categorySource,
       tags: mergedTags,
       sourceStreamerIds: linkedStreamers.map(s => s.id),
     };
