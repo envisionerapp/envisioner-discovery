@@ -116,7 +116,6 @@ export async function uploadTikTokAvatar(username: string, avatarUrl: string): P
 
 /**
  * Upload LinkedIn avatar to Bunny CDN
- * Attempts to fetch higher resolution image by modifying LinkedIn CDN URL
  */
 export async function uploadLinkedInAvatar(username: string, avatarUrl: string): Promise<string> {
   if (!avatarUrl || !isConfigured()) {
@@ -127,22 +126,8 @@ export async function uploadLinkedInAvatar(username: string, avatarUrl: string):
     return avatarUrl;
   }
 
-  // Try to get higher resolution by modifying LinkedIn CDN URL
-  // LinkedIn URLs contain size like: profile-displayphoto-shrink_200_200
-  let highResUrl = avatarUrl;
-  if (avatarUrl.includes('licdn.com')) {
-    highResUrl = avatarUrl.replace(/shrink_\d+_\d+/, 'shrink_800_800');
-  }
-
   const path = `avatars/linkedin/${username.toLowerCase()}.jpg`;
-
-  // Try high-res first
-  let cdnUrl = await uploadFromUrl(highResUrl, path);
-
-  // If high-res fails, try original URL
-  if (!cdnUrl && highResUrl !== avatarUrl) {
-    cdnUrl = await uploadFromUrl(avatarUrl, path);
-  }
+  const cdnUrl = await uploadFromUrl(avatarUrl, path);
 
   return cdnUrl || avatarUrl;
 }
