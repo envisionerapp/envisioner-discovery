@@ -554,7 +554,7 @@ async function upsertFacebookPage(pageId: string, pageName: string, source: stri
         username: profile?.username || pageId,
         displayName: profile?.name || pageName,
         profileUrl: `https://facebook.com/${profile?.username || pageId}`,
-        avatarUrl: profile?.image,
+        avatarUrl: profile?.profile_pic_url,
         followers: profile?.follower_count || 0,
         totalLikes: BigInt(profile?.likes_count || 0),
         profileDescription: profile?.about,
