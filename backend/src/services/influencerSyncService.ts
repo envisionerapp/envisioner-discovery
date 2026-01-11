@@ -1,5 +1,7 @@
 import { db, logger } from '../utils/database';
 import { Platform } from '@prisma/client';
+import { scrapeCreatorsService } from './scrapeCreatorsService';
+import { bunnyService } from './bunnyService';
 
 interface ExternalInfluencer {
   id: number;
@@ -54,7 +56,22 @@ export class InfluencerSyncService {
   /**
    * Sync all influencers from the external table to discovery_creators
    */
-  async syncInfluencersToDiscovery(): Promise<{
+  
+  private async enrichLinkedIn(username: string, fallback: { thumbnail?: string | null; displayName?: string }) {
+    try {
+      const profile = await scrapeCreatorsService.getLinkedInProfile(username);
+      if (profile) {
+        const followers = profile.followers || profile.follower_count || 0;
+        let avatarUrl = profile.image;
+        if (avatarUrl) { try { avatarUrl = await bunnyService.uploadLinkedInAvatar(username, avatarUrl); } catch (e) {} }
+        logger.info(`🔗 Enriched LinkedIn ${username}: ${followers.toLocaleString()} followers`);
+        return { followers, avatarUrl: avatarUrl || fallback.thumbnail, displayName: profile.name || fallback.displayName || username, profileDescription: profile.headline || profile.about };
+      }
+    } catch (e) {}
+    return { followers: 0, avatarUrl: fallback.thumbnail, displayName: fallback.displayName || username };
+  }
+
+async syncInfluencersToDiscovery(): Promise<{
     synced: number;
     skipped: number;
     errors: number;
@@ -138,14 +155,21 @@ export class InfluencerSyncService {
           // Use stats_updated_at as proxy for last activity
           const lastActiveDate = inf.stats_updated_at ? new Date(inf.stats_updated_at) : null;
 
+          // Auto-enrich LinkedIn profiles with followers/avatar from API
+          let enriched: any = {};
+          if (platform === Platform.LINKEDIN) {
+            enriched = await this.enrichLinkedIn(username, { thumbnail: inf.thumbnail, displayName: inf.influencer || inf.clean_name });
+          }
+
           await db.streamer.create({
             data: {
               platform,
               username: username.toLowerCase(),
-              displayName: inf.influencer || inf.clean_name || username,
-              avatarUrl: inf.thumbnail,
+              displayName: enriched.displayName || inf.influencer || inf.clean_name || username,
+              avatarUrl: enriched.avatarUrl || inf.thumbnail,
               profileUrl: inf.channel_url || '',
-              followers: inf.subscribers || 0,
+              followers: enriched.followers || inf.subscribers || 0,
+              profileDescription: enriched.profileDescription,
               totalViews: inf.views ? BigInt(inf.views) : BigInt(0),
               region: 'WORLDWIDE',
               language: 'es',
