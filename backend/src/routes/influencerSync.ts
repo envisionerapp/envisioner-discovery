@@ -1,6 +1,8 @@
 import express from 'express';
 import { influencerSyncService } from '../services/influencerSyncService';
 import { enrichLinkedInProfiles } from '../jobs/linkedinEnrichJob';
+import { db } from '../utils/database';
+import { Platform } from '@prisma/client';
 
 const router = express.Router();
 
@@ -46,6 +48,36 @@ router.post('/enrich-linkedin', async (req, res) => {
       success: true,
       message: 'LinkedIn enrichment completed',
       data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+// Debug endpoint to check LinkedIn profiles
+router.get('/debug-linkedin', async (req, res) => {
+  try {
+    const allLinkedIn = await db.streamer.count({
+      where: { platform: Platform.LINKEDIN }
+    });
+    const needsEnrich = await db.streamer.findMany({
+      where: {
+        platform: Platform.LINKEDIN,
+        lastScrapedAt: null,
+      },
+      select: { id: true, username: true, followers: true, lastScrapedAt: true },
+      take: 5,
+    });
+    res.json({
+      success: true,
+      data: {
+        totalLinkedIn: allLinkedIn,
+        needsEnrichCount: needsEnrich.length,
+        samples: needsEnrich,
+      },
     });
   } catch (error: any) {
     res.status(500).json({
