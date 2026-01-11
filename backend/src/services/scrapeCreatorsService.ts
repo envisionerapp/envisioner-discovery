@@ -354,8 +354,14 @@ export class ScrapeCreatorsService {
       const response = await this.client.get('/v1/instagram/profile', {
         params: { handle: handle.replace('@', '') }
       });
+      // Debug: log the full API response structure
+      logger.info(`Instagram API response keys: ${JSON.stringify(Object.keys(response.data || {}))}`);
+
       const raw = response.data?.data || response.data?.user || response.data;
       if (!raw) return null;
+
+      logger.info(`Instagram raw object keys: ${JSON.stringify(Object.keys(raw))}`);
+      logger.info(`Instagram edge_followed_by: ${JSON.stringify(raw.edge_followed_by)}`);
 
       // Map Instagram's native GraphQL structure to our interface
       // Native fields: edge_followed_by.count, edge_follow.count, edge_owner_to_timeline_media.count
@@ -698,6 +704,12 @@ export class ScrapeCreatorsService {
 
   private async upsertStreamer(platform: Platform, profile: SocialProfile, sourceStreamerId?: string): Promise<void> {
     const data = this.mapProfileToStreamer(platform, profile);
+
+    // Skip if no username (API returned incomplete data)
+    if (!data.username) {
+      logger.warn(`Skipping ${platform} profile - no username in API response`);
+      return;
+    }
 
     await db.streamer.upsert({
       where: {
