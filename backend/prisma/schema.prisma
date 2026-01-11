@@ -75,6 +75,9 @@ model Streamer {
   // Content Category
   primaryCategory String? @map("primary_category")
 
+  // Country code from API (YouTube, etc.)
+  countryCode           String?  @map("country_code")            // Direct ISO country code from platform API
+
   // Inferred Demographics (from cross-platform unification)
   inferredCountry       String?  @map("inferred_country")       // ISO code inferred from linked profiles
   inferredCountrySource String?  @map("inferred_country_source") // Platform that provided the country (e.g., "YOUTUBE", "TWITCH")

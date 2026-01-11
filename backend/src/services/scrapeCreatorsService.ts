@@ -159,7 +159,7 @@ export class ScrapeCreatorsService {
     }
   }
 
-  // ==================== SEARCH ENDPOINTS (for smart matching) ====================
+  // ==================== SEARCH/DISCOVERY ENDPOINTS ====================
 
   async searchTikTokUsers(query: string): Promise<TikTokSearchResult[]> {
     try {
@@ -171,6 +171,170 @@ export class ScrapeCreatorsService {
       return response.data?.user_list || [];
     } catch (error: any) {
       logger.error(`TikTok search failed for "${query}":`, error.response?.data || error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Search TikTok by hashtag - finds videos/creators using a hashtag
+   */
+  async searchTikTokByHashtag(hashtag: string): Promise<any[]> {
+    try {
+      if (!await this.ensureApiKey()) return [];
+
+      const response = await this.client.get('/v1/tiktok/search/hashtag', {
+        params: { hashtag: hashtag.replace('#', '') }
+      });
+      return response.data?.videos || response.data?.data || [];
+    } catch (error: any) {
+      logger.error(`TikTok hashtag search failed for "${hashtag}":`, error.response?.data || error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get TikTok trending feed - discover trending creators
+   */
+  async getTikTokTrending(): Promise<any[]> {
+    try {
+      if (!await this.ensureApiKey()) return [];
+
+      const response = await this.client.get('/v1/tiktok/trending');
+      return response.data?.videos || response.data?.data || [];
+    } catch (error: any) {
+      logger.error(`TikTok trending failed:`, error.response?.data || error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get TikTok popular creators
+   */
+  async getTikTokPopularCreators(): Promise<any[]> {
+    try {
+      if (!await this.ensureApiKey()) return [];
+
+      const response = await this.client.get('/v1/tiktok/popular/creators');
+      return response.data?.creators || response.data?.data || [];
+    } catch (error: any) {
+      logger.error(`TikTok popular creators failed:`, error.response?.data || error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Search YouTube channels/videos
+   */
+  async searchYouTube(query: string, type: 'channel' | 'video' = 'channel'): Promise<any[]> {
+    try {
+      if (!await this.ensureApiKey()) return [];
+
+      const response = await this.client.get('/v1/youtube/search', {
+        params: { query, type }
+      });
+      return response.data?.results || response.data?.data || [];
+    } catch (error: any) {
+      logger.error(`YouTube search failed for "${query}":`, error.response?.data || error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Search YouTube by hashtag
+   */
+  async searchYouTubeByHashtag(hashtag: string): Promise<any[]> {
+    try {
+      if (!await this.ensureApiKey()) return [];
+
+      const response = await this.client.get('/v1/youtube/search/hashtag', {
+        params: { hashtag: hashtag.replace('#', '') }
+      });
+      return response.data?.videos || response.data?.data || [];
+    } catch (error: any) {
+      logger.error(`YouTube hashtag search failed for "${hashtag}":`, error.response?.data || error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get YouTube trending shorts
+   */
+  async getYouTubeTrendingShorts(): Promise<any[]> {
+    try {
+      if (!await this.ensureApiKey()) return [];
+
+      const response = await this.client.get('/v1/youtube/trending/shorts');
+      return response.data?.shorts || response.data?.data || [];
+    } catch (error: any) {
+      logger.error(`YouTube trending shorts failed:`, error.response?.data || error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Get YouTube channel details
+   */
+  async getYouTubeChannel(channelId: string): Promise<any> {
+    try {
+      if (!await this.ensureApiKey()) return null;
+
+      const response = await this.client.get('/v1/youtube/channel', {
+        params: { id: channelId }
+      });
+      return response.data?.channel || response.data?.data || response.data;
+    } catch (error: any) {
+      logger.error(`YouTube channel failed for ${channelId}:`, error.response?.data || error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Search Instagram Reels by keyword (uses Google search)
+   */
+  async searchInstagramReels(query: string): Promise<any[]> {
+    try {
+      if (!await this.ensureApiKey()) return [];
+
+      const response = await this.client.get('/v1/instagram/search/reels', {
+        params: { query }
+      });
+      return response.data?.reels || response.data?.data || [];
+    } catch (error: any) {
+      logger.error(`Instagram reels search failed for "${query}":`, error.response?.data || error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Search Facebook Ad Library - find advertisers
+   */
+  async searchFacebookAds(query: string, country: string = 'US'): Promise<any[]> {
+    try {
+      if (!await this.ensureApiKey()) return [];
+
+      const response = await this.client.get('/v1/facebook/ads/search', {
+        params: { query, country }
+      });
+      return response.data?.ads || response.data?.data || [];
+    } catch (error: any) {
+      logger.error(`Facebook ads search failed for "${query}":`, error.response?.data || error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Search LinkedIn Ad Library - find B2B advertisers
+   */
+  async searchLinkedInAds(query: string): Promise<any[]> {
+    try {
+      if (!await this.ensureApiKey()) return [];
+
+      const response = await this.client.get('/v1/linkedin/ads/search', {
+        params: { query }
+      });
+      return response.data?.ads || response.data?.data || [];
+    } catch (error: any) {
+      logger.error(`LinkedIn ads search failed for "${query}":`, error.response?.data || error.message);
       return [];
     }
   }

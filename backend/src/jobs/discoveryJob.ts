@@ -9,6 +9,8 @@
 
 import { db, logger } from '../utils/database';
 import { Platform, Region } from '@prisma/client';
+import { dedupCache, ensureDedupCache } from '../utils/discoveryDeduplication';
+import { inferCategory } from '../utils/categoryMapper';
 import { getConfig } from '../utils/configFromDb';
 
 // Twitch API config - loaded from env or database
@@ -55,12 +57,29 @@ const DISCOVERY_CATEGORIES = {
     { id: '116747788', name: 'Pools, Hot Tubs, and Beaches', priority: 3 },
   ],
   kick: [
+    // iGaming Core (Priority 1)
     { slug: 'slots', name: 'Slots', priority: 1 },
     { slug: 'gambling', name: 'Gambling', priority: 1 },
-    { slug: 'just-chatting', name: 'Just Chatting', priority: 1 },
     { slug: 'poker', name: 'Poker', priority: 1 },
-    { slug: 'sports', name: 'Sports', priority: 2 },
+    { slug: 'blackjack', name: 'Blackjack', priority: 1 },
+    { slug: 'roulette', name: 'Roulette', priority: 1 },
+    { slug: 'sports-betting', name: 'Sports Betting', priority: 1 },
+    // High Traffic (Priority 2)
+    { slug: 'just-chatting', name: 'Just Chatting', priority: 2 },
     { slug: 'irl', name: 'IRL', priority: 2 },
+    { slug: 'sports', name: 'Sports', priority: 2 },
+    { slug: 'gaming', name: 'Gaming', priority: 2 },
+    // Gaming Categories (Priority 3)
+    { slug: 'fortnite', name: 'Fortnite', priority: 3 },
+    { slug: 'call-of-duty', name: 'Call of Duty', priority: 3 },
+    { slug: 'gta-v', name: 'GTA V', priority: 3 },
+    { slug: 'valorant', name: 'Valorant', priority: 3 },
+    { slug: 'league-of-legends', name: 'League of Legends', priority: 3 },
+    { slug: 'minecraft', name: 'Minecraft', priority: 3 },
+    { slug: 'apex-legends', name: 'Apex Legends', priority: 3 },
+    { slug: 'fifa', name: 'FIFA', priority: 3 },
+    { slug: 'cs2', name: 'Counter-Strike 2', priority: 3 },
+    { slug: 'music', name: 'Music', priority: 3 },
   ],
 };
 
@@ -240,28 +259,22 @@ async function discoverTwitchCategory(
 }
 
 /**
- * Discover streamers from Kick categories
+ * Discover streamers from Kick categories with pagination
  */
 async function discoverKickCategory(
   categorySlug: string,
   categoryName: string,
-  limit: number = 50
+  maxStreamers: number = 200
 ): Promise<number> {
-  try {
-    const response = await fetch(
-      `${KICK_API}/channels?category=${categorySlug}&sort=viewers&limit=${limit}`,
-      {
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        },
-      }
-    );
+  let totalCreated = 0;
+  const pageSize = 50;
+  const maxPages = Math.ceil(maxStreamers / pageSize);
 
-    if (!response.ok) {
-      // Try alternative endpoint
-      const altResponse = await fetch(
-        `https://kick.com/api/v1/subcategories/${categorySlug}/livestreams?page=1&limit=${limit}`,
+  for (let page = 1; page <= maxPages; page++) {
+    try {
+      // Try primary endpoint first
+      let response = await fetch(
+        `${KICK_API}/channels?category=${categorySlug}&sort=viewers&limit=${pageSize}&page=${page}`,
         {
           headers: {
             'Accept': 'application/json',
@@ -270,21 +283,49 @@ async function discoverKickCategory(
         }
       );
 
-      if (!altResponse.ok) {
-        logger.warn(`Kick API unavailable for ${categoryName}`);
-        return 0;
+      // Fallback to alternative endpoint
+      if (!response.ok) {
+        response = await fetch(
+          `https://kick.com/api/v1/subcategories/${categorySlug}/livestreams?page=${page}&limit=${pageSize}`,
+          {
+            headers: {
+              'Accept': 'application/json',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          if (page === 1) {
+            logger.warn(`Kick API unavailable for ${categoryName}`);
+          }
+          break;
+        }
       }
 
-      const altData: any = await altResponse.json();
-      return await processKickStreams(altData.data || [], categoryName);
-    }
+      const data: any = await response.json();
+      const streams = data.data || data || [];
 
-    const data: any = await response.json();
-    return await processKickStreams(data.data || data || [], categoryName);
-  } catch (error) {
-    logger.error(`Error discovering Kick ${categoryName}:`, error);
-    return 0;
+      if (streams.length === 0) break;
+
+      const created = await processKickStreams(streams, categoryName);
+      totalCreated += created;
+
+      // If we got fewer results than requested, no more pages
+      if (streams.length < pageSize) break;
+
+      // Rate limit delay between pages
+      await new Promise(r => setTimeout(r, 1500));
+    } catch (error) {
+      logger.error(`Error discovering Kick ${categoryName} page ${page}:`, error);
+      break;
+    }
   }
+
+  if (totalCreated > 0) {
+    logger.info(`Discovered ${totalCreated} new Kick streamers from ${categoryName}`);
+  }
+  return totalCreated;
 }
 
 async function processKickStreams(streams: any[], categoryName: string): Promise<number> {
@@ -296,19 +337,19 @@ async function processKickStreams(streams: any[], categoryName: string): Promise
 
     if (!username) continue;
 
-    // Check if already exists
-    const existing = await db.streamer.findUnique({
-      where: {
-        platform_username: {
-          platform: Platform.KICK,
-          username,
-        },
-      },
-    });
+    // Quick check against dedup cache (much faster than DB query)
+    if (dedupCache.isInitialized() && dedupCache.exists(Platform.KICK, username)) {
+      continue;
+    }
 
-    if (existing) continue;
+    // Quality filter - minimum 200 followers
+    const followers = channel.followers_count || channel.followersCount || 0;
+    if (followers < 200) continue;
 
     try {
+      const gameName = stream.category?.name || categoryName;
+      const category = inferCategory(gameName, [], []);
+
       await db.streamer.create({
         data: {
           platform: Platform.KICK,
@@ -316,13 +357,17 @@ async function processKickStreams(streams: any[], categoryName: string): Promise
           displayName: channel.user?.username || username,
           profileUrl: `https://kick.com/${username}`,
           avatarUrl: channel.user?.profile_pic || channel.thumbnail?.url,
-          followers: channel.followers_count || channel.followersCount || 0,
+          followers,
           currentViewers: stream.viewer_count || stream.viewers || 0,
           isLive: true,
-          currentGame: stream.category?.name || categoryName,
+          currentGame: gameName,
           language: channel.language || 'en',
-          region: 'OTHER' as Region,
+          region: Region.OTHER,
           tags: [],
+          primaryCategory: category,
+          inferredCategory: category,
+          inferredCategorySource: 'KICK',
+          discoveredVia: `kick:category:${categoryName.toLowerCase().replace(/\s+/g, '-')}`,
           socialLinks: [],
           streamTitles: stream.session_title ? [{
             title: stream.session_title,
@@ -331,13 +376,15 @@ async function processKickStreams(streams: any[], categoryName: string): Promise
           lastSeenLive: new Date(),
         },
       });
+
+      // Add to cache
+      dedupCache.add(Platform.KICK, username);
       created++;
     } catch (error) {
-      // Skip on error
+      // Skip on error (likely duplicate)
     }
   }
 
-  logger.info(`Discovered ${created} new Kick streamers from ${categoryName}`);
   return created;
 }
 
@@ -352,10 +399,13 @@ export async function runDiscovery(options: {
   const {
     platforms = ['twitch', 'kick'],
     priorityOnly = false,
-    limitPerCategory = 100,
+    limitPerCategory = 200, // Increased default with pagination
   } = options;
 
   logger.info('Starting creator discovery job', { platforms, priorityOnly });
+
+  // Initialize dedup cache for fast duplicate checking
+  await ensureDedupCache();
 
   const results = {
     totalDiscovered: 0,

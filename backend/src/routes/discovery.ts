@@ -4,7 +4,7 @@ import { db, logger } from '../utils/database';
 import { Platform, Region, FraudStatus } from '@prisma/client';
 import { discoveryService } from '../services/discoveryService';
 import { runDiscovery, runQuickDiscovery, runFullDiscovery } from '../jobs/discoveryJob';
-import { runSocialDiscovery, runQuickSocialDiscovery, runFullSocialDiscovery, runInfluencerDiscovery } from '../jobs/socialDiscoveryJob';
+import { runSocialDiscovery, runQuickSocialDiscovery, runFullSocialDiscovery, runInfluencerDiscovery, runPlatformDiscovery } from '../jobs/socialDiscoveryJob';
 import multer from 'multer';
 import { parse } from 'csv-parse/sync';
 
@@ -517,48 +517,67 @@ router.post('/populate', asyncHandler(async (req: Request, res: Response) => {
 
 /**
  * POST /api/discovery/social
- * Run social platform discovery (TikTok + Instagram) using ScrapeCreators
- * Uses keyword-based search to find new iGaming creators
+ * Run social platform discovery using ScrapeCreators
+ *
+ * Platforms supported:
+ * - TikTok: keyword search, hashtag search, trending, popular creators
+ * - YouTube: search, hashtag search, trending shorts
+ * - Instagram: reels search (via Google)
+ * - Facebook: ad library search (find advertisers)
+ * - LinkedIn: ad library search (B2B advertisers)
  */
 router.post('/social', asyncHandler(async (req: Request, res: Response) => {
   const {
     mode = 'quick',
-    platforms = ['tiktok', 'instagram'],
+    platforms = ['tiktok', 'youtube', 'instagram', 'facebook', 'linkedin'],
+    methods = ['keyword', 'hashtag', 'trending', 'popular', 'ads'],
     keywordSet = 'primary',
-    maxResultsPerKeyword = 10,
+    maxResultsPerQuery = 10,
     maxCredits = 500,
+    platform, // For single platform mode
   } = req.body;
 
-  logger.info('Social discovery requested', { mode, platforms, keywordSet, maxCredits });
+  logger.info('Social discovery requested', { mode, platforms, methods, keywordSet, maxCredits });
 
   let result;
 
   switch (mode) {
     case 'quick':
-      // Primary keywords only, limited results
+      // TikTok + YouTube, primary keywords, limited results
       result = await runQuickSocialDiscovery();
       break;
     case 'full':
-      // All keywords, full budget
+      // All platforms, all methods, full budget
       result = await runFullSocialDiscovery();
       break;
     case 'influencer':
-      // Search for known big names
+      // Search for known big names on TikTok/YouTube/Instagram
       result = await runInfluencerDiscovery();
+      break;
+    case 'platform':
+      // Single platform discovery
+      if (!platform || !['tiktok', 'youtube', 'instagram', 'facebook', 'linkedin'].includes(platform)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid platform. Use: tiktok, youtube, instagram, facebook, or linkedin',
+        });
+      }
+      result = await runPlatformDiscovery(platform);
       break;
     case 'custom':
       // Custom options
       result = await runSocialDiscovery({
-        platforms: platforms as ('tiktok' | 'instagram')[],
+        platforms: platforms as ('tiktok' | 'youtube' | 'instagram' | 'facebook' | 'linkedin')[],
+        methods: methods as ('keyword' | 'hashtag' | 'trending' | 'popular' | 'ads')[],
         keywordSet: keywordSet as 'primary' | 'secondary' | 'influencer' | 'all',
-        maxResultsPerKeyword,
+        maxResultsPerQuery,
         maxCredits,
       });
       break;
     default:
       return res.status(400).json({
         success: false,
-        error: 'Invalid mode. Use: quick, full, influencer, or custom',
+        error: 'Invalid mode. Use: quick, full, influencer, platform, or custom',
       });
   }
 
@@ -567,7 +586,7 @@ router.post('/social', asyncHandler(async (req: Request, res: Response) => {
     data: {
       ...result,
       mode,
-      description: 'Social discovery finds NEW creators on TikTok/Instagram using keyword search',
+      description: 'Social discovery finds NEW creators across TikTok, YouTube, Instagram, Facebook, LinkedIn',
     },
   });
 }));
