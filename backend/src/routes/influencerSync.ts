@@ -57,6 +57,25 @@ router.post('/enrich-linkedin', async (req, res) => {
   }
 });
 
+// Test ScrapeCreators LinkedIn API directly
+router.get('/test-linkedin-api/:username', async (req, res) => {
+  try {
+    const { scrapeCreatorsService } = await import('../services/scrapeCreatorsService');
+    const username = req.params.username;
+    const profile = await scrapeCreatorsService.getLinkedInProfile(username);
+    res.json({
+      success: true,
+      username,
+      profile,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 // Debug endpoint to check LinkedIn profiles
 router.get('/debug-linkedin', async (req, res) => {
   try {
