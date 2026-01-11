@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { db, logger } from '../utils/database';
 import { scrapeCreatorsService } from '../services/scrapeCreatorsService';
 import { bunnyService } from '../services/bunnyService';
+import { Platform } from '@prisma/client';
 
 // Every 5 minutes - enrich LinkedIn profiles with followers data
 export const linkedinEnrichJob = cron.schedule('*/5 * * * *', async () => {
@@ -10,7 +11,7 @@ export const linkedinEnrichJob = cron.schedule('*/5 * * * *', async () => {
     // Find LinkedIn creators without followers data (followers = 0)
     const creators = await db.streamer.findMany({
       where: {
-        platform: 'LINKEDIN',
+        platform: Platform.LINKEDIN,
         followers: 0,
       },
       select: { id: true, username: true },
@@ -74,7 +75,7 @@ export async function enrichLinkedInProfiles(limit: number = 50): Promise<{ upda
 
   const creators = await db.streamer.findMany({
     where: {
-      platform: 'LINKEDIN',
+      platform: Platform.LINKEDIN,
       followers: 0,
     },
     select: { id: true, username: true },
