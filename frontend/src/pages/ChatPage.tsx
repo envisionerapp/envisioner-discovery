@@ -47,62 +47,6 @@ const ChatPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Resizable chat panel state
-  const [chatWidth, setChatWidth] = useState<number | null>(null); // null = auto (75%)
-  const [isResizing, setIsResizing] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const chatPanelRef = useRef<HTMLDivElement>(null);
-  const MIN_WIDTH = 320;
-  const MAX_WIDTH_PERCENT = 0.85;
-
-  // Handle resize drag
-  const handleResizeStart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-  };
-
-  useEffect(() => {
-    if (!isResizing) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const container = chatPanelRef.current?.parentElement;
-      if (!container) return;
-
-      const containerRect = container.getBoundingClientRect();
-      const maxWidth = containerRect.width * MAX_WIDTH_PERCENT;
-      // Calculate width from right edge (since panel is on right)
-      const newWidth = containerRect.right - e.clientX;
-
-      if (newWidth < MIN_WIDTH / 2) {
-        // Minimize if dragged too far right
-        setIsMinimized(true);
-        setChatWidth(MIN_WIDTH);
-      } else {
-        setIsMinimized(false);
-        setChatWidth(Math.max(MIN_WIDTH, Math.min(newWidth, maxWidth)));
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsResizing(false);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isResizing]);
-
-  const toggleMinimize = () => {
-    setIsMinimized(!isMinimized);
-    if (isMinimized) {
-      setChatWidth(null); // Reset to auto
-    }
-  };
-
   // Scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -285,44 +229,8 @@ const ChatPage: React.FC = () => {
         </aside>
 
         {/* Chat area */}
-        <section
-          ref={chatPanelRef}
-          className={`2xl:col-span-3 w-full min-w-0 relative transition-all duration-200 ${isResizing ? 'select-none' : ''}`}
-          style={{
-            width: chatWidth ? `${chatWidth}px` : undefined,
-            minWidth: isMinimized ? '60px' : `${MIN_WIDTH}px`,
-          }}
-        >
-          {/* Resize handle - left edge */}
-          <div
-            className={`absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize z-10 group hidden 2xl:flex items-center ${isResizing ? 'bg-primary-500/30' : 'hover:bg-primary-500/20'}`}
-            onMouseDown={handleResizeStart}
-            style={{ marginLeft: '-4px' }}
-          >
-            {/* Visual grip indicator */}
-            <div className={`w-1 h-16 rounded-full mx-auto transition-colors ${isResizing ? 'bg-primary-500' : 'bg-gray-600 group-hover:bg-primary-500'}`} />
-          </div>
-
-          {/* Minimize/Expand toggle button */}
-          <button
-            onClick={toggleMinimize}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-lg bg-gray-800/90 hover:bg-gray-700 border border-gray-700 text-gray-400 hover:text-primary-500 transition-all hidden 2xl:flex items-center justify-center"
-            title={isMinimized ? 'Expand chat' : 'Minimize chat'}
-          >
-            <svg
-              className={`h-4 w-4 transition-transform ${isMinimized ? 'rotate-180' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-
-          <div
-            className={`card flex flex-col w-full max-w-full transition-opacity duration-200 ${isMinimized ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-            style={{ height: 'calc(100vh - 120px)' }}
-          >
+        <section className="2xl:col-span-3 w-full min-w-0">
+          <div className="card flex flex-col w-full max-w-full" style={{ height: 'calc(100vh - 120px)' }}>
             {/* Chat header */}
             <div className="px-3 py-2 md:px-4 md:py-3 border-b border-gray-800/30 flex items-center justify-between flex-shrink-0 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(255, 107, 53, 0.08) 0%, transparent 100%)' }}>
               <div>
@@ -523,31 +431,6 @@ const ChatPage: React.FC = () => {
               </form>
             </div>
           </div>
-
-          {/* Minimized state indicator */}
-          {isMinimized && (
-            <div
-              className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer"
-              onClick={toggleMinimize}
-            >
-              <div className="card p-4 flex flex-col items-center gap-3 hover:border-primary-500/50 transition-colors">
-                <div className="p-2 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600">
-                  <SparklesIcon className="h-6 w-6 text-black" />
-                </div>
-                <span className="text-xs text-gray-400 writing-mode-vertical" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
-                  Chat
-                </span>
-                <svg
-                  className="h-4 w-4 text-gray-500 rotate-180"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-          )}
         </section>
       </div>
 
