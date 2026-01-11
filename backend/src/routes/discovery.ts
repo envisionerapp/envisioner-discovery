@@ -7,6 +7,7 @@ import { runDiscovery, runQuickDiscovery, runFullDiscovery } from '../jobs/disco
 import { runSocialDiscovery, runQuickSocialDiscovery, runFullSocialDiscovery, runInfluencerDiscovery, runPlatformDiscovery } from '../jobs/socialDiscoveryJob';
 import { runEnhancedTwitchDiscovery, runQuickTwitchDiscovery } from '../jobs/enhancedTwitchDiscovery';
 import { runYouTubeDiscovery, runQuickYouTubeDiscovery } from '../jobs/youtubeDiscoveryJob';
+import { scrapeCreatorsService } from '../services/scrapeCreatorsService';
 import multer from 'multer';
 import { parse } from 'csv-parse/sync';
 
@@ -1019,5 +1020,60 @@ function toInt(val: string | number | null | undefined): number | null {
   const n = typeof val === 'number' ? val : parseFloat(String(val).replace(/[, ]/g, ''));
   return Number.isFinite(n) ? Math.round(n) : null;
 }
+
+/**
+ * GET /api/discovery/debug/instagram/:username
+ * Debug endpoint to test Instagram profile fetching
+ */
+router.get('/debug/instagram/:username', asyncHandler(async (req: Request, res: Response) => {
+  const { username } = req.params;
+
+  logger.info(`Debug: Testing Instagram profile fetch for @${username}`);
+
+  // First, search for reels with this username to verify search works
+  const reels = await scrapeCreatorsService.searchInstagramReels(username);
+
+  // Extract usernames from reels
+  const extractedUsernames: string[] = [];
+  for (const reel of reels) {
+    const u = reel.owner?.username || reel.user?.username || reel.username;
+    if (u) extractedUsernames.push(u);
+  }
+
+  // Now try to fetch the profile
+  const profile = await scrapeCreatorsService.getInstagramProfile(username);
+
+  // Check if already in DB
+  const existing = await db.streamer.findUnique({
+    where: { platform_username: { platform: Platform.INSTAGRAM, username: username.toLowerCase() } },
+    select: { id: true, username: true, followers: true, createdAt: true }
+  });
+
+  res.json({
+    success: true,
+    data: {
+      username,
+      reelsSearch: {
+        totalReels: reels.length,
+        extractedUsernames,
+        sampleReel: reels[0] ? {
+          owner: reels[0].owner,
+          user: reels[0].user,
+          username: reels[0].username,
+        } : null,
+      },
+      profileFetch: profile ? {
+        username: profile.username,
+        full_name: profile.full_name,
+        follower_count: profile.follower_count,
+        following_count: profile.following_count,
+        media_count: profile.media_count,
+        is_verified: profile.is_verified,
+        meetsThreshold: profile.follower_count >= 1000,
+      } : null,
+      existingInDb: existing,
+    },
+  });
+}));
 
 export const discoveryRoutes = router;
