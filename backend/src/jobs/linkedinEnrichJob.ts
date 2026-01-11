@@ -1,19 +1,17 @@
 import cron from 'node-cron';
 import { db, logger } from '../utils/database';
 import { scrapeCreatorsService } from '../services/scrapeCreatorsService';
+import { bunnyService } from '../services/bunnyService';
 
 // Every 5 minutes - enrich LinkedIn profiles with followers data
 export const linkedinEnrichJob = cron.schedule('*/5 * * * *', async () => {
   console.log('\n🔗 [CRON] LinkedIn enrichment triggered');
   try {
-    // Find LinkedIn creators without followers data
+    // Find LinkedIn creators without followers data (followers = 0)
     const creators = await db.streamer.findMany({
       where: {
         platform: 'LINKEDIN',
-        OR: [
-          { followers: 0 },
-          { followers: null },
-        ]
+        followers: 0,
       },
       select: { id: true, username: true },
       take: 20, // Process 20 per run to stay within rate limits
@@ -31,8 +29,28 @@ export const linkedinEnrichJob = cron.schedule('*/5 * * * *', async () => {
 
     for (const creator of creators) {
       try {
-        await scrapeCreatorsService.syncProfile('LINKEDIN', creator.username);
-        updated++;
+        const profile = await scrapeCreatorsService.getLinkedInProfile(creator.username);
+        if (profile) {
+          const followers = profile.followers || profile.follower_count || 0;
+          let avatarUrl = profile.image;
+
+          // Upload avatar to Bunny CDN
+          if (avatarUrl) {
+            avatarUrl = await bunnyService.uploadLinkedInAvatar(creator.username, avatarUrl);
+          }
+
+          await db.streamer.update({
+            where: { id: creator.id },
+            data: {
+              followers,
+              avatarUrl: avatarUrl || undefined,
+              displayName: profile.name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || undefined,
+              profileDescription: profile.headline || profile.about || undefined,
+              lastScrapedAt: new Date(),
+            }
+          });
+          updated++;
+        }
 
         // Rate limit: 500ms between requests
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -57,10 +75,7 @@ export async function enrichLinkedInProfiles(limit: number = 50): Promise<{ upda
   const creators = await db.streamer.findMany({
     where: {
       platform: 'LINKEDIN',
-      OR: [
-        { followers: 0 },
-        { followers: null },
-      ]
+      followers: 0,
     },
     select: { id: true, username: true },
     take: limit,
@@ -78,8 +93,28 @@ export async function enrichLinkedInProfiles(limit: number = 50): Promise<{ upda
 
   for (const creator of creators) {
     try {
-      await scrapeCreatorsService.syncProfile('LINKEDIN', creator.username);
-      updated++;
+      const profile = await scrapeCreatorsService.getLinkedInProfile(creator.username);
+      if (profile) {
+        const followers = profile.followers || profile.follower_count || 0;
+        let avatarUrl = profile.image;
+
+        // Upload avatar to Bunny CDN
+        if (avatarUrl) {
+          avatarUrl = await bunnyService.uploadLinkedInAvatar(creator.username, avatarUrl);
+        }
+
+        await db.streamer.update({
+          where: { id: creator.id },
+          data: {
+            followers,
+            avatarUrl: avatarUrl || undefined,
+            displayName: profile.name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || undefined,
+            profileDescription: profile.headline || profile.about || undefined,
+            lastScrapedAt: new Date(),
+          }
+        });
+        updated++;
+      }
 
       // Rate limit
       await new Promise(resolve => setTimeout(resolve, 300));
