@@ -40,15 +40,11 @@ model Streamer {
   lastStreamed  DateTime?
   isLive        Boolean   @default(false)
   currentGame   String?
-  topGames      String[]
   tags          String[]
   region        Region
   language      String    @default("en")
   socialLinks   Json      @default("[]")
-  usesCamera    Boolean   @default(false)
-  isVtuber      Boolean   @default(false)
   fraudCheck    FraudStatus @default(CLEAN)
-  notes         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   lastScrapedAt DateTime?
@@ -56,7 +52,6 @@ model Streamer {
 
   // Sync Optimization
   syncTier       SyncTier  @default(STANDARD) @map("sync_tier")
-  lastSyncedBy   String?   @map("last_synced_by")  // 'discovery' or 'redtrack-api'
   socialSyncedAt DateTime? @map("social_synced_at") // Last ScrapeCreators sync
 
   // Social Metrics (Instagram/TikTok/FB/X/LinkedIn)
@@ -87,7 +82,6 @@ model Streamer {
   audiencePsychology    Json? @map("audience_psychology")
   brandSafetyScore      Int   @default(0) @map("brand_safety_score")
   gamblingCompatibility Boolean @default(false) @map("gambling_compatibility")
-  lastIntelligenceUpdate DateTime? @map("last_intelligence_update")
   riskAssessment        Json? @map("risk_assessment")
   conversionPotential   Json? @map("conversion_potential")
 

@@ -33,11 +33,18 @@ const TIER_CONFIG = {
 };
 
 // Credit budgets per provider (daily)
+// DIRECT APIs (free/quota-based):
+// - twitch: Twitch Helix API (free, ~1M calls/month limit)
+// - youtube: YouTube Data API v3 (10k quota/day per key, we have 5 keys)
+// - kick: Kick API (free, no hard limits)
+//
+// VIA SCRAPECREATORS (credit-based):
+// - tiktok, instagram, x, facebook, linkedin all use ScrapeCreators credits
 const DAILY_CREDIT_BUDGETS = {
-  scrapecreators: 3300, // ~100k/month
-  youtube: 10000,
-  twitch: 50000,
-  kick: 50000,
+  scrapecreators: 3300, // ~100k/month for TikTok, Instagram, X, Facebook, LinkedIn
+  youtube: 10000,       // Direct API - 10k quota units/day
+  twitch: 50000,        // Direct API - essentially free
+  kick: 50000,          // Direct API - essentially free
 };
 
 export class SyncOptimizationService {
