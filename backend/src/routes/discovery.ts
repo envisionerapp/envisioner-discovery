@@ -146,6 +146,9 @@ router.post('/search', asyncHandler(async (req: Request, res: Response) => {
 
   logger.info('Discovery search completed', { count: creators.length, total: totalCount });
 
+  // Cache search results briefly
+  res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=60');
+
   res.json({
     success: true,
     data: {
@@ -207,6 +210,9 @@ router.get('/creator/:id', asyncHandler(async (req: Request, res: Response) => {
       error: 'Creator not found'
     });
   }
+
+  // Cache creator details for 2 minutes
+  res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
 
   res.json({
     success: true,

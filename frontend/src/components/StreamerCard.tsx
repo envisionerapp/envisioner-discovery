@@ -50,6 +50,8 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
                 className="w-full h-full rounded-full object-cover"
                 src={streamer.avatarUrl || AVATARS[index % AVATARS.length]}
                 alt={streamer.displayName}
+                loading="lazy"
+                decoding="async"
               />
               <span className={`platform-badge ${getPlatformColor(streamer.platform)}`}>
                 <PlatformIcon name={streamer.platform.toLowerCase() as any} className="h-3 w-3" />
