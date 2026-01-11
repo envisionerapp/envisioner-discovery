@@ -7,6 +7,7 @@ import { YouTubeScraper } from '../scrapers/youtubeScraper';
 import { KickScraper } from '../scrapers/kickScraper';
 import { syncOptimization } from '../services/syncOptimizationService';
 import { runDiscovery, runQuickDiscovery, runFullDiscovery } from './discoveryJob';
+import { runSocialDiscovery, runQuickSocialDiscovery, runFullSocialDiscovery, runInfluencerDiscovery } from './socialDiscoveryJob';
 
 const scrapingQueue = new ScrapingJobQueue();
 let healthCheckScrapers: {
@@ -276,7 +277,44 @@ export const startScheduledJobs = async () => {
     }
   });
 
-  logger.info('Scheduled jobs initialized (with tiered sync + discovery)');
+  // ============================================
+  // SOCIAL DISCOVERY JOBS - TikTok, Instagram via ScrapeCreators
+  // ============================================
+
+  // Quick social discovery every 3 hours - primary iGaming keywords only
+  cron.schedule('0 */3 * * *', async () => {
+    try {
+      logger.info('Starting quick social discovery (TikTok + Instagram)...');
+      const result = await runQuickSocialDiscovery();
+      logger.info('Quick social discovery complete', result);
+    } catch (error) {
+      logger.error('Error in quick social discovery:', error);
+    }
+  });
+
+  // Full social discovery daily at 6 AM - all keywords
+  cron.schedule('0 6 * * *', async () => {
+    try {
+      logger.info('Starting full social discovery...');
+      const result = await runFullSocialDiscovery();
+      logger.info('Full social discovery complete', result);
+    } catch (error) {
+      logger.error('Error in full social discovery:', error);
+    }
+  });
+
+  // Influencer discovery twice daily - find accounts related to known big names
+  cron.schedule('0 10,22 * * *', async () => {
+    try {
+      logger.info('Starting influencer discovery...');
+      const result = await runInfluencerDiscovery();
+      logger.info('Influencer discovery complete', result);
+    } catch (error) {
+      logger.error('Error in influencer discovery:', error);
+    }
+  });
+
+  logger.info('Scheduled jobs initialized (with tiered sync + platform/social discovery)');
 };
 
 const performHealthCheck = async (): Promise<void> => {

@@ -4,6 +4,7 @@ import { db, logger } from '../utils/database';
 import { Platform, Region, FraudStatus } from '@prisma/client';
 import { discoveryService } from '../services/discoveryService';
 import { runDiscovery, runQuickDiscovery, runFullDiscovery } from '../jobs/discoveryJob';
+import { runSocialDiscovery, runQuickSocialDiscovery, runFullSocialDiscovery, runInfluencerDiscovery } from '../jobs/socialDiscoveryJob';
 import multer from 'multer';
 import { parse } from 'csv-parse/sync';
 
@@ -505,6 +506,63 @@ router.post('/populate', asyncHandler(async (req: Request, res: Response) => {
       ...result,
       mode,
     }
+  });
+}));
+
+/**
+ * POST /api/discovery/social
+ * Run social platform discovery (TikTok + Instagram) using ScrapeCreators
+ * Uses keyword-based search to find new iGaming creators
+ */
+router.post('/social', asyncHandler(async (req: Request, res: Response) => {
+  const {
+    mode = 'quick',
+    platforms = ['tiktok', 'instagram'],
+    keywordSet = 'primary',
+    maxResultsPerKeyword = 10,
+    maxCredits = 500,
+  } = req.body;
+
+  logger.info('Social discovery requested', { mode, platforms, keywordSet, maxCredits });
+
+  let result;
+
+  switch (mode) {
+    case 'quick':
+      // Primary keywords only, limited results
+      result = await runQuickSocialDiscovery();
+      break;
+    case 'full':
+      // All keywords, full budget
+      result = await runFullSocialDiscovery();
+      break;
+    case 'influencer':
+      // Search for known big names
+      result = await runInfluencerDiscovery();
+      break;
+    case 'custom':
+      // Custom options
+      result = await runSocialDiscovery({
+        platforms: platforms as ('tiktok' | 'instagram')[],
+        keywordSet: keywordSet as 'primary' | 'secondary' | 'influencer' | 'all',
+        maxResultsPerKeyword,
+        maxCredits,
+      });
+      break;
+    default:
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid mode. Use: quick, full, influencer, or custom',
+      });
+  }
+
+  res.json({
+    success: true,
+    data: {
+      ...result,
+      mode,
+      description: 'Social discovery finds NEW creators on TikTok/Instagram using keyword search',
+    },
   });
 }));
 

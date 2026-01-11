@@ -56,6 +56,7 @@ model Streamer {
   // Sync Optimization
   syncTier       SyncTier  @default(STANDARD) @map("sync_tier")
   socialSyncedAt DateTime? @map("social_synced_at") // Last ScrapeCreators sync
+  discoveredVia  String?   @map("discovered_via") // How this creator was discovered (e.g., "search:slots", "twitch:category:498566")
 
   // Social Metrics (Instagram/TikTok/FB/X/LinkedIn)
   totalViews    BigInt    @default(0) @map("total_views")
