@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { db, logger } from '../utils/database';
 import { Platform, Region } from '@prisma/client';
+import { getConfig } from '../utils/configFromDb';
 
 // API Response interfaces
 interface TikTokProfile {
@@ -93,13 +94,11 @@ interface SyncQueueItem {
 export class ScrapeCreatorsService {
   private client: AxiosInstance;
   private readonly BASE_URL = 'https://api.scrapecreators.com';
+  private apiKeyLoaded: boolean = false;
 
   constructor() {
+    // Initialize with env var, will try database on first use if not set
     const apiKey = process.env.SCRAPECREATORS_API_KEY;
-
-    if (!apiKey) {
-      logger.warn('SCRAPECREATORS_API_KEY not configured');
-    }
 
     this.client = axios.create({
       baseURL: this.BASE_URL,
@@ -109,12 +108,38 @@ export class ScrapeCreatorsService {
       },
       timeout: 30000,
     });
+
+    if (!apiKey) {
+      logger.warn('SCRAPECREATORS_API_KEY not in env, will try database config');
+    } else {
+      this.apiKeyLoaded = true;
+    }
+  }
+
+  /**
+   * Ensure API key is loaded (from env or database)
+   */
+  private async ensureApiKey(): Promise<boolean> {
+    if (this.apiKeyLoaded) return true;
+
+    const apiKey = await getConfig('SCRAPECREATORS_API_KEY');
+    if (apiKey) {
+      this.client.defaults.headers['x-api-key'] = apiKey;
+      this.apiKeyLoaded = true;
+      logger.info('Loaded SCRAPECREATORS_API_KEY from database config');
+      return true;
+    }
+
+    logger.error('SCRAPECREATORS_API_KEY not found in env or database');
+    return false;
   }
 
   // ==================== PROFILE ENDPOINTS (1 credit each) ====================
 
   async getTikTokProfile(handle: string): Promise<TikTokProfile | null> {
     try {
+      if (!await this.ensureApiKey()) return null;
+
       const response = await this.client.get('/v1/tiktok/profile', {
         params: { handle: handle.replace('@', '') }
       });
@@ -138,6 +163,8 @@ export class ScrapeCreatorsService {
 
   async searchTikTokUsers(query: string): Promise<TikTokSearchResult[]> {
     try {
+      if (!await this.ensureApiKey()) return [];
+
       const response = await this.client.get('/v1/tiktok/search/users', {
         params: { query }
       });

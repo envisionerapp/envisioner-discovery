@@ -328,6 +328,8 @@ export class ChatController {
         where: { isActive: true }
       });
 
+      // Cache stats for 30 seconds
+      res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=60');
       res.json({
         success: true,
         data: {
@@ -387,6 +389,8 @@ export class ChatController {
         tags: filterCategoryTags(s.tags)
       }));
 
+      // Cache for 60 seconds
+      res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=120');
       res.json({
         success: true,
         data: filteredStreamers
@@ -493,6 +497,8 @@ export class ChatController {
           avgViewers: Math.round(cat.totalViewers / cat.streamerCount)
         }));
 
+      // Cache for 60 seconds
+      res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=120');
       res.json({
         success: true,
         data: topCategories
@@ -552,6 +558,8 @@ export class ChatController {
         tags: filterCategoryTags(s.tags)
       }));
 
+      // Cache for 15 seconds (live data changes frequently)
+      res.set('Cache-Control', 'public, max-age=15, stale-while-revalidate=30');
       res.json({
         success: true,
         data: filteredStreamers,

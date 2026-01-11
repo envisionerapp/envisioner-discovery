@@ -25,7 +25,8 @@ export default defineConfig({
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-query': ['react-query', 'axios'],
-          'vendor-ui': ['@headlessui/react'],
+          'vendor-ui': ['@headlessui/react', '@heroicons/react'],
+          'vendor-utils': ['date-fns', 'clsx'],
         },
         assetFileNames: (assetInfo) => {
           // Keep logo files with their original names for easier reference
