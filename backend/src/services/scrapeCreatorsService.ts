@@ -367,6 +367,47 @@ export class ScrapeCreatorsService {
     }
   }
 
+  async getInstagramProfileDebug(handle: string): Promise<{ profile: InstagramProfile | null; debug: any }> {
+    try {
+      if (!await this.ensureApiKey()) return { profile: null, debug: { error: 'No API key' } };
+
+      const response = await this.client.get('/v1/instagram/profile', {
+        params: { handle: handle.replace('@', '') }
+      });
+
+      const debug = {
+        responseDataKeys: Object.keys(response.data || {}),
+        dataKeys: Object.keys(response.data?.data || {}),
+        userExists: !!response.data?.data?.user,
+        userKeys: response.data?.data?.user ? Object.keys(response.data.data.user).slice(0, 15) : [],
+        edge_followed_by: response.data?.data?.user?.edge_followed_by,
+        biography: response.data?.data?.user?.biography?.substring(0, 50),
+        username: response.data?.data?.user?.username,
+      };
+
+      const raw = response.data?.data?.user || response.data?.user || response.data?.data || response.data;
+      if (!raw) return { profile: null, debug: { ...debug, error: 'raw is null' } };
+
+      const profile: InstagramProfile = {
+        id: raw.id || raw.pk || '',
+        username: raw.username || handle,
+        full_name: raw.full_name || '',
+        profile_pic_url: raw.profile_pic_url_hd || raw.profile_pic_url || '',
+        biography: raw.biography || '',
+        is_verified: raw.is_verified || false,
+        follower_count: raw.follower_count ?? raw.edge_followed_by?.count ?? 0,
+        following_count: raw.following_count ?? raw.edge_follow?.count ?? 0,
+        media_count: raw.media_count ?? raw.edge_owner_to_timeline_media?.count ?? 0,
+        total_likes: raw.total_likes || 0,
+        total_comments: raw.total_comments || 0,
+      };
+
+      return { profile, debug };
+    } catch (error: any) {
+      return { profile: null, debug: { error: error.response?.data || error.message } };
+    }
+  }
+
   async getInstagramProfile(handle: string): Promise<InstagramProfile | null> {
     try {
       if (!await this.ensureApiKey()) return null;
@@ -376,8 +417,19 @@ export class ScrapeCreatorsService {
       });
 
       // API returns { success, data: { user: {...} } }
+      logger.info(`Instagram API response.data keys: ${Object.keys(response.data || {}).join(', ')}`);
+      logger.info(`Instagram response.data.data keys: ${Object.keys(response.data?.data || {}).join(', ')}`);
+      logger.info(`Instagram response.data.data.user exists: ${!!response.data?.data?.user}`);
+
       const raw = response.data?.data?.user || response.data?.user || response.data?.data || response.data;
-      if (!raw) return null;
+      if (!raw) {
+        logger.warn(`Instagram profile raw is null for ${handle}`);
+        return null;
+      }
+
+      logger.info(`Instagram raw object keys: ${Object.keys(raw).slice(0, 10).join(', ')}`);
+      logger.info(`Instagram raw.edge_followed_by: ${JSON.stringify(raw.edge_followed_by)}`);
+      logger.info(`Instagram raw.biography: ${raw.biography?.substring(0, 50)}`);
 
       // Map Instagram's native GraphQL structure to our interface
       // Native fields: edge_followed_by.count, edge_follow.count, edge_owner_to_timeline_media.count

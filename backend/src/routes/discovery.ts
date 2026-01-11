@@ -1040,8 +1040,8 @@ router.get('/debug/instagram/:username', asyncHandler(async (req: Request, res: 
     if (u) extractedUsernames.push(u);
   }
 
-  // Now try to fetch the profile
-  const profile = await scrapeCreatorsService.getInstagramProfile(username);
+  // Now try to fetch the profile with debug info
+  const { profile, debug: profileDebug } = await scrapeCreatorsService.getInstagramProfileDebug(username);
 
   // Get raw API response for debugging
   const rawApiResponse = await scrapeCreatorsService.getInstagramProfileRaw(username);
@@ -1066,6 +1066,7 @@ router.get('/debug/instagram/:username', asyncHandler(async (req: Request, res: 
         } : null,
       },
       rawApiResponse,
+      profileDebug,
       profileFetch: profile ? {
         mappedProfile: profile,
         username: profile.username,
