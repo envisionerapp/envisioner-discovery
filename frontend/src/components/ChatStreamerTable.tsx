@@ -3,7 +3,15 @@ import { differenceInMinutes } from 'date-fns';
 import { Streamer } from '../services/chatService';
 import { PlatformIcon } from './icons/PlatformIcon';
 import { flagFor, regionLabel } from '../utils/geo';
-import { getStreamerAvatar } from '../utils/avatars';
+import { getStreamerAvatar, DEFAULT_AVATAR } from '../utils/avatars';
+
+// Handle image load errors by falling back to placeholder
+const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  const img = e.currentTarget;
+  if (img.src !== DEFAULT_AVATAR) {
+    img.src = DEFAULT_AVATAR;
+  }
+};
 import { UsersIcon, EyeIcon, HashtagIcon, UserIcon, MapPinIcon, ClockIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon, TrophyIcon } from '@heroicons/react/24/outline';
 
 type SortField = 'displayName' | 'followers' | 'currentViewers' | 'peakViewers' | 'region' | 'lastLive';
@@ -154,8 +162,8 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
 
   const hasStreamers = streamers && streamers.length > 0;
 
-  const resolveAvatar = (s: any, idx: number) => {
-    return getStreamerAvatar(s, idx);
+  const resolveAvatar = (s: any) => {
+    return getStreamerAvatar(s);
   };
 
   const handlePageChange = (page: number) => {
@@ -335,7 +343,7 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                 <div className="flex items-center gap-3 mb-3">
                   <div className="relative h-12 w-12 flex-shrink-0">
                     <div className="rounded-full overflow-hidden w-full h-full relative" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}>
-                      <img className="block w-full h-full object-cover" src={resolveAvatar(s, idx)} alt={(s as any).displayName} loading="lazy" style={{ filter: 'brightness(0.9)' }} />
+                      <img className="block w-full h-full object-cover" src={resolveAvatar(s)} alt={(s as any).displayName} loading="lazy" style={{ filter: 'brightness(0.9)' }} onError={handleImageError} />
                       <span className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.12)' }} />
                     </div>
                     {platform && (
@@ -557,10 +565,11 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                           >
                             <img
                               className="block w-full h-full object-cover"
-                              src={resolveAvatar(s, idx)}
+                              src={resolveAvatar(s)}
                               alt={(s as any).displayName}
                               loading="lazy"
                               style={{ filter: 'brightness(0.9)' }}
+                              onError={handleImageError}
                             />
                             <span className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.12)' }} />
                           </div>

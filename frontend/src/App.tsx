@@ -1,7 +1,15 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import './App.css';
 import { fetchCreators, fetchFavoriteIds, toggleFavorite as apiToggleFavorite, fetchDiscardedIds, toggleDiscarded as apiToggleDiscarded, fetchNotesMap, saveNote as apiSaveNote, formatLastActive, ApiCreator, validateAccess, AccessValidationResult } from './api';
-import { getStreamerAvatar } from './utils/avatars';
+import { getStreamerAvatar, DEFAULT_AVATAR } from './utils/avatars';
+
+// Handle image load errors by falling back to placeholder
+const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  const img = e.currentTarget;
+  if (img.src !== DEFAULT_AVATAR) {
+    img.src = DEFAULT_AVATAR;
+  }
+};
 
 // ===========================================
 // API HELPER FUNCTIONS
@@ -1161,15 +1169,8 @@ function App() {
                   )}
 
                   <div className="creator-top">
-                    <div
-                      className="creator-avatar"
-                      style={!creator.avatarUrl ? { background: getAvatarColor(creator.username) } : undefined}
-                    >
-                      {creator.avatarUrl ? (
-                        <img src={getStreamerAvatar(creator)} alt={displayName} />
-                      ) : (
-                        <span>{displayName.charAt(0).toUpperCase()}</span>
-                      )}
+                    <div className="creator-avatar">
+                      <img src={getStreamerAvatar(creator)} alt={displayName} onError={handleImageError} />
                       <div className="platform-badge" style={{ backgroundColor: PLATFORM_COLORS[platformKey] }}>
                         {PlatformIcons[platformKey]}
                       </div>
@@ -1311,15 +1312,8 @@ function App() {
               <button className="modal-close" onClick={() => setSelectedCreator(null)}>{Icons.x}</button>
 
               <div className="profile-header">
-                <div
-                  className="profile-avatar"
-                  style={!selectedCreator.avatarUrl ? { background: getAvatarColor(selectedCreator.username) } : undefined}
-                >
-                  {selectedCreator.avatarUrl ? (
-                    <img src={getStreamerAvatar(selectedCreator)} alt={modalDisplayName} />
-                  ) : (
-                    <span>{modalDisplayName.charAt(0).toUpperCase()}</span>
-                  )}
+                <div className="profile-avatar">
+                  <img src={getStreamerAvatar(selectedCreator)} alt={modalDisplayName} onError={handleImageError} />
                   <div className="platform-badge" style={{ backgroundColor: PLATFORM_COLORS[modalPlatformKey] }}>
                     {PlatformIcons[modalPlatformKey]}
                   </div>

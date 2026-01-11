@@ -16,8 +16,16 @@ import {
   EyeIcon,
   TrophyIcon
 } from '@heroicons/react/24/outline';
-import { AVATARS } from '@/utils/avatars';
+import { getStreamerAvatar, DEFAULT_AVATAR } from '@/utils/avatars';
 import { PlatformIcon } from '@/components/icons/PlatformIcon';
+
+// Handle image load errors by falling back to placeholder
+const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  const img = e.currentTarget;
+  if (img.src !== DEFAULT_AVATAR) {
+    img.src = DEFAULT_AVATAR;
+  }
+};
 import { flagFor, regionLabel } from '@/utils/geo';
 // Results now rendered via table theme
 import { ChatStreamerTable } from '@/components/ChatStreamerTable';
@@ -281,7 +289,7 @@ const ChatPage: React.FC = () => {
                         <div className="h-7 w-7 md:h-8 md:w-8 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-xs md:text-sm font-bold text-white flex-shrink-0">E</div>
                       ) : (
                         <img
-                          src={AVATARS[0]}
+                          src={DEFAULT_AVATAR}
                           alt="You"
                           className="h-7 w-7 md:h-8 md:w-8 rounded-full object-cover flex-shrink-0"
                         />
@@ -463,9 +471,10 @@ const ChatPage: React.FC = () => {
               <div className="flex items-start gap-4">
                 <div className="relative">
                   <img
-                    src={selected.avatarUrl || AVATARS[0]}
+                    src={getStreamerAvatar(selected)}
                     alt={selected.displayName}
                     className="w-16 h-16 rounded-full object-cover border-2 border-primary-500/30"
+                    onError={handleImageError}
                   />
                   {selected.platform && (
                     <span className={`absolute -bottom-0.5 -right-0.5 flex items-center justify-center rounded-full ${

@@ -2,7 +2,15 @@ import React from 'react';
 import { Streamer } from '../services/chatService';
 import { PlatformIcon } from './icons/PlatformIcon';
 import { flagFor, regionLabel } from '../utils/geo';
-import { AVATARS } from '../utils/avatars';
+import { getStreamerAvatar, DEFAULT_AVATAR } from '../utils/avatars';
+
+// Handle image load errors by falling back to placeholder
+const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  const img = e.currentTarget;
+  if (img.src !== DEFAULT_AVATAR) {
+    img.src = DEFAULT_AVATAR;
+  }
+};
 import { formatDistanceToNow } from 'date-fns';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -48,10 +56,11 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
             <div className="avatar avatar-md">
               <img
                 className="w-full h-full rounded-full object-cover"
-                src={streamer.avatarUrl || AVATARS[index % AVATARS.length]}
+                src={getStreamerAvatar(streamer)}
                 alt={streamer.displayName}
                 loading="lazy"
                 decoding="async"
+                onError={handleImageError}
               />
               <span className={`platform-badge ${getPlatformColor(streamer.platform)}`}>
                 <PlatformIcon name={streamer.platform.toLowerCase() as any} className="h-3 w-3" />

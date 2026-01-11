@@ -54,49 +54,56 @@ export const getUserAvatar = (seed: string): string => {
   return `https://ui-avatars.com/api/?name=${encodedName}&background=FF6B35&color=fff&size=128&bold=true&format=svg`;
 };
 
-// Simple SVG gradient avatar placeholders as data URIs
-const svg = (g1: string, g2: string) =>
-  `data:image/svg+xml;utf8,` +
-  encodeURIComponent(
-    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
-      <defs>
-        <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
-          <stop offset='0%' stop-color='${g1}'/>
-          <stop offset='100%' stop-color='${g2}'/>
-        </linearGradient>
-      </defs>
-      <rect width='64' height='64' rx='32' fill='url(%23g)'/>
-      <circle cx='32' cy='24' r='10' fill='rgba(255,255,255,0.6)'/>
-      <path d='M16 52c4-10 28-10 32 0' fill='rgba(255,255,255,0.5)'/>
-    </svg>`
-  );
+// Default placeholder avatar from Bunny CDN
+export const DEFAULT_AVATAR = 'https://todoalrojo.b-cdn.net/envisioner/icono.jpg';
 
+// Legacy AVATARS array - now all point to the same Bunny CDN placeholder
 export const AVATARS: string[] = [
-  svg('#FF6B35','#FF6B35'),
-  svg('#FF6B35','#FF6B35'),
-  svg('#FF6B35','#FF6B35'),
-  svg('#FF6B35','#FF6B35'),
-  svg('#FF6B35','#FF6B35'),
-  svg('#FF6B35','#FF6B35'),
+  DEFAULT_AVATAR,
+  DEFAULT_AVATAR,
+  DEFAULT_AVATAR,
+  DEFAULT_AVATAR,
+  DEFAULT_AVATAR,
+  DEFAULT_AVATAR,
 ];
 
 /**
  * Get the avatar URL, using Bunny CDN URLs directly
- * For Instagram/TikTok, avatars should already be on Bunny CDN (media.envr.io)
+ * For all platforms, avatars should ideally be on Bunny CDN (media.envr.io)
+ * Non-Bunny URLs are proxied through weserv.nl for reliability
  */
 const proxyImageUrl = (url: string): string => {
   if (!url) return url;
 
   // Bunny CDN URLs work directly - no proxy needed
-  if (url.includes('media.envr.io')) {
+  if (url.includes('media.envr.io') || url.includes('.b-cdn.net')) {
     return url;
   }
 
-  // For non-Bunny Instagram/TikTok URLs (legacy), use weserv.nl proxy as fallback
-  const needsProxy = url.includes('instagram.') ||
-                     url.includes('fbcdn.net') ||
-                     url.includes('cdninstagram.') ||
-                     url.includes('tiktokcdn.');
+  // Kick CDN works directly - no proxy needed (files.kick.com)
+  if (url.includes('files.kick.com') || url.includes('kick.com/images')) {
+    return url;
+  }
+
+  // Twitch CDN works directly - no proxy needed
+  if (url.includes('static-cdn.jtvnw.net')) {
+    return url;
+  }
+
+  // YouTube CDN works directly - no proxy needed
+  if (url.includes('yt3.ggpht.com') || url.includes('yt3.googleusercontent.com')) {
+    return url;
+  }
+
+  // Proxy platforms with CORS issues through weserv.nl
+  const needsProxy =
+    // Instagram / Facebook (CORS issues)
+    url.includes('instagram.') ||
+    url.includes('fbcdn.net') ||
+    url.includes('cdninstagram.') ||
+    // TikTok (CORS issues)
+    url.includes('tiktokcdn.') ||
+    url.includes('tiktok.com');
 
   if (needsProxy) {
     return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=300&h=300&fit=cover&output=jpg`;
@@ -108,14 +115,13 @@ const proxyImageUrl = (url: string): string => {
 /**
  * Get avatar URL for a streamer
  * @param streamer - Streamer object with username and avatarUrl
- * @param fallbackIndex - Index for fallback avatar if no avatarUrl exists
- * @returns Avatar URL (streamer's avatar or local generated)
+ * @returns Avatar URL (streamer's avatar or Bunny CDN placeholder)
  */
-export const getStreamerAvatar = (streamer: any, fallbackIndex: number = 0): string => {
+export const getStreamerAvatar = (streamer: any): string => {
   if (streamer?.avatarUrl && streamer.avatarUrl.trim() !== '') {
     return proxyImageUrl(streamer.avatarUrl);
   }
-  // Use local avatar fallback
-  return AVATARS[fallbackIndex % AVATARS.length];
+  // Use Bunny CDN placeholder as fallback
+  return DEFAULT_AVATAR;
 };
 

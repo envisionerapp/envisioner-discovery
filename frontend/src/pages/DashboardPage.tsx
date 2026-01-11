@@ -2,8 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { differenceInMinutes, formatDistanceToNow } from 'date-fns';
 import { HashtagIcon, UserIcon, MapPinIcon, EyeIcon, ClockIcon, ChartBarIcon, UsersIcon, RocketLaunchIcon, CheckCircleIcon, ChevronUpIcon, ChevronDownIcon, TrophyIcon } from '@heroicons/react/24/outline';
 import { PlatformIcon } from '@/components/icons/PlatformIcon';
-import { getStreamerAvatar, AVATARS } from '@/utils/avatars';
+import { getStreamerAvatar, DEFAULT_AVATAR } from '@/utils/avatars';
 import { flagFor, regionLabel } from '@/utils/geo';
+
+// Handle image load errors by falling back to placeholder
+const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  const img = e.currentTarget;
+  if (img.src !== DEFAULT_AVATAR) {
+    img.src = DEFAULT_AVATAR;
+  }
+};
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useLiveCount } from '@/contexts/LiveCountContext';
 import { withBase } from '@/utils/api';
@@ -107,7 +115,7 @@ const DashboardPage: React.FC = () => {
       peak: streamer.highestViewers || 0,
       g: streamer.currentGame || 'Unknown',
       ll: streamer.isLive ? 'Live' : formatTimeAgo(streamer.lastStreamed),
-      avatar: getStreamerAvatar(streamer, 0)
+      avatar: getStreamerAvatar(streamer)
     };
   };
 
@@ -276,7 +284,7 @@ const DashboardPage: React.FC = () => {
 
                       {/* Avatar */}
                       <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
-                        <img className="w-full h-full rounded-md sm:rounded-lg object-cover ring-1 sm:ring-2 ring-gray-800 group-hover:ring-primary-600/50 transition-all" src={getStreamerAvatar(streamer, i)} alt="avatar" />
+                        <img className="w-full h-full rounded-md sm:rounded-lg object-cover ring-1 sm:ring-2 ring-gray-800 group-hover:ring-primary-600/50 transition-all" src={getStreamerAvatar(streamer)} alt="avatar" onError={handleImageError} />
                         <span className={`absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 flex items-center justify-center rounded-sm sm:rounded-md ${brand} w-4 h-4 sm:w-5 sm:h-5`} style={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(0,0,0,1)' }}>
                           <PlatformIcon name={p as any} className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                         </span>
@@ -519,7 +527,7 @@ const DashboardPage: React.FC = () => {
                     <div className="flex items-center gap-3 mb-3">
                       <div className="relative h-12 w-12 flex-shrink-0">
                         <div className="rounded-full overflow-hidden w-full h-full relative" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}>
-                          <img className="block w-full h-full object-cover" src={row.avatar} alt="avatar" loading="lazy" style={{ filter: 'brightness(0.9)' }} />
+                          <img className="block w-full h-full object-cover" src={row.avatar} alt="avatar" loading="lazy" style={{ filter: 'brightness(0.9)' }} onError={handleImageError} />
                           <span className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.12)' }} />
                         </div>
                         <span className={`absolute flex items-center justify-center rounded-full ${row.p==='twitch'?'brand-twitch':row.p==='youtube'?'brand-youtube':'brand-kick'}`} style={{ bottom: -2, right: -2, width: 20, height: 20, backgroundColor: 'rgba(0,0,0,0.75)', zIndex: 3 }}>
@@ -680,7 +688,7 @@ const DashboardPage: React.FC = () => {
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="relative h-8 w-8 sm:h-9 sm:w-9">
                             <div className="rounded-full overflow-hidden w-full h-full relative" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}>
-                              <img className="block w-full h-full object-cover" src={row.avatar} alt="avatar" loading="lazy" style={{ filter: 'brightness(0.9)' }} />
+                              <img className="block w-full h-full object-cover" src={row.avatar} alt="avatar" loading="lazy" style={{ filter: 'brightness(0.9)' }} onError={handleImageError} />
                               <span className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.12)' }} />
                             </div>
                             <span className={`absolute flex items-center justify-center rounded-full ${row.p==='twitch'?'brand-twitch':row.p==='youtube'?'brand-youtube':'brand-kick'}`} style={{ bottom: -4, right: -4, width: 16, height: 16, backgroundColor: 'rgba(0,0,0,0.75)' }}>
@@ -873,9 +881,10 @@ const DashboardPage: React.FC = () => {
               <div className="flex items-start gap-4">
                 <div className="relative">
                   <img
-                    src={getStreamerAvatar(selectedStreamer, 0)}
+                    src={getStreamerAvatar(selectedStreamer)}
                     alt={selectedStreamer.displayName}
                     className="w-16 h-16 rounded-full object-cover border-2 border-primary-500/30"
+                    onError={handleImageError}
                   />
                   {selectedStreamer.platform && (
                     <span className={`absolute -bottom-0.5 -right-0.5 flex items-center justify-center rounded-full ${

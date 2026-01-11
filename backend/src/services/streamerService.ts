@@ -557,6 +557,92 @@ export class StreamerService {
     }
   }
 
+  async backfillYouTubeAvatars(limit: number = 100): Promise<{ updated: number; errors: number }> {
+    console.log(`🎬 [YOUTUBE] Backfilling avatars for ${limit} streamers...`);
+
+    try {
+      const streamers = await db.streamer.findMany({
+        where: {
+          platform: 'YOUTUBE',
+          avatarUrl: null
+        },
+        select: { id: true, username: true, profileUrl: true },
+        take: limit
+      });
+
+      if (streamers.length === 0) {
+        console.log('✅ All YouTube streamers have avatars');
+        return { updated: 0, errors: 0 };
+      }
+
+      const apiKey = process.env.YOUTUBE_API_KEY;
+      if (!apiKey) {
+        console.error('YOUTUBE_API_KEY not configured');
+        return { updated: 0, errors: streamers.length };
+      }
+
+      let updated = 0;
+      let errors = 0;
+
+      // Process in batches of 50 (YouTube API limit)
+      const BATCH_SIZE = 50;
+      const batches = Math.ceil(streamers.length / BATCH_SIZE);
+
+      for (let i = 0; i < batches; i++) {
+        const batch = streamers.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE);
+
+        // Extract channel IDs or handles from profile URLs
+        const channelHandles: { id: string; handle: string }[] = [];
+
+        for (const s of batch) {
+          // Try to extract handle from profile URL
+          const handleMatch = s.profileUrl?.match(/@([a-zA-Z0-9_-]+)/);
+          if (handleMatch) {
+            channelHandles.push({ id: s.id, handle: handleMatch[1] });
+          } else if (s.username) {
+            channelHandles.push({ id: s.id, handle: s.username.replace(/\s+/g, '') });
+          }
+        }
+
+        if (channelHandles.length === 0) continue;
+
+        // Fetch channel info for each handle
+        for (const { id, handle } of channelHandles) {
+          try {
+            const response = await axios.get('https://www.googleapis.com/youtube/v3/channels', {
+              params: {
+                part: 'snippet',
+                forHandle: handle,
+                key: apiKey
+              },
+              timeout: 5000
+            });
+
+            const channel = response.data?.items?.[0];
+            if (channel?.snippet?.thumbnails?.medium?.url) {
+              await db.streamer.update({
+                where: { id },
+                data: { avatarUrl: channel.snippet.thumbnails.medium.url }
+              });
+              updated++;
+            }
+
+            // Rate limit
+            await new Promise(resolve => setTimeout(resolve, 100));
+          } catch (e) {
+            errors++;
+          }
+        }
+      }
+
+      console.log(`🎉 [YOUTUBE] Avatar backfill complete: ${updated} updated, ${errors} errors`);
+      return { updated, errors };
+    } catch (error) {
+      console.error('💥 [YOUTUBE] Avatar backfill failed:', error);
+      throw error;
+    }
+  }
+
   // ==================== BACKFILL YOUTUBE HANDLES ====================
 
   async backfillYouTubeHandles(limit: number = 100): Promise<{ updated: number; errors: number; skipped: number }> {

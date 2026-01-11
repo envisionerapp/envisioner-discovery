@@ -351,6 +351,11 @@ export class AdminController {
         results.push({ platform: 'TWITCH', ...twitchResult });
       }
 
+      if (platform === 'ALL' || platform === 'YOUTUBE') {
+        const youtubeResult = await streamerService.backfillYouTubeAvatars(limit);
+        results.push({ platform: 'YOUTUBE', ...youtubeResult });
+      }
+
       if (platform === 'ALL' || platform === 'KICK') {
         const kickResult = await streamerService.backfillKickAvatars(limit);
         results.push({ platform: 'KICK', ...kickResult });
