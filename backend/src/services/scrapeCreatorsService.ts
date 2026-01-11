@@ -354,8 +354,26 @@ export class ScrapeCreatorsService {
       const response = await this.client.get('/v1/instagram/profile', {
         params: { handle: handle.replace('@', '') }
       });
-      const profile = response.data?.data || response.data?.user || response.data;
-      logger.debug(`Instagram profile for ${handle}: ${profile?.follower_count || 0} followers`);
+      const raw = response.data?.data || response.data?.user || response.data;
+      if (!raw) return null;
+
+      // Map Instagram's native GraphQL structure to our interface
+      // Native fields: edge_followed_by.count, edge_follow.count, edge_owner_to_timeline_media.count
+      const profile: InstagramProfile = {
+        id: raw.id || raw.pk || '',
+        username: raw.username || handle,
+        full_name: raw.full_name || '',
+        profile_pic_url: raw.profile_pic_url_hd || raw.profile_pic_url || '',
+        biography: raw.biography || '',
+        is_verified: raw.is_verified || false,
+        follower_count: raw.follower_count ?? raw.edge_followed_by?.count ?? 0,
+        following_count: raw.following_count ?? raw.edge_follow?.count ?? 0,
+        media_count: raw.media_count ?? raw.edge_owner_to_timeline_media?.count ?? 0,
+        total_likes: raw.total_likes || 0,
+        total_comments: raw.total_comments || 0,
+      };
+
+      logger.debug(`Instagram profile for ${handle}: ${profile.follower_count} followers`);
       return profile;
     } catch (error: any) {
       logger.error(`Instagram profile fetch failed for ${handle}:`, error.response?.data || error.message);
