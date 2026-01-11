@@ -33,5 +33,9 @@ services:
         sync: false
       - key: TWITCH_CLIENT_SECRET
         sync: false
+      - key: SCRAPECREATORS_API_KEY
+        sync: false
+      - key: REDIS_URL
+        sync: false
     healthCheckPath: /health
     autoDeploy: false

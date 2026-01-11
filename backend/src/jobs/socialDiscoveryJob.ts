@@ -270,7 +270,8 @@ export async function runSocialDiscovery(options: {
   results: DiscoveryResult[];
 }> {
   const {
-    platforms = ['tiktok', 'instagram'],
+    // NOTE: Instagram search API doesn't exist in ScrapeCreators, only TikTok works for discovery
+    platforms = ['tiktok'],
     keywordSet = 'primary',
     maxResultsPerKeyword = 10,
     maxCredits = DISCOVERY_DAILY_BUDGET,
