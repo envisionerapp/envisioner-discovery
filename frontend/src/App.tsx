@@ -140,7 +140,7 @@ const getAvatarColor = (name: string): string => {
 // ===========================================
 const PLATFORMS = ['twitch', 'youtube', 'kick', 'facebook', 'tiktok', 'instagram', 'x', 'linkedin'] as const;
 const REGIONS = ['USA', 'MEXICO', 'SPAIN', 'COLOMBIA', 'BRAZIL', 'ARGENTINA', 'CANADA', 'CHILE', 'PERU', 'SWEDEN', 'UK', 'GERMANY', 'FRANCE', 'PORTUGAL', 'ITALY'] as const;
-const CATEGORIES = ['Gaming', 'Just Chatting', 'IRL', 'Music', 'Sports', 'Slots', 'Poker', 'Entertainment', 'Education', 'News', 'Lifestyle', 'Business', 'Comedy', 'Tech'] as const;
+const CATEGORIES = ['Gaming', 'iGaming', 'IRL'] as const;
 
 type Platform = typeof PLATFORMS[number];
 type Region = typeof REGIONS[number];

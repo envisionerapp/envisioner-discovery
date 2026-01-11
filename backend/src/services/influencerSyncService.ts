@@ -156,8 +156,6 @@ export class InfluencerSyncService {
               // Set last active dates from stats_updated_at
               lastSeenLive: lastActiveDate,
               lastScrapedAt: lastActiveDate,
-              // Mark as synced from influencers table
-              notes: `Synced from influencers table (id: ${inf.id})`,
             },
           });
 

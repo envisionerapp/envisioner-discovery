@@ -434,7 +434,7 @@ export class ScrapingJobQueue {
           updated++;
         } else {
           await db.streamer.create({
-            data: streamerRecord
+            data: streamerRecord as any
           });
           created++;
         }

@@ -291,7 +291,6 @@ export class StreamerController {
         updatedAt: true,
         streamTitles: true,
         panelImages: true,
-        notes: true,
         profileDescription: true,
         aboutSection: true,
         externalLinks: true,

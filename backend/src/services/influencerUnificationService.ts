@@ -565,8 +565,10 @@ export class InfluencerUnificationService {
     const unified: UnifiedInfluencer = {
       displayName: baseStreamer.displayName,
       country: this.regionToCountry(baseStreamer.region),
+      countrySource: baseStreamer.platform,
       language: baseStreamer.language,
       primaryCategory: baseStreamer.primaryCategory,
+      categorySource: baseStreamer.platform,
       tags: baseStreamer.tags || [],
       sourceStreamerIds: [baseStreamer.id],
     };
@@ -620,6 +622,7 @@ export class InfluencerUnificationService {
       countrySource,
       language: streamer.language,
       primaryCategory: streamer.primaryCategory,
+      categorySource: streamer.inferredCategorySource || (streamer.primaryCategory ? streamer.platform : null),
       tags: streamer.tags || [],
       sourceStreamerIds: [streamer.id],
     };
