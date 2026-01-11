@@ -353,24 +353,30 @@ const StreamersPage: React.FC = () => {
                   ))}
                 </div>
               </div>
-              {/* iGaming Filter Toggle */}
-              <button
-                onClick={() => {
-                  setPage(1);
-                  setCategoryFilter(categoryFilter === 'iGaming' ? '' : 'iGaming');
-                }}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  categoryFilter === 'iGaming'
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                    : 'bg-gray-800/60 text-gray-400 border border-gray-700 hover:bg-gray-700/60'
-                }`}
-                title="Filter by iGaming content"
-              >
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>iGaming</span>
-              </button>
+              {/* Category Filter Dropdown */}
+              <div className="relative">
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => { setPage(1); setCategoryFilter(e.target.value); }}
+                  className="appearance-none px-3 py-1.5 pr-8 rounded-lg text-xs font-semibold bg-gray-800/60 text-gray-300 border border-gray-700 hover:bg-gray-700/60 focus:outline-none focus:ring-1 focus:ring-primary-500 cursor-pointer"
+                  style={{ minWidth: '110px' }}
+                >
+                  <option value="">All Categories</option>
+                  <option value="Gaming">Gaming</option>
+                  <option value="iGaming">iGaming</option>
+                  <option value="IRL">IRL</option>
+                  <option value="Music">Music</option>
+                  <option value="Creative">Creative</option>
+                  <option value="Sports">Sports</option>
+                  <option value="Education">Education</option>
+                  <option value="Variety">Variety</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
               <div className="w-full sm:w-64">
                 <SearchInput
                   containerClassName="w-full"
