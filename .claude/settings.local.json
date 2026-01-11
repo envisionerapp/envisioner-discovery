@@ -23,7 +23,21 @@
       "Bash(git commit:*)",
       "Bash(node scripts/run-unification.js:*)",
       "Bash(tasklist:*)",
-      "Bash(npx vercel:*)"
+      "Bash(npx vercel:*)",
+      "Bash(node scripts/check-influencers-table.js:*)",
+      "Bash(node scripts/diagnose-streamers.js:*)",
+      "Bash(node scripts/run-sync.js:*)",
+      "Bash(node scripts/test-api-response.js:*)",
+      "Bash(node scripts/sync-x-stats.js:*)",
+      "Bash(node scripts/check-futbol-sync.js:*)",
+      "Bash(node scripts/run-promo-sync.js:*)",
+      "Bash(git revert:*)",
+      "Bash(node scripts/sync-social-to-influencers.js:*)",
+      "Bash(for i in 1 2 3 4 5)",
+      "Bash(do node scripts/sync-social-to-influencers.js:*)",
+      "Bash(done)",
+      "Bash(node scripts/fetch-x-profile.js:*)",
+      "Bash(for i in 1 2 3 4 5 6 7 8 9 10)"
     ]
   }
 }

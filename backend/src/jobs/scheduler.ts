@@ -1,10 +1,11 @@
 import cron from 'node-cron';
 import { ScrapingJobQueue } from './scrapingQueue';
 import { db, logger } from '../utils/database';
-import { Platform } from '@prisma/client';
+import { Platform, SyncTier } from '@prisma/client';
 import { TwitchScraper } from '../scrapers/twitchScraper';
 import { YouTubeScraper } from '../scrapers/youtubeScraper';
 import { KickScraper } from '../scrapers/kickScraper';
+import { syncOptimization } from '../services/syncOptimizationService';
 
 const scrapingQueue = new ScrapingJobQueue();
 let healthCheckScrapers: {
@@ -27,24 +28,12 @@ export const startScheduledJobs = async () => {
   logger.info('Starting scheduled jobs...');
   await initializeHealthCheckScrapers();
 
-  // Incremental scraping every 10 minutes
-  cron.schedule('*/10 * * * *', async () => {
-    try {
-      logger.info('Starting scheduled incremental scraping...');
-      const queueStats = await scrapingQueue.getQueueStats();
+  // LEGACY: Incremental scraping disabled - replaced by tiered sync
+  // Now using tier-based sync (HOT/ACTIVE/STANDARD/COLD) for better credit optimization
+  // See tiered sync jobs below
 
-      if (queueStats.active < 2 && queueStats.waiting < 5) {
-        await scrapingQueue.addIncrementalJob();
-      } else {
-        logger.info('Skipping incremental scraping - queue is busy', queueStats);
-      }
-    } catch (error) {
-      logger.error('Error starting scheduled incremental scraping:', error);
-    }
-  });
-
-  // Platform-specific trending scraping every 30 minutes (staggered)
-  cron.schedule('5,35 * * * *', async () => {
+  // Platform-specific trending scraping every hour (reduced from 30 min)
+  cron.schedule('5 * * * *', async () => {
     try {
       logger.info('Starting Twitch trending scraping...');
       await scrapingQueue.addTrendingScrapingJob(Platform.TWITCH, 50);
@@ -53,17 +42,7 @@ export const startScheduledJobs = async () => {
     }
   });
 
-  // DISABLED: YouTube trending scraping
-  // cron.schedule('15,45 * * * *', async () => {
-  //   try {
-  //     logger.info('Starting YouTube trending scraping...');
-  //     await scrapingQueue.addTrendingScrapingJob(Platform.YOUTUBE, 30);
-  //   } catch (error) {
-  //     logger.error('Error starting YouTube trending scraping:', error);
-  //   }
-  // });
-
-  cron.schedule('25,55 * * * *', async () => {
+  cron.schedule('35 * * * *', async () => {
     try {
       logger.info('Starting Kick trending scraping...');
       await scrapingQueue.addTrendingScrapingJob(Platform.KICK, 25);
@@ -131,7 +110,131 @@ export const startScheduledJobs = async () => {
     }
   });
 
-  logger.info('Scheduled jobs initialized');
+  // ============================================
+  // TIERED SYNC OPTIMIZATION JOBS
+  // ============================================
+
+  // HOT tier sync - every 5 minutes (live streamers, high viewers)
+  cron.schedule('*/5 * * * *', async () => {
+    try {
+      const hasBudget = await syncOptimization.hasBudget('twitch');
+      if (!hasBudget) {
+        logger.warn('Skipping HOT tier sync - daily budget exhausted for Twitch');
+        return;
+      }
+
+      const streamersToSync = await syncOptimization.getStreamersNeedingSync(
+        SyncTier.HOT,
+        'platform',
+        50
+      );
+
+      if (streamersToSync.length > 0) {
+        logger.info(`HOT tier sync: ${streamersToSync.length} streamers need syncing`);
+        await scrapingQueue.addSpecificScrapingJob(
+          streamersToSync.map(s => s.id),
+          'HOT tier sync'
+        );
+      }
+    } catch (error) {
+      logger.error('Error in HOT tier sync:', error);
+    }
+  });
+
+  // ACTIVE tier sync - every 30 minutes
+  cron.schedule('*/30 * * * *', async () => {
+    try {
+      const streamersToSync = await syncOptimization.getStreamersNeedingSync(
+        SyncTier.ACTIVE,
+        'platform',
+        100
+      );
+
+      if (streamersToSync.length > 0) {
+        logger.info(`ACTIVE tier sync: ${streamersToSync.length} streamers need syncing`);
+        await scrapingQueue.addSpecificScrapingJob(
+          streamersToSync.map(s => s.id),
+          'ACTIVE tier sync'
+        );
+      }
+    } catch (error) {
+      logger.error('Error in ACTIVE tier sync:', error);
+    }
+  });
+
+  // STANDARD tier sync - every 2 hours
+  cron.schedule('0 */2 * * *', async () => {
+    try {
+      const streamersToSync = await syncOptimization.getStreamersNeedingSync(
+        SyncTier.STANDARD,
+        'platform',
+        100
+      );
+
+      if (streamersToSync.length > 0) {
+        logger.info(`STANDARD tier sync: ${streamersToSync.length} streamers need syncing`);
+        await scrapingQueue.addSpecificScrapingJob(
+          streamersToSync.map(s => s.id),
+          'STANDARD tier sync'
+        );
+      }
+    } catch (error) {
+      logger.error('Error in STANDARD tier sync:', error);
+    }
+  });
+
+  // COLD tier sync - daily at 4 AM
+  cron.schedule('0 4 * * *', async () => {
+    try {
+      const streamersToSync = await syncOptimization.getStreamersNeedingSync(
+        SyncTier.COLD,
+        'platform',
+        200
+      );
+
+      if (streamersToSync.length > 0) {
+        logger.info(`COLD tier sync: ${streamersToSync.length} streamers need syncing`);
+        await scrapingQueue.addSpecificScrapingJob(
+          streamersToSync.map(s => s.id),
+          'COLD tier sync'
+        );
+      }
+    } catch (error) {
+      logger.error('Error in COLD tier sync:', error);
+    }
+  });
+
+  // Tier recalculation - daily at 3 AM
+  cron.schedule('0 3 * * *', async () => {
+    try {
+      logger.info('Starting daily tier recalculation...');
+      const result = await syncOptimization.recalculateAllTiers();
+      logger.info('Tier recalculation complete', result);
+    } catch (error) {
+      logger.error('Error in tier recalculation:', error);
+    }
+  });
+
+  // Credit usage report - every 6 hours
+  cron.schedule('0 */6 * * *', async () => {
+    try {
+      const stats = await syncOptimization.getSyncStats();
+      logger.info('Sync optimization stats', {
+        tierDistribution: stats.tierDistribution,
+        dailyCredits: stats.dailyCredits,
+      });
+
+      // Warn if approaching budget limits
+      const scrapecreatorsBudget = 3300; // Daily budget
+      if (stats.dailyCredits.byProvider['scrapecreators'] > scrapecreatorsBudget * 0.8) {
+        logger.warn('ScrapeCreators credits at 80% of daily budget', stats.dailyCredits);
+      }
+    } catch (error) {
+      logger.error('Error generating credit usage report:', error);
+    }
+  });
+
+  logger.info('Scheduled jobs initialized (with tiered sync optimization)');
 };
 
 const performHealthCheck = async (): Promise<void> => {

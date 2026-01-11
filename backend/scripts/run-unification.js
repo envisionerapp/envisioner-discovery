@@ -1,65 +1,100 @@
 require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
-const { influencerUnificationService } = require('../dist/services/influencerUnificationService');
 
 const db = new PrismaClient();
 
 async function run() {
-  console.log('🔗 Starting full influencer unification...\n');
-  console.log('This will merge 12k+ streamers into unified profiles.\n');
+  console.log('🔗 Starting chunked influencer unification...\n');
 
-  // Clear existing influencers for fresh batch insert
-  const existing = await db.influencer.count();
-  if (existing > 0) {
-    console.log(`🗑️ Clearing ${existing} existing influencers for fresh start...`);
-    await db.influencer.deleteMany({});
-    console.log('✅ Table cleared\n');
+  // Get all base streamers
+  const baseStreamers = await db.streamer.findMany({
+    where: { platform: { in: ['TWITCH', 'YOUTUBE', 'KICK'] } },
+    orderBy: { followers: 'desc' },
+  });
+
+  console.log(`📊 Found ${baseStreamers.length} base streamers\n`);
+
+  // Process in small chunks of 50
+  const CHUNK_SIZE = 50;
+  let created = 0;
+  let skipped = 0;
+  let errors = 0;
+
+  for (let i = 0; i < baseStreamers.length; i += CHUNK_SIZE) {
+    const chunk = baseStreamers.slice(i, i + CHUNK_SIZE);
+
+    for (const streamer of chunk) {
+      try {
+        // Check if influencer already exists for this streamer
+        let existing = null;
+        if (streamer.platform === 'TWITCH') {
+          existing = await db.influencer.findFirst({ where: { twitchId: streamer.id } });
+        } else if (streamer.platform === 'YOUTUBE') {
+          existing = await db.influencer.findFirst({ where: { youtubeId: streamer.id } });
+        } else if (streamer.platform === 'KICK') {
+          existing = await db.influencer.findFirst({ where: { kickId: streamer.id } });
+        }
+
+        if (existing) {
+          skipped++;
+          continue;
+        }
+
+        // Build platform data
+        const platformData = {};
+        if (streamer.platform === 'TWITCH') {
+          platformData.twitchId = streamer.id;
+          platformData.twitchUsername = streamer.username;
+          platformData.twitchDisplayName = streamer.displayName;
+          platformData.twitchFollowers = streamer.followers;
+          platformData.twitchAvatar = streamer.avatarUrl;
+          platformData.twitchUrl = streamer.profileUrl;
+        } else if (streamer.platform === 'YOUTUBE') {
+          platformData.youtubeId = streamer.id;
+          platformData.youtubeUsername = streamer.username;
+          platformData.youtubeDisplayName = streamer.displayName;
+          platformData.youtubeFollowers = streamer.followers;
+          platformData.youtubeAvatar = streamer.avatarUrl;
+          platformData.youtubeUrl = streamer.profileUrl;
+        } else if (streamer.platform === 'KICK') {
+          platformData.kickId = streamer.id;
+          platformData.kickUsername = streamer.username;
+          platformData.kickDisplayName = streamer.displayName;
+          platformData.kickFollowers = streamer.followers;
+          platformData.kickAvatar = streamer.avatarUrl;
+          platformData.kickUrl = streamer.profileUrl;
+        }
+
+        await db.influencer.create({
+          data: {
+            displayName: streamer.displayName,
+            country: null,
+            language: streamer.language,
+            primaryCategory: streamer.primaryCategory,
+            tags: streamer.tags || [],
+            sourceStreamerIds: [streamer.id],
+            totalReach: BigInt(streamer.followers),
+            platformCount: 1,
+            lastVerifiedAt: new Date(),
+            ...platformData,
+          }
+        });
+
+        created++;
+      } catch (err) {
+        errors++;
+      }
+    }
+
+    console.log(`✅ ${Math.min(i + CHUNK_SIZE, baseStreamers.length)}/${baseStreamers.length} | +${created} new, ${skipped} exist, ${errors} err`);
   }
 
-  const startTime = Date.now();
+  console.log(`\n🎉 Done! Created: ${created}, Already existed: ${skipped}, Errors: ${errors}`);
 
-  const result = await influencerUnificationService.unifyAllStreamers();
+  const total = await db.influencer.count();
+  console.log(`📊 Total influencers in table: ${total}`);
 
-  const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-
-  console.log('\n========================================');
-  console.log('📊 UNIFICATION COMPLETE');
-  console.log('========================================');
-  console.log('Created:', result.created);
-  console.log('Updated:', result.updated);
-  console.log('Errors:', result.errors);
-  console.log('Duration:', duration, 'seconds');
-
-  // Get final stats
-  const stats = await influencerUnificationService.getStats();
-
-  console.log('\n========================================');
-  console.log('📈 INFLUENCER STATS');
-  console.log('========================================');
-  console.log('Total influencers:', stats.total);
-  console.log('With TikTok:', stats.withTiktok);
-  console.log('With Instagram:', stats.withInstagram);
-  console.log('\nBy platform count:');
-  Object.entries(stats.byPlatformCount).forEach(([count, num]) => {
-    if (num > 0) console.log(`  ${count} platform(s): ${num}`);
-  });
-
-  console.log('\nTop 10 by total reach:');
-  stats.topByReach.forEach((i, idx) => {
-    const reach = Number(i.totalReach).toLocaleString();
-    const platforms = [
-      i.twitchUsername ? 'Twitch' : null,
-      i.youtubeUsername ? 'YouTube' : null,
-      i.tiktokUsername ? 'TikTok' : null,
-      i.instagramUsername ? 'Instagram' : null,
-    ].filter(Boolean).join(', ');
-    console.log(`  ${idx + 1}. ${i.displayName} - ${reach} reach (${platforms})`);
-  });
-
-  process.exit(0);
+  await db.$disconnect();
 }
 
-run().catch(err => {
-  console.error('Error:', err);
-  process.exit(1);
-});
+run().catch(console.error);
