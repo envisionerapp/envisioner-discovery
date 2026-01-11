@@ -45,6 +45,7 @@ import { liveStatusService } from './services/liveStatusService';
 import { twitchSyncJob } from './jobs/twitchSync';
 import { kickSyncJob } from './jobs/kickSync';
 import { avatarBackfillJob } from './jobs/avatarBackfillJob';
+import { influencerSyncJob } from './jobs/influencerSyncJob';
 import { performanceSyncRoutes } from './routes/performanceSync';
 import { discoveryRoutes } from './routes/discovery';
 import { favoritesRoutes } from './routes/favorites';
@@ -341,10 +342,12 @@ server.listen(PORT, () => {
   twitchSyncJob.start();
   kickSyncJob.start();
   avatarBackfillJob.start();
+  influencerSyncJob.start();
 
   logger.info('✅ Twitch sync: every 3 minutes');
   logger.info('✅ Kick sync: every 3 minutes');
   logger.info('✅ Avatar backfill: every 10 minutes');
+  logger.info('✅ Influencer sync: every 5 minutes');
   
 });
 
