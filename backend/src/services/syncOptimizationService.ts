@@ -348,12 +348,11 @@ export class SyncOptimizationService {
    */
   async markSynced(
     streamerId: string,
-    syncType: 'platform' | 'social',
-    syncedBy: string = 'discovery'
+    syncType: 'platform' | 'social'
   ): Promise<void> {
     const data = syncType === 'social'
-      ? { socialSyncedAt: new Date(), lastSyncedBy: syncedBy }
-      : { lastScrapedAt: new Date(), lastSyncedBy: syncedBy };
+      ? { socialSyncedAt: new Date() }
+      : { lastScrapedAt: new Date() };
 
     await db.streamer.update({
       where: { id: streamerId },

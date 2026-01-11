@@ -40,10 +40,13 @@ model Streamer {
   lastStreamed  DateTime?
   isLive        Boolean   @default(false)
   currentGame   String?
+  topGames      String[]
   tags          String[]
   region        Region
   language      String    @default("en")
   socialLinks   Json      @default("[]")
+  usesCamera    Boolean   @default(false)
+  isVtuber      Boolean   @default(false)
   fraudCheck    FraudStatus @default(CLEAN)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -552,16 +555,9 @@ model Influencer {
   totalLikes        BigInt    @default(0) @map("total_likes")  // Sum of all likes
   totalViews        BigInt    @default(0) @map("total_views")  // Sum of all views
   platformCount     Int       @default(0) @map("platform_count") // Number of platforms linked
-  avgEngagementRate Float?    @map("avg_engagement_rate")
-
-  // === GDPR COMPLIANCE ===
-  dataSource        String    @default("public_api") @map("data_source") // public_api, user_submitted, manual
-  deletionRequested Boolean   @default(false) @map("deletion_requested")
-  deletionRequestedAt DateTime? @map("deletion_requested_at")
-  lastVerifiedAt    DateTime? @map("last_verified_at")  // When data was last confirmed public
 
   // === METADATA ===
-  notes         String?
+  lastVerifiedAt    DateTime? @map("last_verified_at")  // When data was last confirmed public
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
