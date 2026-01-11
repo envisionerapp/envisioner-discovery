@@ -135,26 +135,16 @@ export class TagInferenceService {
 
   /**
    * Analyze game content and return relevant tags
+   * Returns just 'IGAMING' for all gambling/casino content (consolidated)
    */
   private analyzeGameContent(gameContent: string): string[] {
-    const tags: string[] = [];
-
-    if (!gameContent) return tags;
+    if (!gameContent) return [];
 
     // Check against all iGaming patterns
-    for (const [category, patterns] of Object.entries(this.IGAMING_PATTERNS)) {
+    for (const [_category, patterns] of Object.entries(this.IGAMING_PATTERNS)) {
       for (const pattern of patterns) {
         if (gameContent.includes(pattern)) {
-          tags.push(category);
-
-          // Add parent category "gambling" for all casino-related content
-          if (['casino', 'slots', 'poker', 'roulette', 'blackjack', 'baccarat'].includes(category)) {
-            if (!tags.includes('gambling')) {
-              tags.push('gambling');
-            }
-          }
-
-          break; // Found match for this category, move to next
+          return ['IGAMING']; // Single consolidated tag
         }
       }
     }
@@ -162,14 +152,11 @@ export class TagInferenceService {
     // Check against popular casino game names
     for (const gameName of this.CASINO_GAME_NAMES) {
       if (gameContent.includes(gameName)) {
-        if (!tags.includes('slots')) tags.push('slots');
-        if (!tags.includes('casino')) tags.push('casino');
-        if (!tags.includes('gambling')) tags.push('gambling');
-        break;
+        return ['IGAMING']; // Single consolidated tag
       }
     }
 
-    return tags;
+    return [];
   }
 
   /**
@@ -277,11 +264,10 @@ export class TagInferenceService {
     const streamersWithIGamingGames = results.length;
     const potentialNewTags = results.reduce((sum, r) => sum + r.inferredTags.length, 0);
 
-    // Get current count of streamers with iGaming tags
-    const igamingTags = ['casino', 'slots', 'poker', 'betting', 'gambling', 'roulette', 'blackjack'];
+    // Get current count of streamers with iGaming tag
     const streamersWithIGamingTags = await db.streamer.count({
       where: {
-        tags: { hasSome: igamingTags }
+        tags: { has: 'IGAMING' }
       }
     });
 

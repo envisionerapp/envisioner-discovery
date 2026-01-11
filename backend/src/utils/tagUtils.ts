@@ -42,9 +42,8 @@ export function filterCategoryTags(tags: string[]): string[] {
 export function addCategoryTags(tags: string[]): string[] {
   const newTags = [...tags];
 
-  // Add _CAT_GAMBLING if any gambling tags present
-  const gamblingTags = ['CASINO', 'SLOTS', 'BETTING', 'POKER', 'BLACKJACK', 'ROULETTE', 'GAMBLING', 'IGAMING'];
-  if (tags.some(t => gamblingTags.includes(t)) && !tags.includes('_CAT_GAMBLING')) {
+  // Add _CAT_GAMBLING if IGAMING tag present
+  if (tags.includes('IGAMING') && !tags.includes('_CAT_GAMBLING')) {
     newTags.push('_CAT_GAMBLING');
   }
 
@@ -94,7 +93,9 @@ export function categoryTagToDisplayName(categoryTag: string): string {
  * Adding local StreamerTags to existing tags based on content
  */
 export enum StreamerTag {
+  // Content types
   GAMING='GAMING',
+  IGAMING='IGAMING',  // All gambling/casino content (slots, poker, blackjack, etc.)
   IRL='IRL',
   MUSIC='MUSIC',
   ART='ART',
@@ -107,18 +108,11 @@ export enum StreamerTag {
   SPORTS='SPORTS',
   COMEDY='COMEDY',
   VARIETY='VARIETY',
+  // Gaming sub-genres
   RPG='RPG',
   FPS='FPS',
   STRATEGY='STRATEGY',
   SIMULATION='SIMULATION',
   HORROR='HORROR',
   ADVENTURE='ADVENTURE',
-  CASINO='CASINO',
-  SLOTS='SLOTS',
-  BETTING='BETTING',
-  POKER='POKER',
-  BLACKJACK='BLACKJACK',
-  ROULETTE='ROULETTE',
-  GAMBLING='GAMBLING',
-  IGAMING='IGAMING'
 }
