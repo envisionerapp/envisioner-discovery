@@ -572,6 +572,8 @@ export class ScrapeCreatorsService {
   async getLinkedInProfile(handle: string): Promise<LinkedInProfile | null> {
     try {
       // API requires full URL, not just handle
+      if (!await this.ensureApiKey()) return null;
+
       const url = `https://www.linkedin.com/in/${handle}`;
       const response = await this.client.get('/v1/linkedin/profile', {
         params: { url }
