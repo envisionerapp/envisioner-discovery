@@ -347,6 +347,26 @@ export class ScrapeCreatorsService {
     }
   }
 
+
+  /**
+   * Debug method to get raw Instagram API response
+   */
+  async getInstagramProfileRaw(handle: string): Promise<any> {
+    try {
+      if (!await this.ensureApiKey()) return { error: 'No API key' };
+
+      const response = await this.client.get('/v1/instagram/profile', {
+        params: { handle: handle.replace('@', '') }
+      });
+      return {
+        responseDataKeys: Object.keys(response.data || {}),
+        responseData: response.data,
+      };
+    } catch (error: any) {
+      return { error: error.response?.data || error.message };
+    }
+  }
+
   async getInstagramProfile(handle: string): Promise<InstagramProfile | null> {
     try {
       if (!await this.ensureApiKey()) return null;
@@ -354,14 +374,10 @@ export class ScrapeCreatorsService {
       const response = await this.client.get('/v1/instagram/profile', {
         params: { handle: handle.replace('@', '') }
       });
-      // Debug: log the full API response structure
-      logger.info(`Instagram API response keys: ${JSON.stringify(Object.keys(response.data || {}))}`);
 
-      const raw = response.data?.data || response.data?.user || response.data;
+      // API returns { success, data: { user: {...} } }
+      const raw = response.data?.data?.user || response.data?.user || response.data?.data || response.data;
       if (!raw) return null;
-
-      logger.info(`Instagram raw object keys: ${JSON.stringify(Object.keys(raw))}`);
-      logger.info(`Instagram edge_followed_by: ${JSON.stringify(raw.edge_followed_by)}`);
 
       // Map Instagram's native GraphQL structure to our interface
       // Native fields: edge_followed_by.count, edge_follow.count, edge_owner_to_timeline_media.count
@@ -379,7 +395,7 @@ export class ScrapeCreatorsService {
         total_comments: raw.total_comments || 0,
       };
 
-      logger.debug(`Instagram profile for ${handle}: ${profile.follower_count} followers`);
+      logger.debug(`Instagram profile for ${handle}: ${profile.follower_count?.toLocaleString()} followers`);
       return profile;
     } catch (error: any) {
       logger.error(`Instagram profile fetch failed for ${handle}:`, error.response?.data || error.message);

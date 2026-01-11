@@ -1043,6 +1043,9 @@ router.get('/debug/instagram/:username', asyncHandler(async (req: Request, res: 
   // Now try to fetch the profile
   const profile = await scrapeCreatorsService.getInstagramProfile(username);
 
+  // Get raw API response for debugging
+  const rawApiResponse = await scrapeCreatorsService.getInstagramProfileRaw(username);
+
   // Check if already in DB
   const existing = await db.streamer.findUnique({
     where: { platform_username: { platform: Platform.INSTAGRAM, username: username.toLowerCase() } },
@@ -1062,8 +1065,9 @@ router.get('/debug/instagram/:username', asyncHandler(async (req: Request, res: 
           username: reels[0].username,
         } : null,
       },
+      rawApiResponse,
       profileFetch: profile ? {
-        rawProfile: profile,
+        mappedProfile: profile,
         username: profile.username,
         full_name: profile.full_name,
         follower_count: profile.follower_count,
