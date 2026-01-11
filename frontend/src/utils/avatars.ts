@@ -81,20 +81,24 @@ export const AVATARS: string[] = [
 ];
 
 /**
- * Proxy image through weserv.nl to avoid CORS issues with Instagram/TikTok
- * Also converts HEIF/AVIF to JPEG for browser compatibility
+ * Get the avatar URL, using Bunny CDN URLs directly
+ * For Instagram/TikTok, avatars should already be on Bunny CDN (media.envr.io)
  */
 const proxyImageUrl = (url: string): string => {
   if (!url) return url;
 
-  // Check if URL needs proxying (Instagram, TikTok CDNs)
+  // Bunny CDN URLs work directly - no proxy needed
+  if (url.includes('media.envr.io')) {
+    return url;
+  }
+
+  // For non-Bunny Instagram/TikTok URLs (legacy), use weserv.nl proxy as fallback
   const needsProxy = url.includes('instagram.') ||
                      url.includes('fbcdn.net') ||
                      url.includes('cdninstagram.') ||
                      url.includes('tiktokcdn.');
 
   if (needsProxy) {
-    // Use weserv.nl image proxy - handles CORS and format conversion
     return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=300&h=300&fit=cover&output=jpg`;
   }
 

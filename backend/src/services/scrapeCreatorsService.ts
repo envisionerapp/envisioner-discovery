@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { db, logger } from '../utils/database';
 import { Platform, Region } from '@prisma/client';
 import { getConfig } from '../utils/configFromDb';
+import { bunnyService } from './bunnyService';
 
 // API Response interfaces
 interface TikTokProfile {
@@ -817,6 +818,22 @@ export class ScrapeCreatorsService {
     if (!data.username) {
       logger.warn(`Skipping ${platform} profile - no username in API response`);
       return;
+    }
+
+    // Upload avatar to Bunny CDN (platform CDN URLs expire)
+    if (data.avatarUrl) {
+      try {
+        if (platform === 'INSTAGRAM') {
+          data.avatarUrl = await bunnyService.uploadInstagramAvatar(data.username, data.avatarUrl);
+        } else if (platform === 'TIKTOK') {
+          data.avatarUrl = await bunnyService.uploadTikTokAvatar(data.username, data.avatarUrl);
+        } else if (platform === 'LINKEDIN') {
+          data.avatarUrl = await bunnyService.uploadLinkedInAvatar(data.username, data.avatarUrl);
+        }
+      } catch (error: any) {
+        logger.warn(`Failed to upload avatar to Bunny CDN for ${platform}/${data.username}: ${error.message}`);
+        // Continue with original URL if upload fails
+      }
     }
 
     await db.streamer.upsert({
