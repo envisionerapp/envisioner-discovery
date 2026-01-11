@@ -223,82 +223,34 @@ export class ScrapeCreatorsService {
   }
 
   /**
-   * Search YouTube channels/videos
+   * Get YouTube channel details (Note: No YouTube search endpoint exists in ScrapeCreators)
    */
-  async searchYouTube(query: string, type: 'channel' | 'video' = 'channel'): Promise<any[]> {
-    try {
-      if (!await this.ensureApiKey()) return [];
-
-      const response = await this.client.get('/v1/youtube/search', {
-        params: { query, type }
-      });
-      return response.data?.results || response.data?.data || [];
-    } catch (error: any) {
-      logger.error(`YouTube search failed for "${query}":`, error.response?.data || error.message);
-      return [];
-    }
-  }
-
-  /**
-   * Search YouTube by hashtag
-   */
-  async searchYouTubeByHashtag(hashtag: string): Promise<any[]> {
-    try {
-      if (!await this.ensureApiKey()) return [];
-
-      const response = await this.client.get('/v1/youtube/search/hashtag', {
-        params: { hashtag: hashtag.replace('#', '') }
-      });
-      return response.data?.videos || response.data?.data || [];
-    } catch (error: any) {
-      logger.error(`YouTube hashtag search failed for "${hashtag}":`, error.response?.data || error.message);
-      return [];
-    }
-  }
-
-  /**
-   * Get YouTube trending shorts
-   */
-  async getYouTubeTrendingShorts(): Promise<any[]> {
-    try {
-      if (!await this.ensureApiKey()) return [];
-
-      const response = await this.client.get('/v1/youtube/trending/shorts');
-      return response.data?.shorts || response.data?.data || [];
-    } catch (error: any) {
-      logger.error(`YouTube trending shorts failed:`, error.response?.data || error.message);
-      return [];
-    }
-  }
-
-  /**
-   * Get YouTube channel details
-   */
-  async getYouTubeChannel(channelId: string): Promise<any> {
+  async getYouTubeChannel(handleOrId: string): Promise<any> {
     try {
       if (!await this.ensureApiKey()) return null;
 
       const response = await this.client.get('/v1/youtube/channel', {
-        params: { id: channelId }
+        params: { handle: handleOrId.replace('@', '') }
       });
       return response.data?.channel || response.data?.data || response.data;
     } catch (error: any) {
-      logger.error(`YouTube channel failed for ${channelId}:`, error.response?.data || error.message);
+      logger.error(`YouTube channel failed for ${handleOrId}:`, error.response?.data || error.message);
       return null;
     }
   }
 
   /**
-   * Search Instagram Reels by keyword (uses Google search)
+   * Search Instagram Reels by keyword (uses Google search internally)
+   * Endpoint: GET /v1/instagram/search/reels?keyword=xxx
    */
   async searchInstagramReels(query: string): Promise<any[]> {
     try {
       if (!await this.ensureApiKey()) return [];
 
       const response = await this.client.get('/v1/instagram/search/reels', {
-        params: { query }
+        params: { keyword: query }
       });
-      return response.data?.reels || response.data?.data || [];
+      return response.data?.reels || response.data?.results || response.data?.data || [];
     } catch (error: any) {
       logger.error(`Instagram reels search failed for "${query}":`, error.response?.data || error.message);
       return [];
@@ -307,15 +259,19 @@ export class ScrapeCreatorsService {
 
   /**
    * Search Facebook Ad Library - find advertisers
+   * Endpoint: GET /v1/facebook/adLibrary/search/ads
    */
   async searchFacebookAds(query: string, country: string = 'US'): Promise<any[]> {
     try {
       if (!await this.ensureApiKey()) return [];
 
-      const response = await this.client.get('/v1/facebook/ads/search', {
-        params: { query, country }
+      const response = await this.client.get('/v1/facebook/adLibrary/search/ads', {
+        params: {
+          search_terms: query,
+          ad_reached_countries: country,
+        }
       });
-      return response.data?.ads || response.data?.data || [];
+      return response.data?.ads || response.data?.results || response.data?.data || [];
     } catch (error: any) {
       logger.error(`Facebook ads search failed for "${query}":`, error.response?.data || error.message);
       return [];
@@ -324,15 +280,16 @@ export class ScrapeCreatorsService {
 
   /**
    * Search LinkedIn Ad Library - find B2B advertisers
+   * Endpoint: GET /v1/linkedin/ads/search
    */
   async searchLinkedInAds(query: string): Promise<any[]> {
     try {
       if (!await this.ensureApiKey()) return [];
 
       const response = await this.client.get('/v1/linkedin/ads/search', {
-        params: { query }
+        params: { search: query }
       });
-      return response.data?.ads || response.data?.data || [];
+      return response.data?.ads || response.data?.results || response.data?.data || [];
     } catch (error: any) {
       logger.error(`LinkedIn ads search failed for "${query}":`, error.response?.data || error.message);
       return [];

@@ -8,6 +8,8 @@ import { KickScraper } from '../scrapers/kickScraper';
 import { syncOptimization } from '../services/syncOptimizationService';
 import { runDiscovery, runQuickDiscovery, runFullDiscovery } from './discoveryJob';
 import { runSocialDiscovery, runQuickSocialDiscovery, runFullSocialDiscovery, runInfluencerDiscovery } from './socialDiscoveryJob';
+import { runEnhancedTwitchDiscovery, runQuickTwitchDiscovery } from './enhancedTwitchDiscovery';
+import { runYouTubeDiscovery, runQuickYouTubeDiscovery } from './youtubeDiscoveryJob';
 
 const scrapingQueue = new ScrapingJobQueue();
 let healthCheckScrapers: {
@@ -314,7 +316,57 @@ export const startScheduledJobs = async () => {
     }
   });
 
-  logger.info('Scheduled jobs initialized (with tiered sync + platform/social discovery)');
+  // ============================================
+  // ENHANCED DISCOVERY JOBS - Target 1K/platform/day
+  // ============================================
+
+  // Enhanced Twitch Discovery - 4x daily (spread across timezones)
+  // Targets 250 new streamers per run = 1,000/day
+  cron.schedule('15 0,6,12,18 * * *', async () => {
+    try {
+      logger.info('🟣 Starting enhanced Twitch discovery...');
+      const result = await runEnhancedTwitchDiscovery({ targetNew: 250 });
+      logger.info('🟣 Enhanced Twitch discovery complete', result);
+    } catch (error) {
+      logger.error('Error in enhanced Twitch discovery:', error);
+    }
+  });
+
+  // Quick Twitch Discovery - 2x daily (between main runs)
+  cron.schedule('15 3,15 * * *', async () => {
+    try {
+      logger.info('🟣 Starting quick Twitch discovery...');
+      const result = await runQuickTwitchDiscovery();
+      logger.info('🟣 Quick Twitch discovery complete', result);
+    } catch (error) {
+      logger.error('Error in quick Twitch discovery:', error);
+    }
+  });
+
+  // YouTube Discovery - 3x daily
+  // Targets 334 new channels per run = ~1,000/day
+  cron.schedule('15 2,10,18 * * *', async () => {
+    try {
+      logger.info('🔴 Starting YouTube discovery...');
+      const result = await runYouTubeDiscovery({ targetNew: 334 });
+      logger.info('🔴 YouTube discovery complete', result);
+    } catch (error) {
+      logger.error('Error in YouTube discovery:', error);
+    }
+  });
+
+  // Quick YouTube Discovery - 2x daily (between main runs)
+  cron.schedule('15 6,14 * * *', async () => {
+    try {
+      logger.info('🔴 Starting quick YouTube discovery...');
+      const result = await runQuickYouTubeDiscovery();
+      logger.info('🔴 Quick YouTube discovery complete', result);
+    } catch (error) {
+      logger.error('Error in quick YouTube discovery:', error);
+    }
+  });
+
+  logger.info('Scheduled jobs initialized (with tiered sync + platform/social discovery + enhanced discovery)');
 };
 
 const performHealthCheck = async (): Promise<void> => {

@@ -662,3 +662,39 @@ model ApiUsage {
   @@index([recordedAt(sort: Desc)])
   @@map("api_usage")
 }
+
+// Discovery Metrics - Track daily discovery stats per platform
+model DiscoveryMetrics {
+  id              String    @id @default(cuid())
+  date            DateTime  @db.Date // Date of metrics (truncated to day)
+  platform        Platform
+
+  // Discovery counts
+  discovered      Int       @default(0) // New streamers discovered
+  skipped         Int       @default(0) // Skipped (duplicates/low quality)
+  errors          Int       @default(0) // API/processing errors
+
+  // Discovery methods
+  byCategory      Int       @default(0) @map("by_category")     // From category browsing
+  bySearch        Int       @default(0) @map("by_search")       // From search API
+  byFollowers     Int       @default(0) @map("by_followers")    // From follower expansion
+  byHashtag       Int       @default(0) @map("by_hashtag")      // From hashtag search
+  byLiveStreams   Int       @default(0) @map("by_live_streams") // From live stream discovery
+
+  // Resource usage
+  apiCalls        Int       @default(0) @map("api_calls")       // Total API calls made
+  quotaUsed       Int       @default(0) @map("quota_used")      // YouTube quota units (or equivalent)
+  creditsUsed     Int       @default(0) @map("credits_used")    // ScrapeCreators credits
+
+  // Timing
+  totalDuration   Int       @default(0) @map("total_duration")  // Total ms across all runs
+  runCount        Int       @default(0) @map("run_count")       // Number of discovery runs
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@unique([date, platform])
+  @@index([date(sort: Desc)])
+  @@index([platform, date(sort: Desc)])
+  @@map("discovery_metrics")
+}

@@ -3,10 +3,12 @@
  *
  * Discovery methods by platform:
  * - TikTok: Keyword search, Hashtag search, Trending feed, Popular creators
- * - YouTube: Search, Hashtag search, Trending shorts
- * - Instagram: Reels search (via Google)
- * - Facebook: Ad Library search (find advertisers)
- * - LinkedIn: Ad Library search (B2B advertisers)
+ * - Instagram: Reels search (via Google) - finds reels and their creators
+ * - Facebook: Ad Library search - finds iGaming advertisers
+ * - LinkedIn: Ad Library search - finds B2B advertisers
+ *
+ * Note: YouTube does NOT have a search endpoint in ScrapeCreators.
+ * Use the existing YouTube Data API discovery in youtubeDiscoveryJob.ts instead.
  */
 
 import { db, logger } from '../utils/database';
@@ -43,20 +45,36 @@ const DISCOVERY_KEYWORDS = {
   ],
 };
 
-// Hashtags for discovery
+// Hashtags for discovery - expanded for 1K/day target
 const DISCOVERY_HASHTAGS = {
   tiktok: [
+    // English iGaming
     'slots', 'casino', 'gambling', 'poker', 'sportsbetting',
     'slotwin', 'casinolife', 'pokertiktok', 'bigwin', 'jackpot',
+    'onlinecasino', 'slotmachine', 'casinonight', 'blackjack', 'roulette',
+    'stake', 'stakeus', 'rollbit', 'bcgame', 'casinoonline',
+    // Spanish
+    'apuestas', 'tragamonedas', 'casinoenlinea', 'apuestasdeportivas',
+    'slotsmexico', 'casinomexico', 'apostas', 'ganador',
+    // Portuguese
+    'cassino', 'apostasonline', 'slotsbrasil', 'cassinoaovivo',
+    // Streamer names
+    'roshtein', 'trainwreckstv', 'xposed', 'adinross',
   ],
   youtube: [
     'slots', 'casino', 'gambling', 'poker', 'sportsbetting',
-    'slotmachine', 'casinostreamer', 'bigwin',
+    'slotmachine', 'casinostreamer', 'bigwin', 'onlinecasino',
+    'livecasino', 'slotgames', 'casinolive', 'jackpot',
+    'tragamonedas', 'cassino', 'apuestas',
+  ],
+  instagram: [
+    'casino', 'slots', 'gambling', 'poker', 'casinonight',
+    'slotmachine', 'casinoonline', 'sportsbetting', 'bigwin',
   ],
 };
 
-// Daily budget allocation for discovery
-const DISCOVERY_DAILY_BUDGET = 500;
+// Daily budget allocation for discovery - increased for 1K/day target
+const DISCOVERY_DAILY_BUDGET = 2000;
 
 interface DiscoveryResult {
   platform: string;
@@ -287,182 +305,9 @@ async function upsertTikTokCreator(username: string, source: string): Promise<'c
 }
 
 // ==================== YOUTUBE DISCOVERY ====================
-
-/**
- * Discover YouTube channels by search
- */
-async function discoverYouTubeBySearch(
-  query: string,
-  maxResults: number = 10
-): Promise<DiscoveryResult> {
-  const result: DiscoveryResult = {
-    platform: 'YOUTUBE',
-    method: 'search',
-    query,
-    searched: 0,
-    created: 0,
-    skipped: 0,
-    credits: 1,
-  };
-
-  try {
-    const channels = await scrapeCreatorsService.searchYouTube(query, 'channel');
-    await syncOptimization.trackApiCall('scrapecreators', 'youtube/search', 1, true);
-    result.searched = channels.length;
-
-    for (const channel of channels.slice(0, maxResults)) {
-      const channelId = channel.channelId || channel.channel_id || channel.id;
-      if (!channelId) continue;
-
-      const created = await upsertYouTubeCreator(channelId, channel, `search:${query}`);
-      if (created === 'created') result.created++;
-      else if (created === 'skipped') result.skipped++;
-      else result.credits++;
-
-      await new Promise(r => setTimeout(r, 100));
-    }
-  } catch (error) {
-    logger.error(`YouTube search discovery failed for "${query}":`, error);
-  }
-
-  return result;
-}
-
-/**
- * Discover YouTube creators by hashtag
- */
-async function discoverYouTubeByHashtag(
-  hashtag: string,
-  maxResults: number = 15
-): Promise<DiscoveryResult> {
-  const result: DiscoveryResult = {
-    platform: 'YOUTUBE',
-    method: 'hashtag',
-    query: hashtag,
-    searched: 0,
-    created: 0,
-    skipped: 0,
-    credits: 1,
-  };
-
-  try {
-    const videos = await scrapeCreatorsService.searchYouTubeByHashtag(hashtag);
-    await syncOptimization.trackApiCall('scrapecreators', 'youtube/search/hashtag', 1, true);
-    result.searched = videos.length;
-
-    const channelIds = new Set<string>();
-    for (const video of videos) {
-      const channelId = video.channelId || video.channel_id;
-      if (channelId) channelIds.add(channelId);
-    }
-
-    for (const channelId of Array.from(channelIds).slice(0, maxResults)) {
-      const created = await upsertYouTubeCreator(channelId, null, `hashtag:${hashtag}`);
-      if (created === 'created') result.created++;
-      else if (created === 'skipped') result.skipped++;
-      else result.credits++;
-
-      await new Promise(r => setTimeout(r, 100));
-    }
-  } catch (error) {
-    logger.error(`YouTube hashtag discovery failed for "${hashtag}":`, error);
-  }
-
-  return result;
-}
-
-/**
- * Discover YouTube creators from trending shorts
- */
-async function discoverYouTubeTrendingShorts(maxResults: number = 20): Promise<DiscoveryResult> {
-  const result: DiscoveryResult = {
-    platform: 'YOUTUBE',
-    method: 'trending_shorts',
-    query: 'trending_shorts',
-    searched: 0,
-    created: 0,
-    skipped: 0,
-    credits: 1,
-  };
-
-  try {
-    const shorts = await scrapeCreatorsService.getYouTubeTrendingShorts();
-    await syncOptimization.trackApiCall('scrapecreators', 'youtube/trending/shorts', 1, true);
-    result.searched = shorts.length;
-
-    const channelIds = new Set<string>();
-    for (const short of shorts) {
-      const channelId = short.channelId || short.channel_id;
-      if (channelId) channelIds.add(channelId);
-    }
-
-    for (const channelId of Array.from(channelIds).slice(0, maxResults)) {
-      const created = await upsertYouTubeCreator(channelId, null, 'trending_shorts');
-      if (created === 'created') result.created++;
-      else if (created === 'skipped') result.skipped++;
-      else result.credits++;
-
-      await new Promise(r => setTimeout(r, 100));
-    }
-  } catch (error) {
-    logger.error('YouTube trending shorts discovery failed:', error);
-  }
-
-  return result;
-}
-
-async function upsertYouTubeCreator(
-  channelId: string,
-  searchResult: any,
-  source: string
-): Promise<'created' | 'skipped' | 'fetched'> {
-  // Check by channelId in profileUrl
-  const existing = await db.streamer.findFirst({
-    where: {
-      platform: Platform.YOUTUBE,
-      OR: [
-        { profileUrl: { contains: channelId } },
-        { username: channelId },
-      ],
-    },
-  });
-
-  if (existing) return 'skipped';
-
-  // Get full channel details
-  const channel = searchResult || await scrapeCreatorsService.getYouTubeChannel(channelId);
-  if (!channel) return 'fetched';
-
-  const subscribers = channel.subscriberCount || channel.subscriber_count || channel.subscribers || 0;
-  if (subscribers < 1000) return 'fetched';
-
-  const username = channel.customUrl || channel.custom_url || channel.handle || channelId;
-
-  try {
-    await db.streamer.create({
-      data: {
-        platform: Platform.YOUTUBE,
-        username: username.replace('@', '').toLowerCase(),
-        displayName: channel.title || channel.name || username,
-        profileUrl: `https://youtube.com/channel/${channelId}`,
-        avatarUrl: channel.thumbnail || channel.thumbnails?.high?.url || channel.avatar,
-        followers: subscribers,
-        totalViews: BigInt(channel.viewCount || channel.view_count || 0),
-        profileDescription: channel.description?.substring(0, 500),
-        isLive: false,
-        language: 'en',
-        region: Region.WORLDWIDE,
-        tags: [source.split(':')[0]],
-        socialLinks: [],
-        discoveredVia: `scrapecreators:youtube:${source}`,
-      },
-    });
-    logger.info(`Discovered YouTube: ${channel.title || username} (${subscribers.toLocaleString()} subs)`);
-    return 'created';
-  } catch (error) {
-    return 'skipped';
-  }
-}
+// NOTE: ScrapeCreators does NOT have YouTube search endpoints.
+// YouTube discovery should use the YouTube Data API in youtubeDiscoveryJob.ts instead.
+// These stubs are kept for API compatibility but return empty results.
 
 // ==================== INSTAGRAM DISCOVERY ====================
 
@@ -732,7 +577,7 @@ async function upsertLinkedInCompany(companyId: string, companyName: string, sou
  * Run comprehensive social discovery across all platforms
  */
 export async function runSocialDiscovery(options: {
-  platforms?: ('tiktok' | 'youtube' | 'instagram' | 'facebook' | 'linkedin')[];
+  platforms?: ('tiktok' | 'instagram' | 'facebook' | 'linkedin')[];
   methods?: ('keyword' | 'hashtag' | 'trending' | 'popular' | 'ads')[];
   keywordSet?: 'primary' | 'secondary' | 'influencer' | 'all';
   maxResultsPerQuery?: number;
@@ -744,7 +589,8 @@ export async function runSocialDiscovery(options: {
   results: DiscoveryResult[];
 }> {
   const {
-    platforms = ['tiktok', 'youtube', 'instagram', 'facebook', 'linkedin'],
+    // Note: YouTube removed - use YouTube Data API in youtubeDiscoveryJob.ts
+    platforms = ['tiktok', 'instagram', 'facebook', 'linkedin'],
     methods = ['keyword', 'hashtag', 'trending', 'popular', 'ads'],
     keywordSet = 'primary',
     maxResultsPerQuery = 10,
@@ -764,7 +610,7 @@ export async function runSocialDiscovery(options: {
   const results: DiscoveryResult[] = [];
   let totalCredits = 0;
   const byPlatform: Record<string, number> = {
-    tiktok: 0, youtube: 0, instagram: 0, facebook: 0, linkedin: 0,
+    tiktok: 0, instagram: 0, facebook: 0, linkedin: 0,
   };
 
   // TikTok Discovery
@@ -814,42 +660,8 @@ export async function runSocialDiscovery(options: {
     }
   }
 
-  // YouTube Discovery
-  if (platforms.includes('youtube')) {
-    // Search
-    if (methods.includes('keyword')) {
-      for (const keyword of keywords.slice(0, 3)) {
-        if (totalCredits >= maxCredits) break;
-        const r = await discoverYouTubeBySearch(keyword, maxResultsPerQuery);
-        results.push(r);
-        totalCredits += r.credits;
-        byPlatform.youtube += r.created;
-        await new Promise(res => setTimeout(res, 300));
-      }
-    }
-
-    // Hashtag search
-    if (methods.includes('hashtag')) {
-      for (const hashtag of DISCOVERY_HASHTAGS.youtube.slice(0, 3)) {
-        if (totalCredits >= maxCredits) break;
-        const r = await discoverYouTubeByHashtag(hashtag, maxResultsPerQuery);
-        results.push(r);
-        totalCredits += r.credits;
-        byPlatform.youtube += r.created;
-        await new Promise(res => setTimeout(res, 300));
-      }
-    }
-
-    // Trending shorts
-    if (methods.includes('trending')) {
-      if (totalCredits < maxCredits) {
-        const r = await discoverYouTubeTrendingShorts(maxResultsPerQuery);
-        results.push(r);
-        totalCredits += r.credits;
-        byPlatform.youtube += r.created;
-      }
-    }
-  }
+  // NOTE: YouTube discovery removed - ScrapeCreators doesn't have YouTube search.
+  // Use youtubeDiscoveryJob.ts with YouTube Data API instead.
 
   // Instagram Discovery
   if (platforms.includes('instagram')) {
@@ -901,11 +713,12 @@ export async function runSocialDiscovery(options: {
 }
 
 /**
- * Quick social discovery - TikTok + YouTube only, primary keywords
+ * Quick social discovery - TikTok + Instagram, primary keywords
+ * (YouTube handled by youtubeDiscoveryJob.ts)
  */
 export async function runQuickSocialDiscovery(): Promise<{ totalDiscovered: number; totalCredits: number }> {
   return runSocialDiscovery({
-    platforms: ['tiktok', 'youtube'],
+    platforms: ['tiktok', 'instagram'],
     methods: ['keyword', 'trending'],
     keywordSet: 'primary',
     maxResultsPerQuery: 5,
@@ -915,10 +728,11 @@ export async function runQuickSocialDiscovery(): Promise<{ totalDiscovered: numb
 
 /**
  * Full social discovery - all platforms and methods
+ * (YouTube handled by youtubeDiscoveryJob.ts)
  */
 export async function runFullSocialDiscovery(): Promise<{ totalDiscovered: number; totalCredits: number }> {
   return runSocialDiscovery({
-    platforms: ['tiktok', 'youtube', 'instagram', 'facebook', 'linkedin'],
+    platforms: ['tiktok', 'instagram', 'facebook', 'linkedin'],
     methods: ['keyword', 'hashtag', 'trending', 'popular', 'ads'],
     keywordSet: 'all',
     maxResultsPerQuery: 15,
@@ -928,10 +742,11 @@ export async function runFullSocialDiscovery(): Promise<{ totalDiscovered: numbe
 
 /**
  * Influencer-focused discovery - search for known names
+ * (YouTube handled by youtubeDiscoveryJob.ts)
  */
 export async function runInfluencerDiscovery(): Promise<{ totalDiscovered: number; totalCredits: number }> {
   return runSocialDiscovery({
-    platforms: ['tiktok', 'youtube', 'instagram'],
+    platforms: ['tiktok', 'instagram'],
     methods: ['keyword'],
     keywordSet: 'influencer',
     maxResultsPerQuery: 15,
@@ -941,9 +756,10 @@ export async function runInfluencerDiscovery(): Promise<{ totalDiscovered: numbe
 
 /**
  * Platform-specific discovery
+ * (YouTube handled by youtubeDiscoveryJob.ts)
  */
 export async function runPlatformDiscovery(
-  platform: 'tiktok' | 'youtube' | 'instagram' | 'facebook' | 'linkedin'
+  platform: 'tiktok' | 'instagram' | 'facebook' | 'linkedin'
 ): Promise<{ totalDiscovered: number; totalCredits: number }> {
   return runSocialDiscovery({
     platforms: [platform],

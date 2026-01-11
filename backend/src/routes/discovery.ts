@@ -521,15 +521,17 @@ router.post('/populate', asyncHandler(async (req: Request, res: Response) => {
  *
  * Platforms supported:
  * - TikTok: keyword search, hashtag search, trending, popular creators
- * - YouTube: search, hashtag search, trending shorts
  * - Instagram: reels search (via Google)
  * - Facebook: ad library search (find advertisers)
  * - LinkedIn: ad library search (B2B advertisers)
+ *
+ * Note: YouTube NOT supported via ScrapeCreators (no search API).
+ * Use youtubeDiscoveryJob.ts with YouTube Data API instead.
  */
 router.post('/social', asyncHandler(async (req: Request, res: Response) => {
   const {
     mode = 'quick',
-    platforms = ['tiktok', 'youtube', 'instagram', 'facebook', 'linkedin'],
+    platforms = ['tiktok', 'instagram', 'facebook', 'linkedin'],
     methods = ['keyword', 'hashtag', 'trending', 'popular', 'ads'],
     keywordSet = 'primary',
     maxResultsPerQuery = 10,
@@ -556,10 +558,10 @@ router.post('/social', asyncHandler(async (req: Request, res: Response) => {
       break;
     case 'platform':
       // Single platform discovery
-      if (!platform || !['tiktok', 'youtube', 'instagram', 'facebook', 'linkedin'].includes(platform)) {
+      if (!platform || !['tiktok', 'instagram', 'facebook', 'linkedin'].includes(platform)) {
         return res.status(400).json({
           success: false,
-          error: 'Invalid platform. Use: tiktok, youtube, instagram, facebook, or linkedin',
+          error: 'Invalid platform. Use: tiktok, instagram, facebook, or linkedin (YouTube not supported via ScrapeCreators)',
         });
       }
       result = await runPlatformDiscovery(platform);
@@ -567,7 +569,7 @@ router.post('/social', asyncHandler(async (req: Request, res: Response) => {
     case 'custom':
       // Custom options
       result = await runSocialDiscovery({
-        platforms: platforms as ('tiktok' | 'youtube' | 'instagram' | 'facebook' | 'linkedin')[],
+        platforms: platforms as ('tiktok' | 'instagram' | 'facebook' | 'linkedin')[],
         methods: methods as ('keyword' | 'hashtag' | 'trending' | 'popular' | 'ads')[],
         keywordSet: keywordSet as 'primary' | 'secondary' | 'influencer' | 'all',
         maxResultsPerQuery,
