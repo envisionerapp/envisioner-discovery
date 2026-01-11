@@ -957,6 +957,7 @@ export class ScrapeCreatorsService {
       }
       case 'LINKEDIN': {
         const p = profile as LinkedInProfile;
+        console.log('[LinkedIn] Raw profile_pic_url from ScrapeCreators:', p.profile_pic_url);
         return {
           username: p.public_identifier,
           displayName: `${p.first_name} ${p.last_name}`.trim(),
