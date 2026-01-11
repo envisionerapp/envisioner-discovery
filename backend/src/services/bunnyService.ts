@@ -128,7 +128,7 @@ export async function uploadLinkedInAvatar(username: string, avatarUrl: string):
   if (baseUrl.includes(BUNNY_CDN_HOSTNAME!)) {
     // Already on Bunny, just ensure optimizer params are present
     if (!avatarUrl.includes('width=')) {
-      return `${baseUrl}?width=400&height=400&sharpen=true`;
+      return `${baseUrl}?width=800&height=800&sharpen=50&quality=95`;
     }
     return avatarUrl;
   }
@@ -138,7 +138,7 @@ export async function uploadLinkedInAvatar(username: string, avatarUrl: string):
 
   if (cdnUrl) {
     // Add Bunny Optimizer params to upscale and sharpen
-    return `${cdnUrl}?width=400&height=400&sharpen=true`;
+    return `${cdnUrl}?width=800&height=800&sharpen=50&quality=95`;
   }
 
   return avatarUrl;
