@@ -116,20 +116,32 @@ export async function uploadTikTokAvatar(username: string, avatarUrl: string): P
 
 /**
  * Upload LinkedIn avatar to Bunny CDN
+ * Uses Bunny Optimizer to upscale from 200x200 to 400x400 with sharpening
  */
 export async function uploadLinkedInAvatar(username: string, avatarUrl: string): Promise<string> {
   if (!avatarUrl || !isConfigured()) {
     return avatarUrl;
   }
 
-  if (avatarUrl.includes(BUNNY_CDN_HOSTNAME!)) {
+  // Skip if already a Bunny CDN URL (remove query params for comparison)
+  const baseUrl = avatarUrl.split('?')[0];
+  if (baseUrl.includes(BUNNY_CDN_HOSTNAME!)) {
+    // Already on Bunny, just ensure optimizer params are present
+    if (!avatarUrl.includes('width=')) {
+      return `${baseUrl}?width=400&height=400&sharpen=true`;
+    }
     return avatarUrl;
   }
 
   const path = `avatars/linkedin/${username.toLowerCase()}.jpg`;
   const cdnUrl = await uploadFromUrl(avatarUrl, path);
 
-  return cdnUrl || avatarUrl;
+  if (cdnUrl) {
+    // Add Bunny Optimizer params to upscale and sharpen
+    return `${cdnUrl}?width=400&height=400&sharpen=true`;
+  }
+
+  return avatarUrl;
 }
 
 export const bunnyService = {
