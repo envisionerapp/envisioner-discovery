@@ -9,10 +9,28 @@
 
 import { db, logger } from '../utils/database';
 import { Platform, Region } from '@prisma/client';
+import { getConfig } from '../utils/configFromDb';
 
-// Twitch API config
-const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID;
-const TWITCH_CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET;
+// Twitch API config - loaded from env or database
+let TWITCH_CLIENT_ID: string | null = process.env.TWITCH_CLIENT_ID || null;
+let TWITCH_CLIENT_SECRET: string | null = process.env.TWITCH_CLIENT_SECRET || null;
+let twitchCredsLoaded = !!(TWITCH_CLIENT_ID && TWITCH_CLIENT_SECRET);
+
+async function ensureTwitchCreds(): Promise<boolean> {
+  if (twitchCredsLoaded) return true;
+
+  TWITCH_CLIENT_ID = await getConfig('TWITCH_CLIENT_ID');
+  TWITCH_CLIENT_SECRET = await getConfig('TWITCH_CLIENT_SECRET');
+
+  if (TWITCH_CLIENT_ID && TWITCH_CLIENT_SECRET) {
+    twitchCredsLoaded = true;
+    logger.info('Loaded Twitch credentials from database config');
+    return true;
+  }
+
+  logger.error('Twitch credentials not found in env or database');
+  return false;
+}
 const TWITCH_API = 'https://api.twitch.tv/helix';
 
 // Kick API config
@@ -57,7 +75,8 @@ async function getTwitchToken(): Promise<string | null> {
     return twitchAccessToken;
   }
 
-  if (!TWITCH_CLIENT_ID || !TWITCH_CLIENT_SECRET) {
+  // Ensure credentials are loaded from env or database
+  if (!await ensureTwitchCreds()) {
     logger.warn('Twitch credentials not configured');
     return null;
   }
@@ -67,8 +86,8 @@ async function getTwitchToken(): Promise<string | null> {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        client_id: TWITCH_CLIENT_ID,
-        client_secret: TWITCH_CLIENT_SECRET,
+        client_id: TWITCH_CLIENT_ID!,
+        client_secret: TWITCH_CLIENT_SECRET!,
         grant_type: 'client_credentials',
       }),
     });
