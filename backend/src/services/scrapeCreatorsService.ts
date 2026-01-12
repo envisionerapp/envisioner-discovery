@@ -547,10 +547,18 @@ export class ScrapeCreatorsService {
 
   async getXProfile(handle: string): Promise<XProfile | null> {
     try {
+      if (!await this.ensureApiKey()) return null;
+
+      const cleanHandle = handle.replace('@', '');
       const response = await this.client.get('/v1/twitter/profile', {
-        params: { handle: handle.replace('@', '') }
+        params: { handle: cleanHandle }
       });
-      return response.data?.data || response.data;
+      const data = response.data?.data || response.data;
+      if (data) {
+        // Ensure username is populated from handle if API doesn't return it
+        data.username = data.username || data.screen_name || cleanHandle;
+      }
+      return data;
     } catch (error: any) {
       logger.error(`X profile fetch failed for ${handle}:`, error.response?.data || error.message);
       return null;
@@ -559,10 +567,19 @@ export class ScrapeCreatorsService {
 
   async getFacebookProfile(handle: string): Promise<FacebookProfile | null> {
     try {
+      if (!await this.ensureApiKey()) return null;
+
+      // API requires full URL, not just handle
+      const url = `https://www.facebook.com/${handle}`;
       const response = await this.client.get('/v1/facebook/profile', {
-        params: { handle }
+        params: { url }
       });
-      return response.data?.data || response.data;
+      const data = response.data?.data || response.data;
+      if (data) {
+        // Add username from handle since API may not return it
+        data.username = data.username || handle;
+      }
+      return data;
     } catch (error: any) {
       logger.error(`Facebook profile fetch failed for ${handle}:`, error.response?.data || error.message);
       return null;
