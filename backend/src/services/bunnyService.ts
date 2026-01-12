@@ -3,6 +3,8 @@
  * Uploads images to Bunny Storage and serves via CDN
  */
 
+import 'dotenv/config';
+
 const BUNNY_API_KEY = process.env.BUNNY_STORAGE_API_KEY?.trim();
 const BUNNY_STORAGE_ZONE = process.env.BUNNY_STORAGE_ZONE?.trim();
 const BUNNY_CDN_HOSTNAME = process.env.BUNNY_CDN_HOSTNAME?.trim();
@@ -144,10 +146,48 @@ export async function uploadLinkedInAvatar(username: string, avatarUrl: string):
   return avatarUrl;
 }
 
+/**
+ * Upload Facebook avatar to Bunny CDN
+ */
+export async function uploadFacebookAvatar(username: string, avatarUrl: string): Promise<string> {
+  if (!avatarUrl || !isConfigured()) {
+    return avatarUrl;
+  }
+
+  if (avatarUrl.includes(BUNNY_CDN_HOSTNAME!)) {
+    return avatarUrl;
+  }
+
+  const path = `avatars/facebook/${username.toLowerCase()}.jpg`;
+  const cdnUrl = await uploadFromUrl(avatarUrl, path);
+
+  return cdnUrl || avatarUrl;
+}
+
+/**
+ * Upload X/Twitter avatar to Bunny CDN
+ */
+export async function uploadXAvatar(username: string, avatarUrl: string): Promise<string> {
+  if (!avatarUrl || !isConfigured()) {
+    return avatarUrl;
+  }
+
+  if (avatarUrl.includes(BUNNY_CDN_HOSTNAME!)) {
+    return avatarUrl;
+  }
+
+  const path = `avatars/x/${username.toLowerCase()}.jpg`;
+  const cdnUrl = await uploadFromUrl(avatarUrl, path);
+
+  return cdnUrl || avatarUrl;
+}
+
 export const bunnyService = {
   isConfigured,
   uploadFromUrl,
   uploadInstagramAvatar,
   uploadTikTokAvatar,
   uploadLinkedInAvatar,
+  uploadFacebookAvatar,
+  uploadXAvatar,
 };

@@ -22,13 +22,19 @@ async function check() {
   const kickCount = await db.streamer.count({ where: { platform: 'KICK' } });
   console.log('\nTotal Kick streamers:', kickCount);
 
+  // Check coscu specifically
+  const coscu = await db.streamer.findFirst({
+    where: { platform: 'KICK', username: 'coscu' }
+  });
+  console.log('\ncoscu:', JSON.stringify(coscu?.socialLinks));
+
   // Sample some with socialLinks
   const withSocial = await db.streamer.findMany({
     where: {
       platform: 'KICK',
       NOT: { socialLinks: { equals: [] } }
     },
-    take: 5
+    take: 10
   });
 
   console.log('\nKick streamers with socialLinks:', withSocial.length);

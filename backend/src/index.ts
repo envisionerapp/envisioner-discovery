@@ -47,6 +47,8 @@ import { kickSyncJob } from './jobs/kickSync';
 import { avatarBackfillJob } from './jobs/avatarBackfillJob';
 import { influencerSyncJob } from './jobs/influencerSyncJob';
 import { linkedinEnrichJob, enrichLinkedInProfiles } from './jobs/linkedinEnrichJob';
+import { socialSyncJob } from './jobs/socialSync';
+import { twitchExtractionJob, kickExtractionJob, youtubeExtractionJob } from './jobs/socialExtractionJob';
 import { performanceSyncRoutes } from './routes/performanceSync';
 import { discoveryRoutes } from './routes/discovery';
 import { favoritesRoutes } from './routes/favorites';
@@ -350,12 +352,20 @@ server.listen(PORT, () => {
   avatarBackfillJob.start();
   influencerSyncJob.start();
   linkedinEnrichJob.start();
+  socialSyncJob.start();
+
+  // Social extraction jobs - extract social links from existing profiles
+  twitchExtractionJob.start();
+  kickExtractionJob.start();
+  youtubeExtractionJob.start();
 
   logger.info('✅ Twitch sync: every 3 minutes');
   logger.info('✅ Kick sync: every 3 minutes');
   logger.info('✅ Avatar backfill: every 10 minutes');
   logger.info('✅ Influencer sync: every 5 minutes');
   logger.info('✅ LinkedIn enrich: every 5 minutes');
+  logger.info('✅ Social sync queue: every 10 minutes (TikTok, IG, X, FB, LinkedIn)');
+  logger.info('✅ Social extraction: Twitch/Kick every 2h, YouTube every 4h');
   
 });
 

@@ -6,10 +6,19 @@ import { TwitchScraper } from '../scrapers/twitchScraper';
 import { YouTubeScraper } from '../scrapers/youtubeScraper';
 import { KickScraper } from '../scrapers/kickScraper';
 import { syncOptimization } from '../services/syncOptimizationService';
-import { runDiscovery, runQuickDiscovery, runFullDiscovery } from './discoveryJob';
-import { runSocialDiscovery, runQuickSocialDiscovery, runFullSocialDiscovery, runInfluencerDiscovery } from './socialDiscoveryJob';
-import { runEnhancedTwitchDiscovery, runQuickTwitchDiscovery } from './enhancedTwitchDiscovery';
-import { runYouTubeDiscovery, runQuickYouTubeDiscovery } from './youtubeDiscoveryJob';
+// Social Extraction Jobs - extract social links from existing profiles
+import {
+  twitchExtractionJob,
+  kickExtractionJob,
+  youtubeExtractionJob,
+} from './socialExtractionJob';
+
+// DISABLED: Keyword-based discovery has poor results (~500 creators from keywords vs 14,000+ from imports)
+// Keeping imports for reference but not using them
+// import { runDiscovery, runQuickDiscovery, runFullDiscovery } from './discoveryJob';
+// import { runSocialDiscovery, runQuickSocialDiscovery, runFullSocialDiscovery, runInfluencerDiscovery } from './socialDiscoveryJob';
+// import { runEnhancedTwitchDiscovery, runQuickTwitchDiscovery } from './enhancedTwitchDiscovery';
+// import { runYouTubeDiscovery, runQuickYouTubeDiscovery } from './youtubeDiscoveryJob';
 
 const scrapingQueue = new ScrapingJobQueue();
 let healthCheckScrapers: {
@@ -239,134 +248,46 @@ export const startScheduledJobs = async () => {
   });
 
   // ============================================
-  // DISCOVERY JOBS - Find NEW creators
+  // SOCIAL EXTRACTION JOBS - Extract social links from existing profiles
   // ============================================
+  // This replaces keyword-based discovery which had poor results.
+  // Stats showed: ~500 creators from keywords vs 14,000+ from imports
+  // The real value is extracting social links from profiles we already have.
 
-  // Quick discovery every 2 hours - priority categories (Slots, Poker, Just Chatting)
-  cron.schedule('15 */2 * * *', async () => {
-    try {
-      logger.info('Starting quick discovery (priority categories)...');
-      const result = await runQuickDiscovery();
-      logger.info('Quick discovery complete', result);
-    } catch (error) {
-      logger.error('Error in quick discovery:', error);
-    }
-  });
+  // Start the social extraction jobs
+  twitchExtractionJob.start();
+  kickExtractionJob.start();
+  youtubeExtractionJob.start();
 
-  // Full discovery every 6 hours - all categories
-  cron.schedule('45 */6 * * *', async () => {
-    try {
-      logger.info('Starting full discovery (all categories)...');
-      const result = await runFullDiscovery();
-      logger.info('Full discovery complete', result);
-    } catch (error) {
-      logger.error('Error in full discovery:', error);
-    }
-  });
-
-  // iGaming-focused discovery every 4 hours - specifically Slots/Poker/Gambling
-  cron.schedule('30 */4 * * *', async () => {
-    try {
-      logger.info('Starting iGaming discovery...');
-      const result = await runDiscovery({
-        platforms: ['twitch', 'kick'],
-        priorityOnly: true, // Only priority=1 categories (Slots, Poker, Gambling)
-        limitPerCategory: 100,
-      });
-      logger.info('iGaming discovery complete', result);
-    } catch (error) {
-      logger.error('Error in iGaming discovery:', error);
-    }
-  });
+  logger.info('🔗 Social extraction jobs started:');
+  logger.info('   - Twitch: Every 2 hours (FREE - Twitch GQL API)');
+  logger.info('   - Kick: Every 2 hours offset 30min (FREE - Kick API)');
+  logger.info('   - YouTube: Every 4 hours (~100 credits/run = 600/day)');
 
   // ============================================
-  // SOCIAL DISCOVERY JOBS - TikTok, Instagram via ScrapeCreators
+  // DISABLED: Keyword-based discovery jobs
   // ============================================
+  // These jobs are disabled because they have very poor results:
+  // - Discovery keywords are too narrow (e.g., "slots streamer")
+  // - Only ~500 creators found via keyword discovery
+  // - Most creators came from CSV imports, not automated discovery
+  //
+  // If you need to re-enable, uncomment the imports at the top of this file
+  // and uncomment the job schedules below.
+  //
+  // Previously enabled jobs:
+  // - Quick discovery every 2 hours
+  // - Full discovery every 6 hours
+  // - iGaming discovery every 4 hours
+  // - Quick social discovery every 3 hours
+  // - Full social discovery daily at 6 AM
+  // - Influencer discovery twice daily
+  // - Enhanced Twitch Discovery 4x daily
+  // - Quick Twitch Discovery 2x daily
+  // - YouTube Discovery 3x daily
+  // - Quick YouTube Discovery 2x daily
 
-  // Quick social discovery every 3 hours - primary iGaming keywords only
-  cron.schedule('0 */3 * * *', async () => {
-    try {
-      logger.info('Starting quick social discovery (TikTok + Instagram)...');
-      const result = await runQuickSocialDiscovery();
-      logger.info('Quick social discovery complete', result);
-    } catch (error) {
-      logger.error('Error in quick social discovery:', error);
-    }
-  });
-
-  // Full social discovery daily at 6 AM - all keywords
-  cron.schedule('0 6 * * *', async () => {
-    try {
-      logger.info('Starting full social discovery...');
-      const result = await runFullSocialDiscovery();
-      logger.info('Full social discovery complete', result);
-    } catch (error) {
-      logger.error('Error in full social discovery:', error);
-    }
-  });
-
-  // Influencer discovery twice daily - find accounts related to known big names
-  cron.schedule('0 10,22 * * *', async () => {
-    try {
-      logger.info('Starting influencer discovery...');
-      const result = await runInfluencerDiscovery();
-      logger.info('Influencer discovery complete', result);
-    } catch (error) {
-      logger.error('Error in influencer discovery:', error);
-    }
-  });
-
-  // ============================================
-  // ENHANCED DISCOVERY JOBS - Target 1K/platform/day
-  // ============================================
-
-  // Enhanced Twitch Discovery - 4x daily (spread across timezones)
-  // Targets 250 new streamers per run = 1,000/day
-  cron.schedule('15 0,6,12,18 * * *', async () => {
-    try {
-      logger.info('🟣 Starting enhanced Twitch discovery...');
-      const result = await runEnhancedTwitchDiscovery({ targetNew: 250 });
-      logger.info('🟣 Enhanced Twitch discovery complete', result);
-    } catch (error) {
-      logger.error('Error in enhanced Twitch discovery:', error);
-    }
-  });
-
-  // Quick Twitch Discovery - 2x daily (between main runs)
-  cron.schedule('15 3,15 * * *', async () => {
-    try {
-      logger.info('🟣 Starting quick Twitch discovery...');
-      const result = await runQuickTwitchDiscovery();
-      logger.info('🟣 Quick Twitch discovery complete', result);
-    } catch (error) {
-      logger.error('Error in quick Twitch discovery:', error);
-    }
-  });
-
-  // YouTube Discovery - 3x daily
-  // Targets 334 new channels per run = ~1,000/day
-  cron.schedule('15 2,10,18 * * *', async () => {
-    try {
-      logger.info('🔴 Starting YouTube discovery...');
-      const result = await runYouTubeDiscovery({ targetNew: 334 });
-      logger.info('🔴 YouTube discovery complete', result);
-    } catch (error) {
-      logger.error('Error in YouTube discovery:', error);
-    }
-  });
-
-  // Quick YouTube Discovery - 2x daily (between main runs)
-  cron.schedule('15 6,14 * * *', async () => {
-    try {
-      logger.info('🔴 Starting quick YouTube discovery...');
-      const result = await runQuickYouTubeDiscovery();
-      logger.info('🔴 Quick YouTube discovery complete', result);
-    } catch (error) {
-      logger.error('Error in quick YouTube discovery:', error);
-    }
-  });
-
-  logger.info('Scheduled jobs initialized (with tiered sync + platform/social discovery + enhanced discovery)');
+  logger.info('Scheduled jobs initialized (with tiered sync + social extraction)');
 };
 
 const performHealthCheck = async (): Promise<void> => {

@@ -66,17 +66,35 @@ interface XProfile {
   tweet_count: number;
   listed_count: number;
   location?: string;
+  // Raw API fields (nested structure)
+  avatar?: { image_url?: string };
+  core?: { name?: string; screen_name?: string };
+  legacy?: {
+    profile_image_url_https?: string;
+    description?: string;
+    followers_count?: number;
+    friends_count?: number;
+    statuses_count?: number;
+    listed_count?: number;
+    location?: string;
+    name?: string;
+    screen_name?: string;
+  };
 }
 
 interface FacebookProfile {
   id: string;
-  username: string;
+  username?: string;
   name: string;
-  profile_pic_url: string;
+  url?: string;
+  profilePicLarge?: string;
+  profilePicMedium?: string;
+  profilePicSmall?: string;
+  pageIntro?: string;
+  category?: string;
   about?: string;
-  follower_count: number;
-  following_count?: number;
-  likes_count?: number;
+  followerCount?: number;
+  likeCount?: number;
 }
 
 interface LinkedInProfile {
@@ -859,6 +877,10 @@ export class ScrapeCreatorsService {
           data.avatarUrl = await bunnyService.uploadTikTokAvatar(data.username, data.avatarUrl);
         } else if (platform === 'LINKEDIN') {
           data.avatarUrl = await bunnyService.uploadLinkedInAvatar(data.username, data.avatarUrl);
+        } else if (platform === 'FACEBOOK') {
+          data.avatarUrl = await bunnyService.uploadFacebookAvatar(data.username, data.avatarUrl);
+        } else if (platform === 'X') {
+          data.avatarUrl = await bunnyService.uploadXAvatar(data.username, data.avatarUrl);
         }
       } catch (error: any) {
         logger.warn(`Failed to upload avatar to Bunny CDN for ${platform}/${data.username}: ${error.message}`);
@@ -964,25 +986,31 @@ export class ScrapeCreatorsService {
       }
       case 'X': {
         const p = profile as XProfile;
+        // Handle nested API structure: avatar.image_url, core.name, legacy.followers_count
+        const avatarUrl = p.avatar?.image_url || p.legacy?.profile_image_url_https || p.profile_image_url;
+        // Get higher resolution by replacing _normal with _400x400
+        const highResAvatar = avatarUrl?.replace('_normal.', '_400x400.');
         return {
-          username: p.username,
-          displayName: p.name || p.username,
-          profileUrl: `https://x.com/${p.username}`,
-          avatarUrl: p.profile_image_url,
-          followers: p.followers_count || 0,
-          profileDescription: p.description,
+          username: p.username || p.core?.screen_name || p.legacy?.screen_name || '',
+          displayName: p.name || p.core?.name || p.legacy?.name || p.username || '',
+          profileUrl: `https://x.com/${p.username || p.core?.screen_name || p.legacy?.screen_name}`,
+          avatarUrl: highResAvatar,
+          followers: p.followers_count || p.legacy?.followers_count || 0,
+          profileDescription: p.description || p.legacy?.description,
         };
       }
       case 'FACEBOOK': {
         const p = profile as FacebookProfile;
+        // Extract username from URL if not provided (e.g., https://facebook.com/username)
+        const urlUsername = p.url?.match(/facebook\.com\/([^/?]+)/)?.[1];
         return {
-          username: p.username || p.id,
-          displayName: p.name,
-          profileUrl: `https://facebook.com/${p.username || p.id}`,
-          avatarUrl: p.profile_pic_url,
-          followers: p.follower_count || 0,
-          totalLikes: BigInt(p.likes_count || 0),
-          profileDescription: p.about,
+          username: p.username || urlUsername || p.id,
+          displayName: p.name || p.username || urlUsername || p.id || '',
+          profileUrl: p.url || `https://facebook.com/${p.username || p.id}`,
+          avatarUrl: p.profilePicLarge || p.profilePicMedium || p.profilePicSmall,
+          followers: p.followerCount || 0,
+          totalLikes: BigInt(p.likeCount || 0),
+          profileDescription: p.pageIntro || p.about,
         };
       }
       case 'LINKEDIN': {
