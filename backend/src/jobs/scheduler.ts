@@ -257,12 +257,12 @@ export const startScheduledJobs = async () => {
   // Start the social extraction jobs
   twitchExtractionJob.start();
   kickExtractionJob.start();
-  youtubeExtractionJob.start();
+  // youtubeExtractionJob.start(); // DISABLED: YouTube API not on free ScrapeCreators plan
 
   logger.info('🔗 Social extraction jobs started:');
   logger.info('   - Twitch: Every 2 hours (FREE - Twitch GQL API)');
   logger.info('   - Kick: Every 2 hours offset 30min (FREE - Kick API)');
-  logger.info('   - YouTube: Every 4 hours (~100 credits/run = 600/day)');
+  logger.info('   - YouTube: DISABLED (not available on free ScrapeCreators API)');
 
   // ============================================
   // DISABLED: Keyword-based discovery jobs

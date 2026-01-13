@@ -357,7 +357,7 @@ server.listen(PORT, () => {
   // Social extraction jobs - extract social links from existing profiles
   twitchExtractionJob.start();
   kickExtractionJob.start();
-  youtubeExtractionJob.start();
+  // youtubeExtractionJob.start(); // DISABLED: YouTube API not available on free ScrapeCreators plan
 
   logger.info('✅ Twitch sync: every 3 minutes');
   logger.info('✅ Kick sync: every 3 minutes');
@@ -365,7 +365,7 @@ server.listen(PORT, () => {
   logger.info('✅ Influencer sync: every 5 minutes');
   logger.info('✅ LinkedIn enrich: every 5 minutes');
   logger.info('✅ Social sync queue: every 10 minutes (TikTok, IG, X, FB, LinkedIn)');
-  logger.info('✅ Social extraction: Twitch/Kick every 2h, YouTube every 4h');
+  logger.info('✅ Social extraction: Twitch/Kick every 2h (YouTube disabled - not on free API)');
   
 });
 
