@@ -302,6 +302,28 @@ const MOCK_CREATORS: Creator[] = [
 ];
 
 // ===========================================
+// VIEW MODE
+// ===========================================
+type ViewMode = 'cards' | 'table';
+
+const GridIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="3" y="3" width="7" height="7" rx="1"/>
+    <rect x="14" y="3" width="7" height="7" rx="1"/>
+    <rect x="3" y="14" width="7" height="7" rx="1"/>
+    <rect x="14" y="14" width="7" height="7" rx="1"/>
+  </svg>
+);
+
+const TableRowIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="3" y="4" width="18" height="4" rx="1"/>
+    <rect x="3" y="10" width="18" height="4" rx="1"/>
+    <rect x="3" y="16" width="18" height="4" rx="1"/>
+  </svg>
+);
+
+// ===========================================
 // ICONS
 // ===========================================
 const Icons = {
@@ -543,6 +565,7 @@ function App() {
   const [noteSaving, setNoteSaving] = useState(false);
   const [sortBy, setSortBy] = useState<string>('lastactive');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [viewMode, setViewMode] = useState<ViewMode>('cards');
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -1112,8 +1135,126 @@ function App() {
 
         {/* Results */}
         <main className="results">
+          {/* View Toggle Header */}
+          <div className="results-header">
+            <div className="results-info">
+              <span className="results-count-main">{hasMore ? '500+' : totalCreators} creators</span>
+            </div>
+            <div className="view-toggle">
+              <button
+                className={`view-toggle-btn ${viewMode === 'cards' ? 'active' : ''}`}
+                onClick={() => setViewMode('cards')}
+                title="Card view"
+              >
+                <GridIcon />
+              </button>
+              <button
+                className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+                onClick={() => setViewMode('table')}
+                title="Table view"
+              >
+                <TableRowIcon />
+              </button>
+            </div>
+          </div>
+
           {loading && <div className="loading">Loading creators...</div>}
-          <div className="creator-grid">
+
+          {/* Table View */}
+          {viewMode === 'table' && !loading && filteredCreators.length > 0 && (
+            <div className="creator-table-wrapper">
+              <table className="creator-table">
+                <thead>
+                  <tr>
+                    <th>Creator</th>
+                    <th>Platform</th>
+                    <th>Region</th>
+                    <th>Category</th>
+                    <th>Followers</th>
+                    <th>Avg Viewers</th>
+                    <th>Last Active</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCreators.map(creator => {
+                    const platformKey = getPlatformKey(creator.platform) as Platform;
+                    const displayName = creator.displayName || creator.username;
+                    const category = creator.primaryCategory || creator.currentGame || '-';
+                    const regionKey = creator.region as Region;
+                    const lastActive = formatLastActive(creator.lastSeenLive, creator.isLive);
+                    const channelUrl = creator.profileUrl || `https://${
+                      platformKey === 'youtube' ? 'youtube.com/@' :
+                      platformKey === 'instagram' ? 'instagram.com/' :
+                      platformKey === 'tiktok' ? 'tiktok.com/@' :
+                      platformKey === 'x' ? 'x.com/' :
+                      platformKey === 'linkedin' ? 'linkedin.com/in/' :
+                      platformKey === 'facebook' ? 'facebook.com/' :
+                      platformKey + '.tv/'
+                    }${creator.username}`;
+
+                    return (
+                      <tr key={creator.id} className="creator-row">
+                        <td>
+                          <a href={channelUrl} target="_blank" rel="noopener noreferrer" className="creator-cell">
+                            <div className="creator-avatar-small">
+                              <img src={getStreamerAvatar(creator)} alt={displayName} onError={handleImageError} />
+                              <div className="platform-badge-small" style={{ backgroundColor: PLATFORM_COLORS[platformKey] }}>
+                                {PlatformIcons[platformKey]}
+                              </div>
+                            </div>
+                            <div className="creator-name-cell">
+                              <span className="creator-display-name">{displayName}</span>
+                              <span className="creator-username">@{creator.username}</span>
+                            </div>
+                          </a>
+                        </td>
+                        <td>
+                          <span className="platform-chip" style={{ backgroundColor: PLATFORM_COLORS[platformKey] }}>
+                            {platformKey.charAt(0).toUpperCase() + platformKey.slice(1)}
+                          </span>
+                        </td>
+                        <td>{FLAGS[regionKey] || '🌍'} {creator.region}</td>
+                        <td>{category}</td>
+                        <td>{formatNumber(creator.followers)}</td>
+                        <td>{creator.avgViewers > 0 ? formatNumber(creator.avgViewers) : '-'}</td>
+                        <td>
+                          {creator.isLive ? (
+                            <span className="live-chip">🔴 LIVE</span>
+                          ) : (
+                            lastActive || '-'
+                          )}
+                        </td>
+                        <td>
+                          <div className="table-actions">
+                            <button
+                              type="button"
+                              className={`action-btn-small ${favorites.includes(creator.id) ? 'active favorite' : ''}`}
+                              onClick={(e) => toggleFavorite(creator.id, e)}
+                              title={favorites.includes(creator.id) ? 'Remove from favorites' : 'Add to favorites'}
+                            >
+                              {favorites.includes(creator.id) ? Icons.heartFilled : Icons.heart}
+                            </button>
+                            <button
+                              type="button"
+                              className={`action-btn-small ${discarded.includes(creator.id) ? 'active discard' : ''}`}
+                              onClick={(e) => toggleDiscarded(creator.id, e)}
+                              title={discarded.includes(creator.id) ? 'Restore' : 'Discard'}
+                            >
+                              {Icons.trash}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Card View */}
+          {viewMode === 'cards' && <div className="creator-grid">
             {filteredCreators.map(creator => {
               const platformKey = getPlatformKey(creator.platform) as Platform;
               const engagement = calculateApiEngagement(creator);
@@ -1223,7 +1364,7 @@ function App() {
                 </a>
               );
             })}
-          </div>
+          </div>}
 
           {/* Load More Button */}
           {!loading && hasMore && filteredCreators.length > 0 && (
