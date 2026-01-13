@@ -574,34 +574,50 @@ function App() {
     e.preventDefault();
     e.stopPropagation();
 
+    if (!email) return;
+
     const showSuccess = () => {
       setCopiedEmail(email);
       setTimeout(() => setCopiedEmail(null), 2000);
     };
 
-    const fallbackCopy = () => {
-      const textArea = document.createElement('textarea');
-      textArea.value = email;
-      textArea.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      try {
-        const success = document.execCommand('copy');
-        if (success) showSuccess();
-      } catch (err) {
-        console.error('Fallback copy failed:', err);
-      }
-      document.body.removeChild(textArea);
-    };
+    // Use execCommand as primary - most reliable across browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = email;
+    // Must be visible for Chrome - position off-screen but not hidden
+    textArea.style.position = 'absolute';
+    textArea.style.left = '-9999px';
+    textArea.style.top = `${window.scrollY}px`;
+    textArea.setAttribute('readonly', '');
+    document.body.appendChild(textArea);
 
-    // Try Clipboard API first (don't await - keeps user gesture context)
-    if (navigator.clipboard?.writeText) {
+    // iOS Safari needs special handling
+    const range = document.createRange();
+    range.selectNodeContents(textArea);
+    const selection = window.getSelection();
+    if (selection) {
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+    textArea.setSelectionRange(0, email.length);
+
+    let success = false;
+    try {
+      success = document.execCommand('copy');
+    } catch (err) {
+      // execCommand failed
+    }
+
+    document.body.removeChild(textArea);
+    if (selection) selection.removeAllRanges();
+
+    if (success) {
+      showSuccess();
+    } else if (navigator.clipboard?.writeText) {
+      // Fallback to Clipboard API if execCommand failed
       navigator.clipboard.writeText(email)
         .then(() => showSuccess())
-        .catch(() => fallbackCopy());
-    } else {
-      fallbackCopy();
+        .catch((err) => console.error('Copy failed:', err));
     }
   };
 
