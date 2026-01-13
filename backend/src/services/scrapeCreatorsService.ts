@@ -113,6 +113,31 @@ interface LinkedInProfile {
   name?: string;  // Full name from API
 }
 
+interface YouTubeChannel {
+  channelId: string;
+  channel: string;
+  name: string;
+  avatar?: {
+    image?: {
+      sources?: Array<{ url: string; width: number; height: number }>;
+    };
+  };
+  description?: string;
+  subscriberCount?: number;
+  subscriberCountText?: string;
+  videoCountText?: string;
+  viewCountText?: string;
+  tags?: string;
+  email?: string | null;
+  store?: string | null;
+  twitter?: string | null;
+  instagram?: string | null;
+  linkedin?: string | null;
+  tiktok?: string | null;
+  links?: string[];
+  country?: string;
+}
+
 type SocialProfile = TikTokProfile | InstagramProfile | XProfile | FacebookProfile | LinkedInProfile;
 
 interface SyncQueueItem {
@@ -621,6 +646,30 @@ export class ScrapeCreatorsService {
       return data;
     } catch (error: any) {
       logger.error(`LinkedIn profile fetch failed for ${handle}:`, error.response?.data || error.message);
+      return null;
+    }
+  }
+
+  async getYouTubeChannel(handle: string): Promise<YouTubeChannel | null> {
+    try {
+      if (!await this.ensureApiKey()) return null;
+
+      // Clean handle - remove @ if present
+      const cleanHandle = handle.replace('@', '');
+
+      const response = await this.client.get('/v1/youtube/channel', {
+        params: { handle: cleanHandle }
+      });
+
+      const data = response.data;
+      if (!data || !data.channelId) {
+        logger.warn(`No YouTube channel data for ${handle}`);
+        return null;
+      }
+
+      return data;
+    } catch (error: any) {
+      logger.error(`YouTube channel fetch failed for ${handle}:`, error.response?.data || error.message);
       return null;
     }
   }
