@@ -76,6 +76,43 @@ router.get('/test-linkedin-api/:username', async (req, res) => {
   }
 });
 
+// Debug endpoint to check sync queue
+router.get('/debug-queue', async (req, res) => {
+  try {
+    const platform = ((req.query.platform as string)?.toUpperCase() || 'LINKEDIN') as Platform;
+
+    const pending = await db.socialSyncQueue.count({
+      where: { platform: platform as any, status: 'PENDING' }
+    });
+    const completed = await db.socialSyncQueue.count({
+      where: { platform: platform as any, status: 'COMPLETED' }
+    });
+    const failed = await db.socialSyncQueue.count({
+      where: { platform: platform as any, status: 'FAILED' }
+    });
+    const samples = await db.socialSyncQueue.findMany({
+      where: { platform: platform as any, status: 'PENDING' },
+      select: { username: true, priority: true, createdAt: true },
+      take: 10,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        platform,
+        pending,
+        completed,
+        failed,
+        total: pending + completed + failed,
+        samples
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Debug endpoint to check LinkedIn profiles
 router.get('/debug-linkedin', async (req, res) => {
   try {
@@ -103,6 +140,44 @@ router.get('/debug-linkedin', async (req, res) => {
       success: false,
       error: error.message,
     });
+  }
+});
+
+// Process pending LinkedIn profiles from queue
+router.post('/process-linkedin-queue', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 50;
+    const { scrapeCreatorsService } = await import('../services/scrapeCreatorsService');
+
+    // Check queue status first
+    const pendingCount = await db.socialSyncQueue.count({
+      where: { platform: 'LINKEDIN' as any, status: 'PENDING' }
+    });
+
+    if (pendingCount === 0) {
+      return res.json({
+        success: true,
+        message: 'No pending LinkedIn profiles in queue',
+        data: { processed: 0, pending: 0 }
+      });
+    }
+
+    // Use existing syncPlatform method which processes the queue
+    scrapeCreatorsService.syncPlatform('LINKEDIN', limit)
+      .then(result => {
+        console.log(`LinkedIn sync complete:`, result);
+      })
+      .catch(error => {
+        console.error(`LinkedIn sync failed:`, error);
+      });
+
+    res.json({
+      success: true,
+      message: `Processing up to ${limit} LinkedIn profiles in background`,
+      data: { pending: pendingCount, batchSize: limit }
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
