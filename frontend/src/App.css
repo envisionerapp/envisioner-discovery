@@ -741,6 +741,16 @@ body::-webkit-scrollbar {
   background: #FFF5F2;
 }
 
+.action-btn.email {
+  color: #EA4335;
+  background: rgba(234, 67, 53, 0.1);
+}
+
+.action-btn.email:hover {
+  background: #EA4335;
+  color: #fff;
+}
+
 .action-btn.active.discard {
   color: #ef4444;
   background: #FEF2F2;

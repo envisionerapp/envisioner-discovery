@@ -1311,6 +1311,16 @@ function App() {
                     <span className="meta-item">{FLAGS[regionKey] || '🌍'} {creator.region}</span>
                     <span className="meta-item category">{category}</span>
                     <div className="card-actions">
+                      {(creator.email || creator.businessEmail) && (
+                        <a
+                          href={`mailto:${creator.businessEmail || creator.email}`}
+                          className="action-btn email"
+                          title={`Email ${creator.businessEmail || creator.email}`}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {Icons.email}
+                        </a>
+                      )}
                       <button
                         type="button"
                         className={`action-btn ${favorites.includes(creator.id) ? 'active favorite' : ''}`}
