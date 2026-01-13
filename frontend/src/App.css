@@ -1755,6 +1755,16 @@ body::-webkit-scrollbar {
   color: #ef4444;
 }
 
+.action-btn-small.email {
+  background: rgba(234, 67, 53, 0.15);
+  color: #EA4335;
+}
+
+.action-btn-small.email:hover {
+  background: #EA4335;
+  color: #fff;
+}
+
 .action-btn-small svg {
   width: 16px;
   height: 16px;

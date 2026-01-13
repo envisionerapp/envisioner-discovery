@@ -329,6 +329,7 @@ const TableRowIcon = () => (
 const Icons = {
   search: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
   filter: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>,
+  email: <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>,
   users: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
   eye: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
   x: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>,
@@ -1237,6 +1238,16 @@ function App() {
                         </td>
                         <td>
                           <div className="table-actions">
+                            {(creator.email || creator.businessEmail) && (
+                              <a
+                                href={`mailto:${creator.businessEmail || creator.email}`}
+                                className="action-btn-small email"
+                                title={`Email ${creator.businessEmail || creator.email}`}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {Icons.email}
+                              </a>
+                            )}
                             <button
                               type="button"
                               className={`action-btn-small ${favorites.includes(creator.id) ? 'active favorite' : ''}`}
