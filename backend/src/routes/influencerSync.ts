@@ -185,11 +185,13 @@ router.post('/process-linkedin-queue', async (req, res) => {
 router.post('/extract-youtube-links', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit as string) || 100;
-    const apiKey = process.env.YOUTUBE_API_KEY;
-
-    if (!apiKey) {
-      return res.status(400).json({ success: false, error: 'YouTube API key not configured' });
-    }
+    // Use hardcoded YouTube API keys (rotated for quota)
+    const youtubeApiKeys = [
+      'AIzaSyDzdtG_gCDRQhUbBjdmN0euebH9NEOP8yQ',
+      'AIzaSyCHNIURBY5bnH1mMd2QAHHuOv9XAA1UV9U',
+      'AIzaSyDzFhnS_2n5_Mo5al0hq0nZbC2DPNtsYsY',
+    ];
+    const apiKey = youtubeApiKeys[Math.floor(Math.random() * youtubeApiKeys.length)];
 
     // Get YouTube streamers without social links
     const streamers = await db.streamer.findMany({
