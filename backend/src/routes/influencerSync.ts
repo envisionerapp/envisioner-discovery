@@ -76,6 +76,44 @@ router.get('/test-linkedin-api/:username', async (req, res) => {
   }
 });
 
+// Raw test - call ScrapeCreators API directly with URL
+router.get('/test-linkedin-raw', async (req, res) => {
+  try {
+    const axios = require('axios');
+    const linkedinUrl = req.query.url as string;
+    if (!linkedinUrl) {
+      return res.status(400).json({ error: 'url query param required' });
+    }
+
+    const apiKey = process.env.SCRAPECREATORS_API_KEY;
+    const isCompany = linkedinUrl.includes('/company/');
+    const endpoint = isCompany ? '/v1/linkedin/company' : '/v1/linkedin/profile';
+
+    console.log('Raw test - URL:', linkedinUrl);
+    console.log('Raw test - Endpoint:', endpoint);
+    console.log('Raw test - API Key present:', !!apiKey);
+
+    const response = await axios.get(`https://api.scrapecreators.com${endpoint}`, {
+      params: { url: linkedinUrl },
+      headers: { 'x-api-key': apiKey }
+    });
+
+    res.json({
+      success: true,
+      requestUrl: linkedinUrl,
+      endpoint,
+      status: response.status,
+      data: response.data
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      response: error.response?.data
+    });
+  }
+});
+
 // Debug endpoint to check sync queue
 router.get('/debug-queue', async (req, res) => {
   try {

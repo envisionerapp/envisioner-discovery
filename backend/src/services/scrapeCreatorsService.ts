@@ -647,10 +647,17 @@ export class ScrapeCreatorsService {
         logger.info(`Fetching LinkedIn profile: ${url}`);
       }
 
+      logger.info(`Making API request to ${endpoint} with url param: ${url}`);
       const response = await this.client.get(endpoint, {
         params: { url }
       });
+      logger.info(`API response status: ${response.status}, data keys: ${Object.keys(response.data || {}).join(', ')}`);
+
       const data = response.data?.data || response.data;
+      if (!data || (data.success === false)) {
+        logger.warn(`API returned no data or error for ${url}: ${JSON.stringify(response.data)}`);
+        return null;
+      }
       if (data) {
         // Add public_identifier from handle since API doesn't return it
         data.public_identifier = cleanHandle;
