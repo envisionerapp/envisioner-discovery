@@ -5,7 +5,9 @@ import {
   enrichStreamers,
   getEnrichmentStatus,
   reEnrichStaleStreamers,
-  getStreamerEnrichmentData
+  getStreamerEnrichmentData,
+  forceReEnrichPanelsToBunny,
+  intelligentReEnrich
 } from '../controllers/enrichmentController';
 
 const router = express.Router();
@@ -53,5 +55,19 @@ router.post('/re-enrich', reEnrichStaleStreamers);
  * @access  Private
  */
 router.get('/streamer/:streamerId', getStreamerEnrichmentData);
+
+/**
+ * @route   POST /api/enrichment/migrate-panels
+ * @desc    Migrate existing panel images to Bunny CDN
+ * @access  Private
+ */
+router.post('/migrate-panels', forceReEnrichPanelsToBunny);
+
+/**
+ * @route   POST /api/enrichment/intelligent
+ * @desc    Run intelligent enrichment (includes Bunny CDN uploads)
+ * @access  Private
+ */
+router.post('/intelligent', intelligentReEnrich);
 
 export default router;

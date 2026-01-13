@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import webEnrichmentService from '../services/webEnrichmentService';
 import advancedEnrichmentService from '../services/advancedEnrichmentService';
+import { intelligentEnrichmentService } from '../services/intelligentEnrichmentService';
+import { uploadPanelImages } from '../services/bunnyService';
 import { db, logger } from '../utils/database';
 
 /**
@@ -273,6 +275,133 @@ export const getStreamerEnrichmentData = async (req: Request, res: Response) => 
     res.status(500).json({
       success: false,
       error: 'Failed to get streamer enrichment data'
+    });
+  }
+};
+
+/**
+ * Force re-enrich all streamers' panel images to Bunny CDN
+ */
+export const forceReEnrichPanelsToBunny = async (req: Request, res: Response) => {
+  try {
+    const { batchSize = 50, platform } = req.body;
+
+    // Find streamers with panel images that aren't on Bunny CDN yet
+    const whereClause: any = {
+      panelImages: { not: null }
+    };
+
+    if (platform) {
+      whereClause.platform = platform.toUpperCase();
+    }
+
+    const streamers = await db.streamer.findMany({
+      where: whereClause,
+      select: {
+        id: true,
+        username: true,
+        platform: true,
+        panelImages: true
+      },
+      take: batchSize
+    });
+
+    logger.info(`Found ${streamers.length} streamers with panel images to migrate to Bunny CDN`);
+
+    // Start migration in background
+    (async () => {
+      let migrated = 0;
+      let errors = 0;
+
+      for (const streamer of streamers) {
+        try {
+          const panels = streamer.panelImages as Array<{ url: string; alt?: string; link?: string }>;
+
+          if (!panels || panels.length === 0) continue;
+
+          // Check if already on Bunny
+          const needsMigration = panels.some(p => !p.url.includes('b-cdn.net') && !p.url.includes('media.envr.io'));
+
+          if (!needsMigration) {
+            logger.info(`${streamer.username} panels already on Bunny CDN`);
+            continue;
+          }
+
+          logger.info(`Uploading ${panels.length} panels for ${streamer.username} to Bunny CDN...`);
+
+          const updatedPanels = await uploadPanelImages(
+            streamer.platform.toLowerCase(),
+            streamer.username,
+            panels
+          );
+
+          await db.streamer.update({
+            where: { id: streamer.id },
+            data: { panelImages: updatedPanels }
+          });
+
+          migrated++;
+          logger.info(`✅ Migrated panels for ${streamer.username}`);
+
+          // Small delay to avoid overwhelming Bunny API
+          await new Promise(resolve => setTimeout(resolve, 200));
+
+        } catch (error: any) {
+          errors++;
+          logger.error(`Failed to migrate panels for ${streamer.username}:`, error.message);
+        }
+      }
+
+      logger.info(`Panel migration complete: ${migrated} migrated, ${errors} errors`);
+    })();
+
+    res.json({
+      success: true,
+      message: 'Panel migration to Bunny CDN started in background',
+      data: {
+        streamersFound: streamers.length,
+        batchSize
+      }
+    });
+
+  } catch (error) {
+    logger.error('Error starting panel migration:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to start panel migration'
+    });
+  }
+};
+
+/**
+ * Full re-enrichment using intelligent service (with Bunny CDN uploads)
+ */
+export const intelligentReEnrich = async (req: Request, res: Response) => {
+  try {
+    const { limit = 100 } = req.body;
+
+    logger.info(`Starting intelligent re-enrichment for ${limit} streamers`);
+
+    // Start in background
+    intelligentEnrichmentService.enrichAllStreamers(limit)
+      .then(result => {
+        logger.info('Intelligent re-enrichment completed', result);
+      })
+      .catch(error => {
+        logger.error('Intelligent re-enrichment failed:', error);
+      });
+
+    res.json({
+      success: true,
+      message: 'Intelligent re-enrichment started in background',
+      data: { limit }
+    });
+
+  } catch (error) {
+    logger.error('Error starting intelligent re-enrichment:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to start intelligent re-enrichment'
     });
   }
 };
