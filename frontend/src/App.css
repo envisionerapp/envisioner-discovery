@@ -751,6 +751,33 @@ body::-webkit-scrollbar {
   color: #fff;
 }
 
+.email-btn-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.copied-toast {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #141C2E;
+  color: #fff;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  animation: fadeInOut 2s ease;
+  z-index: 100;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+}
+
 .action-btn.active.discard {
   color: #ef4444;
   background: #FEF2F2;

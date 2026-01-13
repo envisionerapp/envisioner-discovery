@@ -567,6 +567,17 @@ function App() {
   const [sortBy, setSortBy] = useState<string>('lastactive');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
+  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+
+  // Copy email to clipboard
+  const copyEmail = (email: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard.writeText(email).then(() => {
+      setCopiedEmail(email);
+      setTimeout(() => setCopiedEmail(null), 2000);
+    });
+  };
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -1239,14 +1250,19 @@ function App() {
                         <td>
                           <div className="table-actions">
                             {(creator.email || creator.businessEmail) && (
-                              <a
-                                href={`mailto:${creator.businessEmail || creator.email}`}
-                                className="action-btn-small email"
-                                title={`Email ${creator.businessEmail || creator.email}`}
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                {Icons.email}
-                              </a>
+                              <div className="email-btn-wrapper">
+                                <button
+                                  type="button"
+                                  className="action-btn-small email"
+                                  title={`Copy ${creator.businessEmail || creator.email}`}
+                                  onClick={(e) => copyEmail((creator.businessEmail || creator.email)!, e)}
+                                >
+                                  {Icons.email}
+                                </button>
+                                {copiedEmail === (creator.businessEmail || creator.email) && (
+                                  <span className="copied-toast">Copied!</span>
+                                )}
+                              </div>
                             )}
                             <button
                               type="button"
@@ -1312,14 +1328,19 @@ function App() {
                     <span className="meta-item category">{category}</span>
                     <div className="card-actions">
                       {(creator.email || creator.businessEmail) && (
-                        <a
-                          href={`mailto:${creator.businessEmail || creator.email}`}
-                          className="action-btn email"
-                          title={`Email ${creator.businessEmail || creator.email}`}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {Icons.email}
-                        </a>
+                        <div className="email-btn-wrapper">
+                          <button
+                            type="button"
+                            className="action-btn email"
+                            title={`Copy ${creator.businessEmail || creator.email}`}
+                            onClick={(e) => copyEmail((creator.businessEmail || creator.email)!, e)}
+                          >
+                            {Icons.email}
+                          </button>
+                          {copiedEmail === (creator.businessEmail || creator.email) && (
+                            <span className="copied-toast">Copied!</span>
+                          )}
+                        </div>
                       )}
                       <button
                         type="button"
