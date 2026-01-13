@@ -569,14 +569,43 @@ function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
 
-  // Copy email to clipboard
-  const copyEmail = (email: string, e: React.MouseEvent) => {
+  // Copy email to clipboard with fallback for Mac/Safari
+  const copyEmail = async (email: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigator.clipboard.writeText(email).then(() => {
+
+    const showSuccess = () => {
       setCopiedEmail(email);
       setTimeout(() => setCopiedEmail(null), 2000);
-    });
+    };
+
+    // Try modern Clipboard API first
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(email);
+        showSuccess();
+        return;
+      } catch (err) {
+        // Fall through to fallback
+      }
+    }
+
+    // Fallback for older browsers or when Clipboard API fails (common on Mac)
+    const textArea = document.createElement('textarea');
+    textArea.value = email;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    textArea.style.top = '0';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      showSuccess();
+    } catch (err) {
+      console.error('Failed to copy email:', err);
+    }
+    document.body.removeChild(textArea);
   };
 
   // Pagination
