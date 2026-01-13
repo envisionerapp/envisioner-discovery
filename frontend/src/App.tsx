@@ -844,7 +844,25 @@ function App() {
         <aside className="filters">
           <div className="filters-header">
             <h3>Filters</h3>
-            {activeFilterCount > 0 && <button className="clear-all" onClick={clearFilters}>Clear all</button>}
+            <div className="filters-header-right">
+              <div className="view-toggle">
+                <button
+                  className={`view-toggle-btn ${viewMode === 'cards' ? 'active' : ''}`}
+                  onClick={() => setViewMode('cards')}
+                  title="Card view"
+                >
+                  <GridIcon />
+                </button>
+                <button
+                  className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+                  onClick={() => setViewMode('table')}
+                  title="Table view"
+                >
+                  <TableRowIcon />
+                </button>
+              </div>
+              {activeFilterCount > 0 && <button className="clear-all" onClick={clearFilters}>Clear all</button>}
+            </div>
           </div>
 
           {/* Search */}
@@ -1135,29 +1153,6 @@ function App() {
 
         {/* Results */}
         <main className="results">
-          {/* View Toggle Header */}
-          <div className="results-header">
-            <div className="results-info">
-              <span className="results-count-main">{hasMore ? '500+' : totalCreators} creators</span>
-            </div>
-            <div className="view-toggle">
-              <button
-                className={`view-toggle-btn ${viewMode === 'cards' ? 'active' : ''}`}
-                onClick={() => setViewMode('cards')}
-                title="Card view"
-              >
-                <GridIcon />
-              </button>
-              <button
-                className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
-                onClick={() => setViewMode('table')}
-                title="Table view"
-              >
-                <TableRowIcon />
-              </button>
-            </div>
-          </div>
-
           {loading && <div className="loading">Loading creators...</div>}
 
           {/* Table View */}
