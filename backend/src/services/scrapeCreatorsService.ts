@@ -675,6 +675,20 @@ export class ScrapeCreatorsService {
     });
   }
 
+  // Atomically claim an item for processing - returns true if claimed, false if already taken
+  async claimItem(id: string): Promise<boolean> {
+    const result = await db.socialSyncQueue.updateMany({
+      where: {
+        id,
+        status: 'PENDING', // Only claim if still pending
+      },
+      data: {
+        processedAt: new Date(), // Mark as being processed
+      }
+    });
+    return result.count > 0;
+  }
+
   async markAsProcessed(id: string, success: boolean, error?: string): Promise<void> {
     await db.socialSyncQueue.update({
       where: { id },
@@ -713,6 +727,13 @@ export class ScrapeCreatorsService {
 
     for (const item of queue) {
       try {
+        // Atomically claim item - skip if another process already took it
+        const claimed = await this.claimItem(item.id);
+        if (!claimed) {
+          console.log(`⏭️ [${platform}] Skipping @${item.username} - already being processed`);
+          continue;
+        }
+
         const profile = await this.fetchProfile(platform, item.username);
 
         if (profile) {
