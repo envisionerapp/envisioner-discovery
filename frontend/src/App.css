@@ -1748,3 +1748,29 @@ body::-webkit-scrollbar {
   width: 16px;
   height: 16px;
 }
+
+.no-results-cell {
+  text-align: center;
+  padding: 60px 20px !important;
+  color: #6c757d;
+}
+
+.no-results-cell p {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.no-results-cell button {
+  background: #FF6B35;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.no-results-cell button:hover {
+  background: #e55a2b;
+}

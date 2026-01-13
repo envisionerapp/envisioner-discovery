@@ -1156,7 +1156,7 @@ function App() {
           {loading && <div className="loading">Loading creators...</div>}
 
           {/* Table View */}
-          {viewMode === 'table' && !loading && filteredCreators.length > 0 && (
+          {viewMode === 'table' && !loading && (
             <div className="creator-table-wrapper">
               <table className="creator-table">
                 <thead>
@@ -1172,6 +1172,14 @@ function App() {
                   </tr>
                 </thead>
                 <tbody>
+                  {filteredCreators.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="no-results-cell">
+                        <p>No creators found matching your filters</p>
+                        <button onClick={clearFilters}>Clear filters</button>
+                      </td>
+                    </tr>
+                  )}
                   {filteredCreators.map(creator => {
                     const platformKey = getPlatformKey(creator.platform) as Platform;
                     const displayName = creator.displayName || creator.username;
@@ -1381,7 +1389,7 @@ function App() {
             </div>
           )}
 
-          {filteredCreators.length === 0 && !loading && (
+          {filteredCreators.length === 0 && !loading && viewMode === 'cards' && (
             <div className="no-results">
               <p>No creators found matching your filters</p>
               <button onClick={clearFilters}>Clear filters</button>
