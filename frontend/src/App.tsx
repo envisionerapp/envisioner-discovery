@@ -569,8 +569,8 @@ function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
 
-  // Copy email to clipboard with fallback for Mac/Safari
-  const copyEmail = async (email: string, e: React.MouseEvent) => {
+  // Copy email to clipboard with cross-browser support
+  const copyEmail = (email: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -579,33 +579,30 @@ function App() {
       setTimeout(() => setCopiedEmail(null), 2000);
     };
 
-    // Try modern Clipboard API first
-    if (navigator.clipboard && window.isSecureContext) {
+    const fallbackCopy = () => {
+      const textArea = document.createElement('textarea');
+      textArea.value = email;
+      textArea.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
       try {
-        await navigator.clipboard.writeText(email);
-        showSuccess();
-        return;
+        const success = document.execCommand('copy');
+        if (success) showSuccess();
       } catch (err) {
-        // Fall through to fallback
+        console.error('Fallback copy failed:', err);
       }
-    }
+      document.body.removeChild(textArea);
+    };
 
-    // Fallback for older browsers or when Clipboard API fails (common on Mac)
-    const textArea = document.createElement('textarea');
-    textArea.value = email;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-9999px';
-    textArea.style.top = '0';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      showSuccess();
-    } catch (err) {
-      console.error('Failed to copy email:', err);
+    // Try Clipboard API first (don't await - keeps user gesture context)
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(email)
+        .then(() => showSuccess())
+        .catch(() => fallbackCopy());
+    } else {
+      fallbackCopy();
     }
-    document.body.removeChild(textArea);
   };
 
   // Pagination
