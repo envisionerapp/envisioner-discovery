@@ -113,6 +113,26 @@ router.get('/debug-queue', async (req, res) => {
   }
 });
 
+// Reset failed queue entries to pending
+router.post('/reset-failed-queue', async (req, res) => {
+  try {
+    const platform = ((req.query.platform as string)?.toUpperCase() || 'LINKEDIN') as Platform;
+
+    const result = await db.socialSyncQueue.updateMany({
+      where: { platform: platform as any, status: 'FAILED' },
+      data: { status: 'PENDING', errorMessage: null }
+    });
+
+    res.json({
+      success: true,
+      message: `Reset ${result.count} failed ${platform} queue entries to pending`,
+      data: { reset: result.count }
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Debug endpoint to check LinkedIn profiles
 router.get('/debug-linkedin', async (req, res) => {
   try {
