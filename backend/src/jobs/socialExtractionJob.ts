@@ -166,6 +166,7 @@ async function extractTwitchSocialLinks(batchSize: number = TWITCH_BATCH): Promi
         else if (sl.platform === 'twitter' || sl.platform === 'x') platform = 'X';
         else if (sl.platform === 'tiktok') platform = 'TIKTOK';
         else if (sl.platform === 'facebook') platform = 'FACEBOOK';
+        else if (sl.platform === 'linkedin') platform = 'LINKEDIN';
 
         if (platform) {
           try {
@@ -430,6 +431,10 @@ function extractHandleFromUrl(url: string, platform: string): string | null {
     } else if (platform === 'twitter' || platform === 'x') {
       const match = url.match(/(?:twitter|x)\.com\/([^/?]+)/);
       return match ? match[1] : null;
+    } else if (platform === 'linkedin') {
+      // LinkedIn URLs: linkedin.com/in/username or linkedin.com/company/name
+      const match = url.match(/linkedin\.com\/(?:in|company)\/([^/?]+)/);
+      return match ? match[1] : null;
     }
     return null;
   } catch {
@@ -553,6 +558,19 @@ async function extractYouTubeSocialLinks(batchSize: number = YOUTUBE_BATCH): Pro
               await db.socialSyncQueue.upsert({
                 where: { platform_username: { platform: 'X', username: handle.toLowerCase() } },
                 create: { platform: 'X', username: handle.toLowerCase(), priority: 50, status: 'PENDING' },
+                update: {}
+              });
+              result.handlesAdded++;
+            } catch {}
+          }
+        }
+        if (social.linkedin) {
+          const handle = extractHandleFromUrl(social.linkedin, 'linkedin');
+          if (handle) {
+            try {
+              await db.socialSyncQueue.upsert({
+                where: { platform_username: { platform: 'LINKEDIN', username: handle.toLowerCase() } },
+                create: { platform: 'LINKEDIN', username: handle.toLowerCase(), priority: 50, status: 'PENDING' },
                 update: {}
               });
               result.handlesAdded++;
