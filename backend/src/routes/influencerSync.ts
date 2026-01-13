@@ -387,6 +387,98 @@ router.post('/extract-youtube-links', async (req, res) => {
   }
 });
 
+// Debug: Test YouTube scraping for a single channel (synchronous)
+router.get('/test-youtube-scrape/:username', async (req, res) => {
+  try {
+    const username = req.params.username;
+    const { chromium } = await import('playwright');
+
+    const browser = await chromium.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    });
+
+    const context = await browser.newContext({
+      viewport: { width: 1920, height: 1080 },
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    });
+
+    const aboutUrl = `https://www.youtube.com/@${username}/about`;
+    console.log(`Testing YouTube scrape: ${aboutUrl}`);
+
+    const page = await context.newPage();
+    await page.goto(aboutUrl, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.waitForTimeout(3000);
+
+    // Get page title to verify we loaded correctly
+    const pageTitle = await page.title();
+
+    // Extract social links
+    const socialLinks = await page.evaluate(() => {
+      const links: string[] = [];
+      const debugInfo: string[] = [];
+
+      // Check all links on page
+      const allAnchors = document.querySelectorAll('a');
+      debugInfo.push(`Total anchors found: ${allAnchors.length}`);
+
+      // Method 1: Direct social links
+      const socialSelectors = [
+        'a[href*="linkedin.com"]',
+        'a[href*="instagram.com"]',
+        'a[href*="twitter.com"]',
+        'a[href*="x.com"]',
+        'a[href*="tiktok.com"]'
+      ];
+
+      for (const selector of socialSelectors) {
+        const elements = document.querySelectorAll(selector);
+        debugInfo.push(`${selector}: ${elements.length} found`);
+        elements.forEach(el => {
+          const href = (el as HTMLAnchorElement).href;
+          if (href && !links.includes(href)) links.push(href);
+        });
+      }
+
+      // Method 2: YouTube redirect links
+      const redirectLinks = document.querySelectorAll('a[href*="youtube.com/redirect"]');
+      debugInfo.push(`Redirect links: ${redirectLinks.length} found`);
+      redirectLinks.forEach(el => {
+        const href = (el as HTMLAnchorElement).href;
+        try {
+          const url = new URL(href);
+          const q = url.searchParams.get('q');
+          if (q) {
+            debugInfo.push(`Redirect target: ${q}`);
+            if (q.includes('linkedin') || q.includes('instagram') || q.includes('twitter') || q.includes('tiktok')) {
+              if (!links.includes(q)) links.push(q);
+            }
+          }
+        } catch {}
+      });
+
+      return { links, debugInfo };
+    });
+
+    await browser.close();
+
+    res.json({
+      success: true,
+      username,
+      aboutUrl,
+      pageTitle,
+      socialLinks: socialLinks.links,
+      debug: socialLinks.debugInfo
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: error.stack
+    });
+  }
+});
+
 // Reset LinkedIn profiles to re-enrich them
 router.post('/reset-linkedin', async (req, res) => {
   try {
