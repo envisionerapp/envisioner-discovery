@@ -266,24 +266,24 @@ router.post('/extract-youtube-links', async (req, res) => {
                 data: { socialLinks }
               });
 
-              // Add LinkedIn to sync queue (both personal /in/ and company /company/)
+              // Add LinkedIn to sync queue - store full URL to preserve special characters
               if (channel.linkedin) {
-                let username = '';
-                if (channel.linkedin.includes('linkedin.com/in/')) {
-                  username = channel.linkedin.split('linkedin.com/in/')[1]?.split(/[/?#]/)[0] || '';
-                } else if (channel.linkedin.includes('linkedin.com/company/')) {
-                  // Store company pages with a "company:" prefix
-                  username = 'company:' + (channel.linkedin.split('linkedin.com/company/')[1]?.split(/[/?#]/)[0] || '');
+                // Normalize URL but keep path intact (don't lowercase the path)
+                let linkedinUrl = channel.linkedin.trim();
+                // Ensure it starts with https://
+                if (!linkedinUrl.startsWith('http')) {
+                  linkedinUrl = 'https://' + linkedinUrl;
                 }
-                if (username) {
-                  await db.socialSyncQueue.upsert({
-                    where: { platform_username: { platform: 'LINKEDIN', username: username.toLowerCase() } },
-                    create: { platform: 'LINKEDIN', username: username.toLowerCase(), priority: 50, status: 'PENDING' },
-                    update: {}
-                  });
-                  linkedinFound++;
-                  console.log(`Added LinkedIn to queue: ${username}`);
-                }
+                // Normalize to www.linkedin.com
+                linkedinUrl = linkedinUrl.replace('://linkedin.com', '://www.linkedin.com');
+
+                await db.socialSyncQueue.upsert({
+                  where: { platform_username: { platform: 'LINKEDIN', username: linkedinUrl } },
+                  create: { platform: 'LINKEDIN', username: linkedinUrl, priority: 50, status: 'PENDING' },
+                  update: {}
+                });
+                linkedinFound++;
+                console.log(`Added LinkedIn to queue: ${linkedinUrl}`);
               }
 
               // Add Instagram to sync queue
@@ -314,21 +314,19 @@ router.post('/extract-youtube-links', async (req, res) => {
                 }
                 // Also check for LinkedIn in links array (both /in/ and /company/)
                 if ((link.includes('linkedin.com/in/') || link.includes('linkedin.com/company/')) && !channel.linkedin) {
-                  let username = '';
-                  if (link.includes('linkedin.com/in/')) {
-                    username = link.split('linkedin.com/in/')[1]?.split(/[/?#]/)[0] || '';
-                  } else if (link.includes('linkedin.com/company/')) {
-                    username = 'company:' + (link.split('linkedin.com/company/')[1]?.split(/[/?#]/)[0] || '');
+                  let linkedinUrl = link.trim();
+                  if (!linkedinUrl.startsWith('http')) {
+                    linkedinUrl = 'https://' + linkedinUrl;
                   }
-                  if (username) {
-                    await db.socialSyncQueue.upsert({
-                      where: { platform_username: { platform: 'LINKEDIN', username: username.toLowerCase() } },
-                      create: { platform: 'LINKEDIN', username: username.toLowerCase(), priority: 50, status: 'PENDING' },
-                      update: {}
-                    });
-                    linkedinFound++;
-                    console.log(`Added LinkedIn from links: ${username}`);
-                  }
+                  linkedinUrl = linkedinUrl.replace('://linkedin.com', '://www.linkedin.com');
+
+                  await db.socialSyncQueue.upsert({
+                    where: { platform_username: { platform: 'LINKEDIN', username: linkedinUrl } },
+                    create: { platform: 'LINKEDIN', username: linkedinUrl, priority: 50, status: 'PENDING' },
+                    update: {}
+                  });
+                  linkedinFound++;
+                  console.log(`Added LinkedIn from links: ${linkedinUrl}`);
                 }
               }
             }
@@ -410,24 +408,22 @@ router.post('/extract-youtube-batch', async (req, res) => {
           data: { socialLinks }
         });
 
-        // Add LinkedIn to queue
+        // Add LinkedIn to queue - store full URL
         let linkedinAdded = null;
         if (channel.linkedin) {
-          let linkedinUsername = '';
-          if (channel.linkedin.includes('linkedin.com/in/')) {
-            linkedinUsername = channel.linkedin.split('linkedin.com/in/')[1]?.split(/[/?#]/)[0] || '';
-          } else if (channel.linkedin.includes('linkedin.com/company/')) {
-            linkedinUsername = 'company:' + (channel.linkedin.split('linkedin.com/company/')[1]?.split(/[/?#]/)[0] || '');
+          let linkedinUrl = channel.linkedin.trim();
+          if (!linkedinUrl.startsWith('http')) {
+            linkedinUrl = 'https://' + linkedinUrl;
           }
-          if (linkedinUsername) {
-            await db.socialSyncQueue.upsert({
-              where: { platform_username: { platform: 'LINKEDIN', username: linkedinUsername.toLowerCase() } },
-              create: { platform: 'LINKEDIN', username: linkedinUsername.toLowerCase(), priority: 50, status: 'PENDING' },
-              update: {}
-            });
-            linkedinAdded = linkedinUsername;
-            linkedinFound++;
-          }
+          linkedinUrl = linkedinUrl.replace('://linkedin.com', '://www.linkedin.com');
+
+          await db.socialSyncQueue.upsert({
+            where: { platform_username: { platform: 'LINKEDIN', username: linkedinUrl } },
+            create: { platform: 'LINKEDIN', username: linkedinUrl, priority: 50, status: 'PENDING' },
+            update: {}
+          });
+          linkedinAdded = linkedinUrl;
+          linkedinFound++;
         }
 
         results.push({
@@ -475,23 +471,20 @@ router.post('/extract-single-youtube/:username', async (req, res) => {
       actions: []
     };
 
-    // Add LinkedIn to queue if found
+    // Add LinkedIn to queue if found - store full URL
     if (channel.linkedin) {
-      let linkedinUsername = '';
-      if (channel.linkedin.includes('linkedin.com/in/')) {
-        linkedinUsername = channel.linkedin.split('linkedin.com/in/')[1]?.split(/[/?#]/)[0] || '';
-      } else if (channel.linkedin.includes('linkedin.com/company/')) {
-        linkedinUsername = 'company:' + (channel.linkedin.split('linkedin.com/company/')[1]?.split(/[/?#]/)[0] || '');
+      let linkedinUrl = channel.linkedin.trim();
+      if (!linkedinUrl.startsWith('http')) {
+        linkedinUrl = 'https://' + linkedinUrl;
       }
+      linkedinUrl = linkedinUrl.replace('://linkedin.com', '://www.linkedin.com');
 
-      if (linkedinUsername) {
-        await db.socialSyncQueue.upsert({
-          where: { platform_username: { platform: 'LINKEDIN', username: linkedinUsername.toLowerCase() } },
-          create: { platform: 'LINKEDIN', username: linkedinUsername.toLowerCase(), priority: 50, status: 'PENDING' },
-          update: {}
-        });
-        results.actions.push(`Added LinkedIn to queue: ${linkedinUsername}`);
-      }
+      await db.socialSyncQueue.upsert({
+        where: { platform_username: { platform: 'LINKEDIN', username: linkedinUrl } },
+        create: { platform: 'LINKEDIN', username: linkedinUrl, priority: 50, status: 'PENDING' },
+        update: {}
+      });
+      results.actions.push(`Added LinkedIn to queue: ${linkedinUrl}`);
     }
 
     // Update streamer socialLinks if in database

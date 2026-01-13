@@ -613,26 +613,38 @@ export class ScrapeCreatorsService {
     }
   }
 
-  async getLinkedInProfile(handle: string): Promise<LinkedInProfile | null> {
+  async getLinkedInProfile(handleOrUrl: string): Promise<LinkedInProfile | null> {
     try {
-      // API requires full URL, not just handle
       if (!await this.ensureApiKey()) return null;
 
-      // Handle company pages (stored as "company:companyname")
-      // Use different API endpoint for companies vs profiles
       let url: string;
       let endpoint: string;
-      let cleanHandle = handle;
+      let cleanHandle: string;
 
-      if (handle.startsWith('company:')) {
-        cleanHandle = handle.replace('company:', '');
+      // Check if it's a full URL or just a handle
+      if (handleOrUrl.includes('linkedin.com/')) {
+        // It's a full URL - use it directly
+        url = handleOrUrl;
+        if (url.includes('/company/')) {
+          endpoint = '/v1/linkedin/company';
+          cleanHandle = url.split('/company/')[1]?.split(/[/?#]/)[0] || '';
+        } else {
+          endpoint = '/v1/linkedin/profile';
+          cleanHandle = url.split('/in/')[1]?.split(/[/?#]/)[0] || '';
+        }
+        logger.info(`Fetching LinkedIn via ${endpoint}: ${url}`);
+      } else if (handleOrUrl.startsWith('company:')) {
+        // Legacy format: company:companyname
+        cleanHandle = handleOrUrl.replace('company:', '');
         url = `https://www.linkedin.com/company/${cleanHandle}`;
         endpoint = '/v1/linkedin/company';
-        logger.info(`Fetching LinkedIn company page: ${url} via ${endpoint}`);
+        logger.info(`Fetching LinkedIn company page: ${url}`);
       } else {
-        url = `https://www.linkedin.com/in/${handle}`;
+        // Legacy format: just a username
+        cleanHandle = handleOrUrl;
+        url = `https://www.linkedin.com/in/${handleOrUrl}`;
         endpoint = '/v1/linkedin/profile';
-        logger.info(`Fetching LinkedIn profile: ${url} via ${endpoint}`);
+        logger.info(`Fetching LinkedIn profile: ${url}`);
       }
 
       const response = await this.client.get(endpoint, {
@@ -645,7 +657,7 @@ export class ScrapeCreatorsService {
       }
       return data;
     } catch (error: any) {
-      logger.error(`LinkedIn profile fetch failed for ${handle}:`, error.response?.data || error.message);
+      logger.error(`LinkedIn profile fetch failed for ${handleOrUrl}:`, error.response?.data || error.message);
       return null;
     }
   }
