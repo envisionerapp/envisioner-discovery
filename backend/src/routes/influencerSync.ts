@@ -335,6 +335,76 @@ router.post('/extract-youtube-links', async (req, res) => {
   }
 });
 
+// Process a single YouTube channel and add LinkedIn to queue (synchronous)
+router.post('/extract-single-youtube/:username', async (req, res) => {
+  try {
+    const username = req.params.username;
+    const { scrapeCreatorsService } = await import('../services/scrapeCreatorsService');
+
+    // Fetch channel data
+    const channel = await scrapeCreatorsService.getYouTubeChannel(username);
+    if (!channel) {
+      return res.json({ success: false, error: 'Channel not found' });
+    }
+
+    const results: any = {
+      channel: channel.name,
+      linkedin: channel.linkedin,
+      instagram: channel.instagram,
+      links: channel.links,
+      actions: []
+    };
+
+    // Add LinkedIn to queue if found
+    if (channel.linkedin) {
+      let linkedinUsername = '';
+      if (channel.linkedin.includes('linkedin.com/in/')) {
+        linkedinUsername = channel.linkedin.split('linkedin.com/in/')[1]?.split(/[/?#]/)[0] || '';
+      } else if (channel.linkedin.includes('linkedin.com/company/')) {
+        linkedinUsername = 'company:' + (channel.linkedin.split('linkedin.com/company/')[1]?.split(/[/?#]/)[0] || '');
+      }
+
+      if (linkedinUsername) {
+        await db.socialSyncQueue.upsert({
+          where: { platform_username: { platform: 'LINKEDIN', username: linkedinUsername.toLowerCase() } },
+          create: { platform: 'LINKEDIN', username: linkedinUsername.toLowerCase(), priority: 50, status: 'PENDING' },
+          update: {}
+        });
+        results.actions.push(`Added LinkedIn to queue: ${linkedinUsername}`);
+      }
+    }
+
+    // Update streamer socialLinks if in database
+    const streamer = await db.streamer.findFirst({
+      where: { platform: 'YOUTUBE', username: { contains: username, mode: 'insensitive' } }
+    });
+
+    if (streamer) {
+      const socialLinks: string[] = [];
+      if (channel.twitter) socialLinks.push(channel.twitter);
+      if (channel.instagram) socialLinks.push(channel.instagram);
+      if (channel.linkedin) socialLinks.push(channel.linkedin);
+      if (channel.links) {
+        for (const link of channel.links) {
+          if (!socialLinks.includes(link)) socialLinks.push(link);
+        }
+      }
+
+      await db.streamer.update({
+        where: { id: streamer.id },
+        data: { socialLinks }
+      });
+      results.actions.push(`Updated streamer ${streamer.id} with ${socialLinks.length} social links`);
+    } else {
+      results.actions.push('Streamer not found in database');
+    }
+
+    res.json({ success: true, ...results });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Debug: Test YouTube channel API for a single channel
 router.get('/test-youtube-scrape/:username', async (req, res) => {
   try {
