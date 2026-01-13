@@ -571,8 +571,10 @@ function App() {
 
   // Copy email to clipboard with cross-browser support
   const copyEmail = (email: string, e: React.MouseEvent) => {
+    // Stop the anchor tag from navigating
     e.preventDefault();
     e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
 
     if (!email) return;
 
@@ -1368,7 +1370,7 @@ function App() {
                   <div className="creator-meta">
                     <span className="meta-item">{FLAGS[regionKey] || '🌍'} {creator.region}</span>
                     <span className="meta-item category">{category}</span>
-                    <div className="card-actions-grid">
+                    <div className="card-actions-grid" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                       {/* Top row: Email, Note */}
                       <div className="card-actions-row">
                         {(creator.email || creator.businessEmail) ? (
