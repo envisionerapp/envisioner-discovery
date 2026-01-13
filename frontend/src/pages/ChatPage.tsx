@@ -152,7 +152,7 @@ const ChatPage: React.FC = () => {
 
       <div className="grid grid-cols-1 2xl:grid-cols-4 gap-3 md:gap-4 2xl:gap-6 items-start w-full max-w-full">
         {/* History sidebar */}
-        <aside className="2xl:col-span-1 w-full min-w-0">
+        <aside className="2xl:col-span-1 w-full min-w-0 2xl:sticky 2xl:top-4 2xl:self-start">
           <div className="flex items-center justify-between 2xl:hidden mb-2">
             <p className="text-sm font-medium text-gray-400">Chat History</p>
             <button
