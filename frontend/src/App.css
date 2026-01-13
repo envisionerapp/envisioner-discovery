@@ -1045,6 +1045,31 @@ body::-webkit-scrollbar {
 .meta-item {
   font-size: 12px;
   color: #666;
+  white-space: nowrap;
+}
+
+@media (max-width: 1400px) {
+  .meta-item {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .meta-item {
+    font-size: 10px;
+  }
+  .meta-item.category {
+    padding: 3px 8px;
+  }
+}
+
+@media (max-width: 900px) {
+  .meta-item {
+    font-size: 9px;
+  }
+  .meta-item.category {
+    padding: 2px 6px;
+  }
 }
 
 .meta-item.category {
