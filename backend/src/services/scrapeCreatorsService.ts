@@ -279,22 +279,6 @@ export class ScrapeCreatorsService {
     }
   }
 
-  /**
-   * Get YouTube channel details (Note: No YouTube search endpoint exists in ScrapeCreators)
-   */
-  async getYouTubeChannel(handleOrId: string): Promise<any> {
-    try {
-      if (!await this.ensureApiKey()) return null;
-
-      const response = await this.client.get('/v1/youtube/channel', {
-        params: { handle: handleOrId.replace('@', '') }
-      });
-      return response.data?.channel || response.data?.data || response.data;
-    } catch (error: any) {
-      logger.error(`YouTube channel failed for ${handleOrId}:`, error.response?.data || error.message);
-      return null;
-    }
-  }
 
   /**
    * Search Instagram Reels by keyword (uses Google search internally)
