@@ -189,6 +189,7 @@ body::-webkit-scrollbar {
   padding: 24px;
   gap: 24px;
   justify-content: flex-end;
+  align-items: flex-start;
 }
 
 /* Filters Sidebar */
