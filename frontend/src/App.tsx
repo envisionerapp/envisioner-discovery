@@ -567,61 +567,6 @@ function App() {
   const [sortBy, setSortBy] = useState<string>('followers');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
-  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
-
-  // Copy email to clipboard with cross-browser support
-  const copyEmail = (email: string, e: React.MouseEvent) => {
-    // Stop the anchor tag from navigating
-    e.preventDefault();
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
-
-    if (!email) return;
-
-    const showSuccess = () => {
-      setCopiedEmail(email);
-      setTimeout(() => setCopiedEmail(null), 2000);
-    };
-
-    // Use execCommand as primary - most reliable across browsers
-    const textArea = document.createElement('textarea');
-    textArea.value = email;
-    // Must be visible for Chrome - position off-screen but not hidden
-    textArea.style.position = 'absolute';
-    textArea.style.left = '-9999px';
-    textArea.style.top = `${window.scrollY}px`;
-    textArea.setAttribute('readonly', '');
-    document.body.appendChild(textArea);
-
-    // iOS Safari needs special handling
-    const range = document.createRange();
-    range.selectNodeContents(textArea);
-    const selection = window.getSelection();
-    if (selection) {
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
-    textArea.setSelectionRange(0, email.length);
-
-    let success = false;
-    try {
-      success = document.execCommand('copy');
-    } catch (err) {
-      // execCommand failed
-    }
-
-    document.body.removeChild(textArea);
-    if (selection) selection.removeAllRanges();
-
-    if (success) {
-      showSuccess();
-    } else if (navigator.clipboard?.writeText) {
-      // Fallback to Clipboard API if execCommand failed
-      navigator.clipboard.writeText(email)
-        .then(() => showSuccess())
-        .catch((err) => console.error('Copy failed:', err));
-    }
-  };
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -1294,19 +1239,13 @@ function App() {
                         <td>
                           <div className="table-actions">
                             {(creator.email || creator.businessEmail) && (
-                              <div className="email-btn-wrapper">
-                                <button
-                                  type="button"
-                                  className="action-btn-small email"
-                                  title={`Copy ${creator.businessEmail || creator.email}`}
-                                  onClick={(e) => copyEmail((creator.businessEmail || creator.email)!, e)}
-                                >
-                                  {Icons.email}
-                                </button>
-                                {copiedEmail === (creator.businessEmail || creator.email) && (
-                                  <span className="copied-toast">Copied!</span>
-                                )}
-                              </div>
+                              <a
+                                href={`mailto:${creator.businessEmail || creator.email}`}
+                                className="action-btn-small email"
+                                title={`Email ${creator.businessEmail || creator.email}`}
+                              >
+                                {Icons.email}
+                              </a>
                             )}
                             <button
                               type="button"
@@ -1370,23 +1309,18 @@ function App() {
                   <div className="creator-meta">
                     <span className="meta-item">{FLAGS[regionKey] || '🌍'} {creator.region}</span>
                     <span className="meta-item category">{category}</span>
-                    <div className="card-actions-grid" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                    <div className="card-actions-grid" onClick={(e) => e.stopPropagation()}>
                       {/* Top row: Email, Note */}
                       <div className="card-actions-row">
                         {(creator.email || creator.businessEmail) ? (
-                          <div className="email-btn-wrapper">
-                            <button
-                              type="button"
-                              className="action-btn email"
-                              title={`Copy ${creator.businessEmail || creator.email}`}
-                              onClick={(e) => copyEmail((creator.businessEmail || creator.email)!, e)}
-                            >
-                              {Icons.email}
-                            </button>
-                            {copiedEmail === (creator.businessEmail || creator.email) && (
-                              <span className="copied-toast">Copied!</span>
-                            )}
-                          </div>
+                          <a
+                            href={`mailto:${creator.businessEmail || creator.email}`}
+                            className="action-btn email"
+                            title={`Email ${creator.businessEmail || creator.email}`}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {Icons.email}
+                          </a>
                         ) : <span className="action-btn-placeholder" />}
                         <div className="note-wrapper">
                           <button
