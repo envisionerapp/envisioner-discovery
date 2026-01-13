@@ -246,9 +246,15 @@ router.post('/extract-youtube-links', async (req, res) => {
                 data: { socialLinks }
               });
 
-              // Add LinkedIn to sync queue
+              // Add LinkedIn to sync queue (both personal /in/ and company /company/)
               if (channel.linkedin) {
-                const username = channel.linkedin.split('linkedin.com/in/')[1]?.split(/[/?#]/)[0];
+                let username = '';
+                if (channel.linkedin.includes('linkedin.com/in/')) {
+                  username = channel.linkedin.split('linkedin.com/in/')[1]?.split(/[/?#]/)[0] || '';
+                } else if (channel.linkedin.includes('linkedin.com/company/')) {
+                  // Store company pages with a "company:" prefix
+                  username = 'company:' + (channel.linkedin.split('linkedin.com/company/')[1]?.split(/[/?#]/)[0] || '');
+                }
                 if (username) {
                   await db.socialSyncQueue.upsert({
                     where: { platform_username: { platform: 'LINKEDIN', username: username.toLowerCase() } },
@@ -286,9 +292,14 @@ router.post('/extract-youtube-links', async (req, res) => {
                     tiktokFound++;
                   }
                 }
-                // Also check for LinkedIn in links array
-                if (link.includes('linkedin.com/in/') && !channel.linkedin) {
-                  const username = link.split('linkedin.com/in/')[1]?.split(/[/?#]/)[0];
+                // Also check for LinkedIn in links array (both /in/ and /company/)
+                if ((link.includes('linkedin.com/in/') || link.includes('linkedin.com/company/')) && !channel.linkedin) {
+                  let username = '';
+                  if (link.includes('linkedin.com/in/')) {
+                    username = link.split('linkedin.com/in/')[1]?.split(/[/?#]/)[0] || '';
+                  } else if (link.includes('linkedin.com/company/')) {
+                    username = 'company:' + (link.split('linkedin.com/company/')[1]?.split(/[/?#]/)[0] || '');
+                  }
                   if (username) {
                     await db.socialSyncQueue.upsert({
                       where: { platform_username: { platform: 'LINKEDIN', username: username.toLowerCase() } },
