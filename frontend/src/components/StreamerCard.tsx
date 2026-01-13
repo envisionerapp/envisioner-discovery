@@ -323,19 +323,197 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
   );
 };
 
+// Compact table row for Excel-like view
+interface StreamerTableRowProps {
+  streamer: Streamer;
+  index: number;
+}
+
+const StreamerTableRow: React.FC<StreamerTableRowProps> = ({ streamer, index }) => {
+  const { t } = useLanguage();
+
+  return (
+    <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+      {/* Avatar & Name */}
+      <td className="py-3 px-3">
+        <div className="flex items-center gap-3">
+          <div className="relative flex-shrink-0">
+            <img
+              className="w-8 h-8 rounded-full object-cover"
+              src={getStreamerAvatar(streamer)}
+              alt={streamer.displayName}
+              loading="lazy"
+              onError={handleImageError}
+            />
+            <span className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
+              streamer.platform.toLowerCase() === 'twitch' ? 'bg-[#9146FF]' :
+              streamer.platform.toLowerCase() === 'youtube' ? 'bg-[#FF0000]' :
+              streamer.platform.toLowerCase() === 'kick' ? 'bg-[#53FC18]' :
+              'bg-gray-600'
+            }`}>
+              <PlatformIcon name={streamer.platform.toLowerCase() as any} className="h-2.5 w-2.5 text-white" />
+            </span>
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-gray-100 truncate">{streamer.displayName}</p>
+            <p className="text-xs text-gray-500 truncate">@{streamer.username}</p>
+          </div>
+        </div>
+      </td>
+
+      {/* Platform */}
+      <td className="py-3 px-3">
+        <span className="text-xs text-gray-300 capitalize">{streamer.platform.toLowerCase()}</span>
+      </td>
+
+      {/* Region */}
+      <td className="py-3 px-3">
+        <span className="text-sm">
+          {flagFor(streamer.region.toLowerCase())} {regionLabel(streamer.region.toLowerCase())}
+        </span>
+      </td>
+
+      {/* Status */}
+      <td className="py-3 px-3">
+        {streamer.isLive ? (
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs bg-[#FF6B35]/20 text-[#FF6B35] border border-[#FF6B35]/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FF6B35] animate-pulse"></span>
+            LIVE
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs bg-gray-500/20 text-gray-400 border border-gray-500/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
+            Offline
+          </span>
+        )}
+      </td>
+
+      {/* Followers */}
+      <td className="py-3 px-3 text-right">
+        <span className="text-sm text-gray-100">{streamer.followers.toLocaleString()}</span>
+      </td>
+
+      {/* Viewers */}
+      <td className="py-3 px-3 text-right">
+        {streamer.isLive && streamer.currentViewers !== undefined ? (
+          <span className="text-sm text-[#FF6B35] font-medium">{streamer.currentViewers.toLocaleString()}</span>
+        ) : (
+          <span className="text-sm text-gray-500">-</span>
+        )}
+      </td>
+
+      {/* Game/Category */}
+      <td className="py-3 px-3">
+        <span className="text-xs text-gray-300 truncate block max-w-[150px]">
+          {streamer.currentGame || '-'}
+        </span>
+      </td>
+
+      {/* Tags */}
+      <td className="py-3 px-3">
+        <div className="flex flex-wrap gap-1">
+          {streamer.tags.slice(0, 2).map((tag) => (
+            <span key={tag} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] bg-white/10 text-gray-400">
+              {tag.toLowerCase()}
+            </span>
+          ))}
+          {streamer.tags.length > 2 && (
+            <span className="text-[10px] text-gray-500">+{streamer.tags.length - 2}</span>
+          )}
+        </div>
+      </td>
+
+      {/* Actions */}
+      <td className="py-3 px-3">
+        <div className="flex items-center gap-1">
+          <button
+            className="p-1.5 rounded hover:bg-white/10 transition-colors text-gray-400 hover:text-gray-200"
+            onClick={() => window.open(streamer.profileUrl, '_blank')}
+            title={t('streamers.card.viewProfile')}
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </button>
+          <button
+            className="p-1.5 rounded hover:bg-[#FF6B35]/20 transition-colors text-gray-400 hover:text-[#FF6B35]"
+            title={t('streamers.card.addToCampaign')}
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+};
+
+// Table view for streamers
+interface StreamerTableProps {
+  streamers: Streamer[];
+}
+
+const StreamerTable: React.FC<StreamerTableProps> = ({ streamers }) => {
+  const { t } = useLanguage();
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[900px]">
+        <thead>
+          <tr className="border-b border-white/10 text-left">
+            <th className="py-3 px-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Streamer</th>
+            <th className="py-3 px-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Platform</th>
+            <th className="py-3 px-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Region</th>
+            <th className="py-3 px-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+            <th className="py-3 px-3 text-xs font-medium text-gray-400 uppercase tracking-wider text-right">Followers</th>
+            <th className="py-3 px-3 text-xs font-medium text-gray-400 uppercase tracking-wider text-right">Viewers</th>
+            <th className="py-3 px-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Category</th>
+            <th className="py-3 px-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Tags</th>
+            <th className="py-3 px-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {streamers.map((streamer, index) => (
+            <StreamerTableRow key={streamer.id} streamer={streamer} index={index} />
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+// View mode toggle icons
+const GridIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+  </svg>
+);
+
+const TableIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+  </svg>
+);
+
 // Grid layout for multiple streamers
+type ViewMode = 'cards' | 'table';
+
 interface StreamerGridProps {
   streamers: Streamer[];
   title?: string;
   subtitle?: string;
+  defaultView?: ViewMode;
 }
 
 export const StreamerGrid: React.FC<StreamerGridProps> = ({
   streamers,
   title = "Search Results",
-  subtitle
+  subtitle,
+  defaultView = 'cards'
 }) => {
   const { t } = useLanguage();
+  const [viewMode, setViewMode] = React.useState<ViewMode>(defaultView);
 
   if (streamers.length === 0) {
     return (
@@ -360,22 +538,53 @@ export const StreamerGrid: React.FC<StreamerGridProps> = ({
           <h3 className="text-lg font-semibold text-gray-100">{title}</h3>
           {subtitle && <p className="text-sm text-gray-400 mt-1">{subtitle}</p>}
         </div>
-        <div className="chip-glass px-3 py-1">
-          <span className="text-sm text-gray-300">
-            {streamers.length} {streamers.length !== 1 ? t('chat.results.streamers') : t('chat.results.streamers')}
-          </span>
+        <div className="flex items-center gap-3">
+          {/* View mode toggle */}
+          <div className="flex items-center rounded-lg bg-white/5 p-1">
+            <button
+              onClick={() => setViewMode('cards')}
+              className={`p-1.5 rounded transition-colors ${
+                viewMode === 'cards'
+                  ? 'bg-[#FF6B35] text-white'
+                  : 'text-gray-400 hover:text-gray-200'
+              }`}
+              title="Card view"
+            >
+              <GridIcon className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`p-1.5 rounded transition-colors ${
+                viewMode === 'table'
+                  ? 'bg-[#FF6B35] text-white'
+                  : 'text-gray-400 hover:text-gray-200'
+              }`}
+              title="Table view"
+            >
+              <TableIcon className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="chip-glass px-3 py-1">
+            <span className="text-sm text-gray-300">
+              {streamers.length} {streamers.length !== 1 ? t('chat.results.streamers') : t('chat.results.streamers')}
+            </span>
+          </div>
         </div>
       </div>
       <div className="card-body">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {streamers.map((streamer, index) => (
-            <StreamerCard
-              key={streamer.id}
-              streamer={streamer}
-              index={index}
-            />
-          ))}
-        </div>
+        {viewMode === 'cards' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {streamers.map((streamer, index) => (
+              <StreamerCard
+                key={streamer.id}
+                streamer={streamer}
+                index={index}
+              />
+            ))}
+          </div>
+        ) : (
+          <StreamerTable streamers={streamers} />
+        )}
       </div>
     </div>
   );
