@@ -554,9 +554,9 @@ async function upsertFacebookPage(pageId: string, pageName: string, source: stri
         username: profile?.username || pageId,
         displayName: profile?.name || pageName,
         profileUrl: `https://facebook.com/${profile?.username || pageId}`,
-        avatarUrl: profile?.profile_pic_url,
-        followers: profile?.follower_count || 0,
-        totalLikes: BigInt(profile?.likes_count || 0),
+        avatarUrl: profile?.profilePicLarge,
+        followers: profile?.followerCount || 0,
+        totalLikes: BigInt(profile?.likeCount || 0),
         profileDescription: profile?.about,
         isLive: false,
         language: 'en',
@@ -566,7 +566,7 @@ async function upsertFacebookPage(pageId: string, pageName: string, source: stri
         discoveredVia: `scrapecreators:facebook:${source}`,
       },
     });
-    logger.info(`Discovered Facebook: ${pageName} (${(profile?.follower_count || 0).toLocaleString()} followers)`);
+    logger.info(`Discovered Facebook: ${pageName} (${(profile?.followerCount || 0).toLocaleString()} followers)`);
     return 'created';
   } catch (error) {
     return 'skipped';
