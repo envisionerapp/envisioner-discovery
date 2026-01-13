@@ -204,23 +204,18 @@ router.post('/extract-youtube-links', async (req, res) => {
       return res.json({ success: true, message: 'No YouTube channels to process', data: { processed: 0 } });
     }
 
-    // Process in background using Playwright web scraping
+    // Process in background using Puppeteer web scraping
     (async () => {
       let processed = 0;
       let linksFound = 0;
-      const { chromium } = await import('playwright');
+      const puppeteer = await import('puppeteer');
 
-      const browser = await chromium.launch({
+      const browser = await puppeteer.default.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
       });
 
       try {
-        const context = await browser.newContext({
-          viewport: { width: 1920, height: 1080 },
-          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        });
-
         for (const streamer of streamers) {
           try {
             // Build About page URL
@@ -239,10 +234,12 @@ router.post('/extract-youtube-links', async (req, res) => {
             }
 
             console.log(`Scraping YouTube About page: ${aboutUrl}`);
-            const page = await context.newPage();
+            const page = await browser.newPage();
+            await page.setViewport({ width: 1920, height: 1080 });
+            await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
 
-            await page.goto(aboutUrl, { waitUntil: 'networkidle', timeout: 30000 });
-            await page.waitForTimeout(2000);
+            await page.goto(aboutUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+            await new Promise(r => setTimeout(r, 2000));
 
             // Extract social links from the About page
             const socialLinks = await page.evaluate(() => {
@@ -368,8 +365,6 @@ router.post('/extract-youtube-links', async (req, res) => {
             processed++;
           }
         }
-
-        await context.close();
       } finally {
         await browser.close();
       }
@@ -387,28 +382,26 @@ router.post('/extract-youtube-links', async (req, res) => {
   }
 });
 
-// Debug: Test YouTube scraping for a single channel (synchronous)
+// Debug: Test YouTube scraping for a single channel (synchronous) - using Puppeteer
 router.get('/test-youtube-scrape/:username', async (req, res) => {
   try {
     const username = req.params.username;
-    const { chromium } = await import('playwright');
+    const puppeteer = await import('puppeteer');
 
-    const browser = await chromium.launch({
+    const browser = await puppeteer.default.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
     });
 
-    const context = await browser.newContext({
-      viewport: { width: 1920, height: 1080 },
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-    });
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1920, height: 1080 });
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
 
     const aboutUrl = `https://www.youtube.com/@${username}/about`;
     console.log(`Testing YouTube scrape: ${aboutUrl}`);
 
-    const page = await context.newPage();
-    await page.goto(aboutUrl, { waitUntil: 'networkidle', timeout: 30000 });
-    await page.waitForTimeout(3000);
+    await page.goto(aboutUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+    await new Promise(r => setTimeout(r, 3000));
 
     // Get page title to verify we loaded correctly
     const pageTitle = await page.title();

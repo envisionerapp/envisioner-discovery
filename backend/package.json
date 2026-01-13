@@ -7,7 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc --incremental && cp -r csv dist/",
     "start": "node --max-old-space-size=512 dist/index.js",
-    "postinstall": "prisma generate && npx playwright install chromium",
+    "postinstall": "prisma generate",
     "import:csv": "ts-node scripts/import-combined-csv.ts",
     "sync:csv-strict": "ts-node scripts/sync-to-csv.ts",
     "avatars:backfill": "ts-node scripts/backfill-avatars.ts",

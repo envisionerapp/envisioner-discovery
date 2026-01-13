@@ -4,7 +4,7 @@ services:
     runtime: node
     region: ohio
     plan: starter
-    buildCommand: cd backend && npm install && npx playwright install chromium --with-deps && npm run build && npx prisma generate
+    buildCommand: cd backend && npm install && npm run build && npx prisma generate
     startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
