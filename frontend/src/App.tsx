@@ -564,7 +564,7 @@ function App() {
   const [noteModalCreator, setNoteModalCreator] = useState<ApiCreator | null>(null);
   const [noteContent, setNoteContent] = useState('');
   const [noteSaving, setNoteSaving] = useState(false);
-  const [sortBy, setSortBy] = useState<string>('lastactive');
+  const [sortBy, setSortBy] = useState<string>('followers');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
