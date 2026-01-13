@@ -1700,6 +1700,16 @@ body::-webkit-scrollbar {
   color: #fff;
 }
 
+.today-chip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
 .table-actions {
   display: flex;
   gap: 8px;

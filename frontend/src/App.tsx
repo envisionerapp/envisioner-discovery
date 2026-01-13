@@ -1215,7 +1215,7 @@ function App() {
                         <td>{creator.avgViewers > 0 ? formatNumber(creator.avgViewers) : '-'}</td>
                         <td>
                           {creator.isLive ? (
-                            <span className="live-chip">🔴 LIVE</span>
+                            <span className="today-chip">Today</span>
                           ) : (
                             lastActive || '-'
                           )}
