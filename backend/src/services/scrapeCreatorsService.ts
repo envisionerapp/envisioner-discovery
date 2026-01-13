@@ -618,14 +618,25 @@ export class ScrapeCreatorsService {
       // API requires full URL, not just handle
       if (!await this.ensureApiKey()) return null;
 
-      const url = `https://www.linkedin.com/in/${handle}`;
+      // Handle company pages (stored as "company:companyname")
+      let url: string;
+      let cleanHandle = handle;
+      if (handle.startsWith('company:')) {
+        cleanHandle = handle.replace('company:', '');
+        url = `https://www.linkedin.com/company/${cleanHandle}`;
+        logger.info(`Fetching LinkedIn company page: ${url}`);
+      } else {
+        url = `https://www.linkedin.com/in/${handle}`;
+        logger.info(`Fetching LinkedIn profile: ${url}`);
+      }
+
       const response = await this.client.get('/v1/linkedin/profile', {
         params: { url }
       });
       const data = response.data?.data || response.data;
       if (data) {
         // Add public_identifier from handle since API doesn't return it
-        data.public_identifier = handle;
+        data.public_identifier = cleanHandle;
       }
       return data;
     } catch (error: any) {
