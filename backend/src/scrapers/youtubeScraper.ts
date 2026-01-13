@@ -210,13 +210,37 @@ export class YouTubeScraper {
           return match ? parseInt(match[1].replace(/,/g, ''), 10) : 0;
         };
 
+        const getSocialLinks = (): string[] => {
+          const links: string[] = [];
+          // Look for links in the About page section
+          const linkElements = document.querySelectorAll('a[href*="linkedin.com"], a[href*="instagram.com"], a[href*="twitter.com"], a[href*="x.com"], a[href*="tiktok.com"], a[href*="facebook.com"]');
+          linkElements.forEach(el => {
+            const href = (el as HTMLAnchorElement).href;
+            if (href && !links.includes(href)) links.push(href);
+          });
+          // Also check redirect links (YouTube uses redirect URLs)
+          const redirectLinks = document.querySelectorAll('a[href*="youtube.com/redirect"]');
+          redirectLinks.forEach(el => {
+            const href = (el as HTMLAnchorElement).href;
+            try {
+              const url = new URL(href);
+              const q = url.searchParams.get('q');
+              if (q && (q.includes('linkedin') || q.includes('instagram') || q.includes('twitter') || q.includes('tiktok') || q.includes('facebook'))) {
+                if (!links.includes(q)) links.push(q);
+              }
+            } catch {}
+          });
+          return links;
+        };
+
         return {
           followers: extractSubscribers(),
           isLive: isLive(),
           displayName: getDisplayName(),
           avatarUrl: getAvatarUrl(),
           description: getDescription(),
-          currentViewers: getCurrentViewers()
+          currentViewers: getCurrentViewers(),
+          socialLinks: getSocialLinks()
         };
       });
 
