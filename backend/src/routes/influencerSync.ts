@@ -80,18 +80,25 @@ router.get('/test-linkedin-api/:username', async (req, res) => {
 router.get('/test-linkedin-raw', async (req, res) => {
   try {
     const axios = require('axios');
+    const { getConfig } = require('../utils/configFromDb');
     const linkedinUrl = req.query.url as string;
     if (!linkedinUrl) {
       return res.status(400).json({ error: 'url query param required' });
     }
 
-    const apiKey = process.env.SCRAPECREATORS_API_KEY;
+    // Get API key from env or database
+    let apiKey = process.env.SCRAPECREATORS_API_KEY;
+    if (!apiKey) {
+      apiKey = await getConfig('SCRAPECREATORS_API_KEY');
+    }
+
     const isCompany = linkedinUrl.includes('/company/');
     const endpoint = isCompany ? '/v1/linkedin/company' : '/v1/linkedin/profile';
 
     console.log('Raw test - URL:', linkedinUrl);
     console.log('Raw test - Endpoint:', endpoint);
     console.log('Raw test - API Key present:', !!apiKey);
+    console.log('Raw test - API Key first 10 chars:', apiKey?.substring(0, 10));
 
     const response = await axios.get(`https://api.scrapecreators.com${endpoint}`, {
       params: { url: linkedinUrl },
