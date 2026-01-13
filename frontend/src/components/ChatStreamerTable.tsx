@@ -17,12 +17,28 @@ import { UsersIcon, EyeIcon, HashtagIcon, UserIcon, MapPinIcon, ClockIcon, Chevr
 type SortField = 'displayName' | 'followers' | 'currentViewers' | 'peakViewers' | 'region' | 'lastLive';
 type SortDirection = 'asc' | 'desc';
 
+// View mode toggle icons
+const GridIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+  </svg>
+);
+
+const TableIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+  </svg>
+);
+
+type ViewMode = 'cards' | 'table';
+
 interface ChatStreamerTableProps {
   streamers: Streamer[];
   totalCount?: number;
   query?: string;
   onViewDetails?: (streamer: Streamer) => void;
   onPlatformFilter?: (platform: '' | 'twitch' | 'youtube' | 'kick') => void;
+  defaultView?: ViewMode;
 }
 
 // Compact number formatter for followers/viewers (e.g., 12.3k, 1.2m)
@@ -74,11 +90,12 @@ const LastLiveChip: React.FC<{ minutes: number; isLive?: boolean; mode: 'simple'
   );
 };
 
-export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers, totalCount, query, onViewDetails, onPlatformFilter }) => {
+export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers, totalCount, query, onViewDetails, onPlatformFilter, defaultView = 'table' }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>('followers');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [platformFilter, setPlatformFilter] = useState<'' | 'twitch' | 'youtube' | 'kick'>('');
+  const [viewMode, setViewMode] = useState<ViewMode>(defaultView);
   const itemsPerPage = 20; // Show 20 streamers per page
 
   // Handle platform filter change
@@ -273,6 +290,43 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                 ))}
               </div>
             </div>
+            {/* View mode toggle */}
+            <div className="rounded-xl p-1" style={{ border: '0.5px solid rgba(255,255,255,0.12)', background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(10px)' }}>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setViewMode('cards')}
+                  className={`inline-flex items-center justify-center rounded-lg h-7 w-7 md:h-8 md:w-8 transition-colors ${
+                    viewMode === 'cards'
+                      ? ''
+                      : 'hover:bg-white/5'
+                  }`}
+                  style={viewMode === 'cards'
+                    ? { backgroundColor: '#FF6B35', color: '#141C2E' }
+                    : { backgroundColor: 'rgba(0,0,0,0.20)', border: '0.5px solid rgba(255,255,255,0.15)', color: '#9ca3af' }
+                  }
+                  title="Card view"
+                  aria-label="Card view"
+                >
+                  <GridIcon className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('table')}
+                  className={`inline-flex items-center justify-center rounded-lg h-7 w-7 md:h-8 md:w-8 transition-colors ${
+                    viewMode === 'table'
+                      ? ''
+                      : 'hover:bg-white/5'
+                  }`}
+                  style={viewMode === 'table'
+                    ? { backgroundColor: '#FF6B35', color: '#141C2E' }
+                    : { backgroundColor: 'rgba(0,0,0,0.20)', border: '0.5px solid rgba(255,255,255,0.15)', color: '#9ca3af' }
+                  }
+                  title="Table view"
+                  aria-label="Table view"
+                >
+                  <TableIcon className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
             <div className="chip-glass px-3 py-1.5">
               <span className="text-xs md:text-sm text-gray-300">
                 {totalPages > 1 ? `${startIndex + 1}-${Math.min(endIndex, streamers.length)} of ${streamers.length}` : `${streamers.length} result${streamers.length !== 1 ? 's' : ''}`}
@@ -300,6 +354,161 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
               </p>
             </div>
           </div>
+        ) : viewMode === 'cards' ? (
+          <>
+            {/* Card Grid View */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {currentStreamers.map((s, idx) => {
+                const region = (s as any).region?.toLowerCase?.() || '';
+                const platform = (s as any).platform?.toLowerCase?.();
+                const peak = (s as any).highestViewers ?? (s as any).currentViewers ?? 0;
+                const isLive = !!(s as any).isLive;
+                const lastStreamed = platform === 'youtube' ? null : ((s as any).lastStreamed ? new Date((s as any).lastStreamed) : null);
+                let minutes = 999999;
+                const refDate = isLive ? null : lastStreamed;
+                if (!isLive && refDate) {
+                  try { minutes = differenceInMinutes(new Date(), refDate); } catch {}
+                }
+                const lastLiveLabel = isLive
+                  ? 'Live'
+                  : isFinite(minutes as any) && minutes < 60
+                    ? `${minutes}m`
+                    : isFinite(minutes as any) && minutes < 1440
+                      ? `${Math.round(minutes / 60)}h`
+                      : isFinite(minutes as any) && minutes < 525600
+                        ? `${Math.round(minutes / 1440)}d`
+                        : '–';
+                const p = (s as any).profileUrl as string | undefined;
+                const username = (s as any).username;
+                let href = p || '';
+                if (!href && platform && username) {
+                  const cleanUsername = username.startsWith('@') ? username.slice(1) : username;
+                  href = platform === 'twitch' ? `https://twitch.tv/${cleanUsername}` : platform === 'youtube' ? `https://www.youtube.com/@${cleanUsername}` : platform === 'kick' ? `https://kick.com/${cleanUsername}` : '';
+                }
+
+                return (
+                  <div
+                    key={(s as any).id || `card-${(s as any).platform}:${(s as any).username}:${idx}`}
+                    className="rounded-xl p-4 transition-all hover:scale-[1.02]"
+                    style={{ background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)' }}
+                  >
+                    {/* Header with Avatar */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="relative h-14 w-14 flex-shrink-0">
+                        <div className="rounded-full overflow-hidden w-full h-full relative" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}>
+                          <img className="block w-full h-full object-cover" src={resolveAvatar(s)} alt={(s as any).displayName} loading="lazy" onError={handleImageError} />
+                        </div>
+                        {platform && (
+                          <span className={`absolute flex items-center justify-center rounded-full`} style={{ bottom: -2, right: -2, width: 22, height: 22, backgroundColor: platform === 'twitch' ? '#9146FF' : platform === 'youtube' ? '#FF0000' : platform === 'kick' ? '#53FC18' : 'rgba(0,0,0,0.75)', zIndex: 3 }} title={platform}>
+                            <PlatformIcon name={platform as any} className="h-3.5 w-3.5 text-white" />
+                          </span>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-base font-semibold text-gray-100 truncate">{(s as any).displayName}</div>
+                        <div className="text-xs text-gray-400 truncate">@{(s as any).username}</div>
+                        <div className="mt-1">
+                          <span className="region-chip text-xs"><span aria-hidden>{flagFor(region)}</span><span>{regionLabel(region)}</span></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Live Status */}
+                    <div className="mb-3">
+                      {isLive ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold animate-pulse" style={{ background: '#FF6B35', color: '#fff', animationDuration: '2s' }}>
+                          <span className="w-2 h-2 rounded-full bg-white"></span>
+                          LIVE {(s as any).currentViewers ? `• ${formatCount((s as any).currentViewers)} viewers` : ''}
+                        </span>
+                      ) : (
+                        <LastLiveChip minutes={minutes} isLive={false} mode="contrast" label={`Last live: ${lastLiveLabel}`} />
+                      )}
+                    </div>
+
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                      <div className="rounded-lg p-2 text-center" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <UsersIcon className="h-3.5 w-3.5 text-primary-500" />
+                        </div>
+                        <div className="text-lg font-bold text-gray-100">{formatCount((s as any).followers)}</div>
+                        <div className="text-[10px] text-gray-400 uppercase">Followers</div>
+                      </div>
+                      <div className="rounded-lg p-2 text-center" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <TrophyIcon className="h-3.5 w-3.5 text-[#FF6B35]" />
+                        </div>
+                        <div className="text-lg font-bold text-gray-100">{peak ? formatCount(peak) : '-'}</div>
+                        <div className="text-[10px] text-gray-400 uppercase">Peak</div>
+                      </div>
+                    </div>
+
+                    {/* Tags */}
+                    {(s as any).tags && (s as any).tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {(s as any).tags.slice(0, 3).map((tag: string, tagIdx: number) => (
+                          <span key={tagIdx} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-white/10 text-gray-300">
+                            {tag.toLowerCase()}
+                          </span>
+                        ))}
+                        {(s as any).tags.length > 3 && (
+                          <span className="text-[10px] text-gray-500">+{(s as any).tags.length - 3}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => onViewDetails?.(s)}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg text-xs font-bold py-2"
+                        style={{ backgroundColor: '#FF6B35', color: '#141C2E' }}
+                      >
+                        View Details
+                      </button>
+                      {href && (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-1.5 rounded-lg text-xs font-bold py-2 px-3"
+                          style={{ backgroundColor: platform === 'twitch' ? '#9146FF' : platform === 'youtube' ? '#FF0000' : platform === 'kick' ? '#53FC18' : 'rgba(255,255,255,0.08)', color: platform === 'kick' ? '#000' : '#fff' }}
+                        >
+                          <PlatformIcon name={platform as any} className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Pagination for card view */}
+            {totalPages > 1 && (
+              <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-3 px-2 sm:px-0">
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left order-2 sm:order-1">
+                  Showing {startIndex + 1}-{Math.min(endIndex, streamers.length)} of {streamers.length} results
+                </p>
+                <div className="flex items-center gap-1.5 sm:gap-2 order-1 sm:order-2">
+                  <button
+                    className="btn-outline text-xs sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2 dark:border-gray-700 dark:text-gray-300"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-gray-400">{currentPage} / {totalPages}</span>
+                  <button
+                    className="btn-outline text-xs sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2 dark:border-gray-700 dark:text-gray-300"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <>
             {/* Mobile list view */}
