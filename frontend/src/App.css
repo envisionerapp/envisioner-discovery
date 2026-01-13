@@ -1749,6 +1749,13 @@ body::-webkit-scrollbar {
   height: 16px;
 }
 
+.loading-cell {
+  text-align: center;
+  padding: 60px 20px !important;
+  color: #6c757d;
+  font-size: 14px;
+}
+
 .no-results-cell {
   text-align: center;
   padding: 60px 20px !important;

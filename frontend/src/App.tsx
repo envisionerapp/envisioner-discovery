@@ -1153,10 +1153,10 @@ function App() {
 
         {/* Results */}
         <main className="results">
-          {loading && <div className="loading">Loading creators...</div>}
+          {loading && viewMode === 'cards' && <div className="loading">Loading creators...</div>}
 
           {/* Table View */}
-          {viewMode === 'table' && !loading && (
+          {viewMode === 'table' && (
             <div className="creator-table-wrapper">
               <table className="creator-table">
                 <thead>
@@ -1172,7 +1172,14 @@ function App() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredCreators.length === 0 && (
+                  {loading && (
+                    <tr>
+                      <td colSpan={8} className="loading-cell">
+                        Loading creators...
+                      </td>
+                    </tr>
+                  )}
+                  {!loading && filteredCreators.length === 0 && (
                     <tr>
                       <td colSpan={8} className="no-results-cell">
                         <p>No creators found matching your filters</p>
@@ -1180,7 +1187,7 @@ function App() {
                       </td>
                     </tr>
                   )}
-                  {filteredCreators.map(creator => {
+                  {!loading && filteredCreators.map(creator => {
                     const platformKey = getPlatformKey(creator.platform) as Platform;
                     const displayName = creator.displayName || creator.username;
                     const category = creator.primaryCategory || creator.currentGame || '-';
