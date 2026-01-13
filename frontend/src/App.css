@@ -715,6 +715,24 @@ body::-webkit-scrollbar {
   margin-left: auto;
 }
 
+.card-actions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-left: auto;
+}
+
+.card-actions-row {
+  display: flex;
+  gap: 3px;
+  justify-content: flex-end;
+}
+
+.action-btn-placeholder {
+  width: 28px;
+  height: 28px;
+}
+
 .action-btn {
   background: rgba(255, 255, 255, 0.95);
   border: none;

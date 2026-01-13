@@ -1326,65 +1326,71 @@ function App() {
                   <div className="creator-meta">
                     <span className="meta-item">{FLAGS[regionKey] || '🌍'} {creator.region}</span>
                     <span className="meta-item category">{category}</span>
-                    <div className="card-actions">
-                      {(creator.email || creator.businessEmail) && (
-                        <div className="email-btn-wrapper">
+                    <div className="card-actions-grid">
+                      {/* Top row: Email, Note */}
+                      <div className="card-actions-row">
+                        {(creator.email || creator.businessEmail) ? (
+                          <div className="email-btn-wrapper">
+                            <button
+                              type="button"
+                              className="action-btn email"
+                              title={`Copy ${creator.businessEmail || creator.email}`}
+                              onClick={(e) => copyEmail((creator.businessEmail || creator.email)!, e)}
+                            >
+                              {Icons.email}
+                            </button>
+                            {copiedEmail === (creator.businessEmail || creator.email) && (
+                              <span className="copied-toast">Copied!</span>
+                            )}
+                          </div>
+                        ) : <span className="action-btn-placeholder" />}
+                        <div className="note-wrapper">
                           <button
                             type="button"
-                            className="action-btn email"
-                            title={`Copy ${creator.businessEmail || creator.email}`}
-                            onClick={(e) => copyEmail((creator.businessEmail || creator.email)!, e)}
+                            className={`action-btn ${notes[creator.id] ? 'active note' : ''}`}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); openNoteModal(creator, e); }}
+                            title={notes[creator.id] ? 'Edit note' : 'Add note'}
                           >
-                            {Icons.email}
+                            {notes[creator.id] ? Icons.noteFilled : Icons.note}
                           </button>
-                          {copiedEmail === (creator.businessEmail || creator.email) && (
-                            <span className="copied-toast">Copied!</span>
+                          {noteModalOpen && noteModalCreator?.id === creator.id && (
+                            <div className="note-popout" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} onMouseDown={(e) => e.stopPropagation()}>
+                              <textarea
+                                value={noteContent}
+                                onChange={(e) => setNoteContent(e.target.value)}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                placeholder="Add a note..."
+                                autoFocus
+                              />
+                              <div className="note-popout-actions">
+                                <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setNoteModalOpen(false); }} onMouseDown={(e) => e.stopPropagation()}>Cancel</button>
+                                <button type="button" className="save" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleSaveNote(); }} onMouseDown={(e) => e.stopPropagation()} disabled={noteSaving}>
+                                  {noteSaving ? '...' : 'Save'}
+                                </button>
+                              </div>
+                            </div>
                           )}
                         </div>
-                      )}
-                      <button
-                        type="button"
-                        className={`action-btn ${favorites.includes(creator.id) ? 'active favorite' : ''}`}
-                        onClick={(e) => toggleFavorite(creator.id, e)}
-                        title={favorites.includes(creator.id) ? 'Remove from favorites' : 'Add to favorites'}
-                      >
-                        {favorites.includes(creator.id) ? Icons.heartFilled : Icons.heart}
-                      </button>
-                      <button
-                        type="button"
-                        className={`action-btn ${discarded.includes(creator.id) ? 'active discard' : ''}`}
-                        onClick={(e) => toggleDiscarded(creator.id, e)}
-                        title={discarded.includes(creator.id) ? 'Restore' : 'Discard'}
-                      >
-                        {Icons.trash}
-                      </button>
-                      <div className="note-wrapper">
+                      </div>
+                      {/* Bottom row: Favorite, Delete */}
+                      <div className="card-actions-row">
                         <button
                           type="button"
-                          className={`action-btn ${notes[creator.id] ? 'active note' : ''}`}
-                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); openNoteModal(creator, e); }}
-                          title={notes[creator.id] ? 'Edit note' : 'Add note'}
+                          className={`action-btn ${favorites.includes(creator.id) ? 'active favorite' : ''}`}
+                          onClick={(e) => toggleFavorite(creator.id, e)}
+                          title={favorites.includes(creator.id) ? 'Remove from favorites' : 'Add to favorites'}
                         >
-                          {notes[creator.id] ? Icons.noteFilled : Icons.note}
+                          {favorites.includes(creator.id) ? Icons.heartFilled : Icons.heart}
                         </button>
-                        {noteModalOpen && noteModalCreator?.id === creator.id && (
-                          <div className="note-popout" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} onMouseDown={(e) => e.stopPropagation()}>
-                            <textarea
-                              value={noteContent}
-                              onChange={(e) => setNoteContent(e.target.value)}
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                              onMouseDown={(e) => e.stopPropagation()}
-                              placeholder="Add a note..."
-                              autoFocus
-                            />
-                            <div className="note-popout-actions">
-                              <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setNoteModalOpen(false); }} onMouseDown={(e) => e.stopPropagation()}>Cancel</button>
-                              <button type="button" className="save" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleSaveNote(); }} onMouseDown={(e) => e.stopPropagation()} disabled={noteSaving}>
-                                {noteSaving ? '...' : 'Save'}
-                              </button>
-                            </div>
-                          </div>
-                        )}
+                        <button
+                          type="button"
+                          className={`action-btn ${discarded.includes(creator.id) ? 'active discard' : ''}`}
+                          onClick={(e) => toggleDiscarded(creator.id, e)}
+                          title={discarded.includes(creator.id) ? 'Restore' : 'Discard'}
+                        >
+                          {Icons.trash}
+                        </button>
                       </div>
                     </div>
                   </div>
