@@ -181,17 +181,10 @@ router.post('/process-linkedin-queue', async (req, res) => {
   }
 });
 
-// Extract social links from YouTube channels using YouTube API (FREE)
+// Extract social links from YouTube channels using web scraping (API doesn't return links)
 router.post('/extract-youtube-links', async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit as string) || 100;
-    // Use hardcoded YouTube API keys (rotated for quota)
-    const youtubeApiKeys = [
-      'AIzaSyDzdtG_gCDRQhUbBjdmN0euebH9NEOP8yQ',
-      'AIzaSyCHNIURBY5bnH1mMd2QAHHuOv9XAA1UV9U',
-      'AIzaSyDzFhnS_2n5_Mo5al0hq0nZbC2DPNtsYsY',
-    ];
-    const apiKey = youtubeApiKeys[Math.floor(Math.random() * youtubeApiKeys.length)];
+    const limit = parseInt(req.query.limit as string) || 50;
 
     // Get YouTube streamers without social links
     const streamers = await db.streamer.findMany({
@@ -211,48 +204,119 @@ router.post('/extract-youtube-links', async (req, res) => {
       return res.json({ success: true, message: 'No YouTube channels to process', data: { processed: 0 } });
     }
 
-    // Process in background
+    // Process in background using Playwright web scraping
     (async () => {
       let processed = 0;
       let linksFound = 0;
-      const { scrapeCreatorsService } = await import('../services/scrapeCreatorsService');
+      const { chromium } = await import('playwright');
 
-      for (const streamer of streamers) {
-        try {
-          // Extract channel ID from URL or use username
-          let channelId = '';
-          if (streamer.profileUrl?.includes('/channel/')) {
-            channelId = streamer.profileUrl.split('/channel/')[1]?.split('/')[0] || '';
-          }
+      const browser = await chromium.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      });
 
-          // If we have a channel ID, fetch from YouTube API
-          if (channelId) {
-            const response = await fetch(
-              `https://www.googleapis.com/youtube/v3/channels?part=snippet,brandingSettings&id=${channelId}&key=${apiKey}`
-            );
-            const data = await response.json();
-            const channel = data.items?.[0];
+      try {
+        const context = await browser.newContext({
+          viewport: { width: 1920, height: 1080 },
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        });
 
-            if (channel) {
-              const description = channel.snippet?.description || '';
-              const links = channel.brandingSettings?.channel?.links || [];
+        for (const streamer of streamers) {
+          try {
+            // Build About page URL
+            let aboutUrl = '';
+            if (streamer.profileUrl?.includes('/@')) {
+              aboutUrl = streamer.profileUrl.replace(/\/$/, '') + '/about';
+            } else if (streamer.profileUrl?.includes('/channel/')) {
+              aboutUrl = streamer.profileUrl.replace(/\/$/, '') + '/about';
+            } else if (streamer.username) {
+              aboutUrl = `https://www.youtube.com/@${streamer.username}/about`;
+            }
 
-              // Extract handles from description
-              const handles = (scrapeCreatorsService as any).extractHandlesFromContent(description);
+            if (!aboutUrl) {
+              processed++;
+              continue;
+            }
 
-              // Also parse the links array
-              const socialLinks: string[] = [];
-              for (const link of links) {
-                const url = link.url || link;
-                if (typeof url === 'string') socialLinks.push(url);
+            console.log(`Scraping YouTube About page: ${aboutUrl}`);
+            const page = await context.newPage();
+
+            await page.goto(aboutUrl, { waitUntil: 'networkidle', timeout: 30000 });
+            await page.waitForTimeout(2000);
+
+            // Extract social links from the About page
+            const socialLinks = await page.evaluate(() => {
+              const links: string[] = [];
+
+              // Method 1: Direct social links on About page
+              const socialSelectors = [
+                'a[href*="linkedin.com"]',
+                'a[href*="instagram.com"]',
+                'a[href*="twitter.com"]',
+                'a[href*="x.com"]',
+                'a[href*="tiktok.com"]',
+                'a[href*="facebook.com"]'
+              ];
+
+              for (const selector of socialSelectors) {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                  const href = (el as HTMLAnchorElement).href;
+                  if (href && !links.includes(href)) links.push(href);
+                });
               }
 
-              // Parse socialLinks for handles
-              const linkContent = socialLinks.join(' ');
-              const linkHandles = (scrapeCreatorsService as any).extractHandlesFromContent(linkContent);
+              // Method 2: YouTube redirect links (youtube.com/redirect?q=...)
+              const redirectLinks = document.querySelectorAll('a[href*="youtube.com/redirect"]');
+              redirectLinks.forEach(el => {
+                const href = (el as HTMLAnchorElement).href;
+                try {
+                  const url = new URL(href);
+                  const q = url.searchParams.get('q');
+                  if (q && (
+                    q.includes('linkedin') ||
+                    q.includes('instagram') ||
+                    q.includes('twitter') ||
+                    q.includes('x.com') ||
+                    q.includes('tiktok') ||
+                    q.includes('facebook')
+                  )) {
+                    if (!links.includes(q)) links.push(q);
+                  }
+                } catch {}
+              });
 
-              // Merge handles
-              const allHandles = { ...handles, ...linkHandles };
+              // Method 3: Look for link text containing social platform names
+              const allLinks = document.querySelectorAll('a');
+              allLinks.forEach(el => {
+                const href = (el as HTMLAnchorElement).href;
+                const text = el.textContent?.toLowerCase() || '';
+                if (href && (
+                  text.includes('linkedin') ||
+                  text.includes('instagram') ||
+                  text.includes('twitter') ||
+                  text.includes('tiktok')
+                )) {
+                  // Check if it's a redirect link
+                  if (href.includes('youtube.com/redirect')) {
+                    try {
+                      const url = new URL(href);
+                      const q = url.searchParams.get('q');
+                      if (q && !links.includes(q)) links.push(q);
+                    } catch {}
+                  } else if (!links.includes(href)) {
+                    links.push(href);
+                  }
+                }
+              });
+
+              return links;
+            });
+
+            await page.close();
+
+            if (socialLinks.length > 0) {
+              console.log(`Found ${socialLinks.length} social links for ${streamer.username}: ${socialLinks.join(', ')}`);
 
               // Update streamer with social links
               await db.streamer.update({
@@ -260,37 +324,54 @@ router.post('/extract-youtube-links', async (req, res) => {
                 data: { socialLinks }
               });
 
-              // Add to sync queue
-              if (allHandles.linkedin) {
-                await db.socialSyncQueue.upsert({
-                  where: { platform_username: { platform: 'LINKEDIN', username: allHandles.linkedin.toLowerCase() } },
-                  create: { platform: 'LINKEDIN', username: allHandles.linkedin.toLowerCase(), priority: 50, status: 'PENDING' },
-                  update: {}
-                });
-                linksFound++;
-              }
-              if (allHandles.instagram) {
-                await db.socialSyncQueue.upsert({
-                  where: { platform_username: { platform: 'INSTAGRAM', username: allHandles.instagram.toLowerCase() } },
-                  create: { platform: 'INSTAGRAM', username: allHandles.instagram.toLowerCase(), priority: 50, status: 'PENDING' },
-                  update: {}
-                });
-              }
-              if (allHandles.tiktok) {
-                await db.socialSyncQueue.upsert({
-                  where: { platform_username: { platform: 'TIKTOK', username: allHandles.tiktok.toLowerCase() } },
-                  create: { platform: 'TIKTOK', username: allHandles.tiktok.toLowerCase(), priority: 50, status: 'PENDING' },
-                  update: {}
-                });
+              // Extract usernames and add to sync queue
+              for (const link of socialLinks) {
+                if (link.includes('linkedin.com/in/')) {
+                  const username = link.split('linkedin.com/in/')[1]?.split(/[/?#]/)[0];
+                  if (username) {
+                    await db.socialSyncQueue.upsert({
+                      where: { platform_username: { platform: 'LINKEDIN', username: username.toLowerCase() } },
+                      create: { platform: 'LINKEDIN', username: username.toLowerCase(), priority: 50, status: 'PENDING' },
+                      update: {}
+                    });
+                    linksFound++;
+                    console.log(`Added LinkedIn to queue: ${username}`);
+                  }
+                }
+                if (link.includes('instagram.com/')) {
+                  const username = link.split('instagram.com/')[1]?.split(/[/?#]/)[0];
+                  if (username && username !== 'p' && username !== 'reel') {
+                    await db.socialSyncQueue.upsert({
+                      where: { platform_username: { platform: 'INSTAGRAM', username: username.toLowerCase() } },
+                      create: { platform: 'INSTAGRAM', username: username.toLowerCase(), priority: 50, status: 'PENDING' },
+                      update: {}
+                    });
+                  }
+                }
+                if (link.includes('tiktok.com/@')) {
+                  const username = link.split('tiktok.com/@')[1]?.split(/[/?#]/)[0];
+                  if (username) {
+                    await db.socialSyncQueue.upsert({
+                      where: { platform_username: { platform: 'TIKTOK', username: username.toLowerCase() } },
+                      create: { platform: 'TIKTOK', username: username.toLowerCase(), priority: 50, status: 'PENDING' },
+                      update: {}
+                    });
+                  }
+                }
               }
             }
-          }
 
-          processed++;
-          await new Promise(r => setTimeout(r, 100)); // Rate limit
-        } catch (error) {
-          console.error(`Failed to process ${streamer.username}:`, error);
+            processed++;
+            await new Promise(r => setTimeout(r, 2000 + Math.random() * 1000)); // Rate limit
+          } catch (error) {
+            console.error(`Failed to process ${streamer.username}:`, error);
+            processed++;
+          }
         }
+
+        await context.close();
+      } finally {
+        await browser.close();
       }
 
       console.log(`YouTube link extraction complete: ${processed} processed, ${linksFound} LinkedIn links found`);
@@ -298,7 +379,7 @@ router.post('/extract-youtube-links', async (req, res) => {
 
     res.json({
       success: true,
-      message: `Extracting social links from ${streamers.length} YouTube channels in background`,
+      message: `Scraping social links from ${streamers.length} YouTube channels in background`,
       data: { queued: streamers.length }
     });
   } catch (error: any) {
