@@ -11,6 +11,15 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     img.src = DEFAULT_AVATAR;
   }
 };
+
+// Handle panel image errors by hiding the broken image
+const handlePanelImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  const img = e.currentTarget;
+  const container = img.parentElement;
+  if (container) {
+    container.style.display = 'none';
+  }
+};
 import { formatDistanceToNow } from 'date-fns';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -164,6 +173,7 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
                     alt={panel.alt || `Panel ${idx + 1}`}
                     className="w-full h-20 object-cover rounded-lg border border-gray-700/50 group-hover:border-primary-500/50 transition-colors"
                     loading="lazy"
+                    onError={handlePanelImageError}
                   />
                 </div>
               ))}

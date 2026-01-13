@@ -921,7 +921,7 @@ const StreamersPage: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {selected.panelImages.map((panel: { url: string; alt?: string; link?: string }, idx: number) => (
-                      <div key={idx} className="group relative">
+                      <div key={idx} className="group relative" style={{ display: 'block' }}>
                         {panel.link ? (
                           <a href={panel.link} target="_blank" rel="noopener noreferrer" className="block">
                             <img
@@ -929,6 +929,7 @@ const StreamersPage: React.FC = () => {
                               alt={panel.alt || `Panel ${idx + 1}`}
                               className="w-full rounded-lg border border-gray-700 hover:border-primary-600 transition-all duration-200 hover:scale-105 cursor-pointer"
                               loading="lazy"
+                              onError={(e) => { const container = e.currentTarget.closest('[style*="display"]'); if (container) (container as HTMLElement).style.display = 'none'; }}
                             />
                           </a>
                         ) : (
@@ -937,6 +938,7 @@ const StreamersPage: React.FC = () => {
                             alt={panel.alt || `Panel ${idx + 1}`}
                             className="w-full rounded-lg border border-gray-700"
                             loading="lazy"
+                            onError={(e) => { const container = e.currentTarget.closest('[style*="display"]'); if (container) (container as HTMLElement).style.display = 'none'; }}
                           />
                         )}
                         {panel.alt && (

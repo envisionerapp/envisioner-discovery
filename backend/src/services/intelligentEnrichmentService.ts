@@ -3,6 +3,7 @@ import { Platform } from '@prisma/client';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { claudeService } from './claudeService';
+import { uploadPanelImages } from './bunnyService';
 
 interface EnrichmentData {
   profileDescription?: string;
@@ -314,6 +315,17 @@ export class IntelligentEnrichmentService {
         logger.warn(`Failed to scrape Twitch page for ${username}`, { error });
       }
 
+      // Upload panel images to Bunny CDN for permanent storage
+      if (data.panelImages && data.panelImages.length > 0) {
+        try {
+          logger.info(`Uploading ${data.panelImages.length} panel images to Bunny CDN for ${username}`);
+          data.panelImages = await uploadPanelImages('twitch', username, data.panelImages);
+          logger.info(`✅ Uploaded panel images to Bunny CDN for ${username}`);
+        } catch (error: any) {
+          logger.warn(`Failed to upload panel images to Bunny for ${username}`, { error: error.message });
+        }
+      }
+
       return data;
 
     } catch (error: any) {
@@ -367,6 +379,28 @@ export class IntelligentEnrichmentService {
             data.externalLinks.push(...urls);
           }
         }
+
+        // Extract panel images from Kick channel if available
+        if (channel.banner_image?.src || channel.offline_banner_image?.src) {
+          data.panelImages = [];
+          if (channel.banner_image?.src) {
+            data.panelImages.push({ url: channel.banner_image.src, alt: 'Banner' });
+          }
+          if (channel.offline_banner_image?.src) {
+            data.panelImages.push({ url: channel.offline_banner_image.src, alt: 'Offline Banner' });
+          }
+        }
+      }
+
+      // Upload panel images to Bunny CDN for permanent storage
+      if (data.panelImages && data.panelImages.length > 0) {
+        try {
+          logger.info(`Uploading ${data.panelImages.length} panel images to Bunny CDN for ${username}`);
+          data.panelImages = await uploadPanelImages('kick', username, data.panelImages);
+          logger.info(`✅ Uploaded panel images to Bunny CDN for ${username}`);
+        } catch (error: any) {
+          logger.warn(`Failed to upload panel images to Bunny for ${username}`, { error: error.message });
+        }
       }
 
       return data;
@@ -399,7 +433,7 @@ export class IntelligentEnrichmentService {
 
       const $ = cheerio.load(response.data);
 
-      // Try to extract description from page
+      // Try to extract description and banner from page
       const scriptTags = $('script').toArray();
       for (const script of scriptTags) {
         const content = $(script).html();
@@ -408,8 +442,25 @@ export class IntelligentEnrichmentService {
           const match = content.match(/"description":\s*"([^"]+)"/);
           if (match) {
             data.profileDescription = match[1];
-            break;
           }
+          // Try to extract banner image
+          const bannerMatch = content.match(/"banner":\s*\{[^}]*"url":\s*"([^"]+)"/);
+          if (bannerMatch) {
+            data.panelImages = data.panelImages || [];
+            data.panelImages.push({ url: bannerMatch[1], alt: 'Channel Banner' });
+          }
+          if (data.profileDescription) break;
+        }
+      }
+
+      // Upload panel images to Bunny CDN for permanent storage
+      if (data.panelImages && data.panelImages.length > 0) {
+        try {
+          logger.info(`Uploading ${data.panelImages.length} panel images to Bunny CDN for ${username}`);
+          data.panelImages = await uploadPanelImages('youtube', username, data.panelImages);
+          logger.info(`✅ Uploaded panel images to Bunny CDN for ${username}`);
+        } catch (error: any) {
+          logger.warn(`Failed to upload panel images to Bunny for ${username}`, { error: error.message });
         }
       }
 

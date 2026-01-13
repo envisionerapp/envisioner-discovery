@@ -182,6 +182,71 @@ export async function uploadXAvatar(username: string, avatarUrl: string): Promis
   return cdnUrl || avatarUrl;
 }
 
+/**
+ * Upload a panel image to Bunny CDN
+ * @param platform - Platform name (twitch, kick, youtube)
+ * @param username - Streamer username
+ * @param panelUrl - Original panel image URL
+ * @param index - Panel index (for unique naming)
+ * @returns Bunny CDN URL or original URL if upload fails
+ */
+export async function uploadPanelImage(
+  platform: string,
+  username: string,
+  panelUrl: string,
+  index: number
+): Promise<string> {
+  if (!panelUrl || !isConfigured()) {
+    return panelUrl;
+  }
+
+  // Skip if already a Bunny CDN URL
+  if (panelUrl.includes(BUNNY_CDN_HOSTNAME!)) {
+    return panelUrl;
+  }
+
+  // Generate unique path: panels/{platform}/{username}/{index}.jpg
+  const path = `panels/${platform.toLowerCase()}/${username.toLowerCase()}/${index}.jpg`;
+  const cdnUrl = await uploadFromUrl(panelUrl, path);
+
+  return cdnUrl || panelUrl;
+}
+
+/**
+ * Upload multiple panel images to Bunny CDN
+ * @param platform - Platform name
+ * @param username - Streamer username
+ * @param panels - Array of panel objects with url, alt, link
+ * @returns Updated panels array with Bunny CDN URLs
+ */
+export async function uploadPanelImages(
+  platform: string,
+  username: string,
+  panels: Array<{ url: string; alt?: string; link?: string }>
+): Promise<Array<{ url: string; alt?: string; link?: string }>> {
+  if (!panels || panels.length === 0 || !isConfigured()) {
+    return panels;
+  }
+
+  const updatedPanels: Array<{ url: string; alt?: string; link?: string }> = [];
+
+  for (let i = 0; i < panels.length; i++) {
+    const panel = panels[i];
+    try {
+      const cdnUrl = await uploadPanelImage(platform, username, panel.url, i);
+      updatedPanels.push({
+        ...panel,
+        url: cdnUrl
+      });
+    } catch (error) {
+      // Keep original URL if upload fails
+      updatedPanels.push(panel);
+    }
+  }
+
+  return updatedPanels;
+}
+
 export const bunnyService = {
   isConfigured,
   uploadFromUrl,
@@ -190,4 +255,6 @@ export const bunnyService = {
   uploadLinkedInAvatar,
   uploadFacebookAvatar,
   uploadXAvatar,
+  uploadPanelImage,
+  uploadPanelImages,
 };
