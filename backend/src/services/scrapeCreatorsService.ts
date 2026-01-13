@@ -619,18 +619,23 @@ export class ScrapeCreatorsService {
       if (!await this.ensureApiKey()) return null;
 
       // Handle company pages (stored as "company:companyname")
+      // Use different API endpoint for companies vs profiles
       let url: string;
+      let endpoint: string;
       let cleanHandle = handle;
+
       if (handle.startsWith('company:')) {
         cleanHandle = handle.replace('company:', '');
         url = `https://www.linkedin.com/company/${cleanHandle}`;
-        logger.info(`Fetching LinkedIn company page: ${url}`);
+        endpoint = '/v1/linkedin/company';
+        logger.info(`Fetching LinkedIn company page: ${url} via ${endpoint}`);
       } else {
         url = `https://www.linkedin.com/in/${handle}`;
-        logger.info(`Fetching LinkedIn profile: ${url}`);
+        endpoint = '/v1/linkedin/profile';
+        logger.info(`Fetching LinkedIn profile: ${url} via ${endpoint}`);
       }
 
-      const response = await this.client.get('/v1/linkedin/profile', {
+      const response = await this.client.get(endpoint, {
         params: { url }
       });
       const data = response.data?.data || response.data;
