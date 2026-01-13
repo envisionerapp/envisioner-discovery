@@ -106,6 +106,12 @@ model Streamer {
   communityPosts        Json? @map("community_posts")
   contentAnalysis       Json? @map("content_analysis")
   webPresence           Json? @map("web_presence")
+
+  // Contact Information (extracted from public profiles)
+  email                 String? @map("email")
+  businessEmail         String? @map("business_email")
+  emailSource           String? @map("email_source")  // e.g., "profile_description", "panel_text", "about_section"
+
   lastEnrichmentUpdate  DateTime? @map("last_enrichment_update")
 
   // Performance feedback from Envisioner (historical data)

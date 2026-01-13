@@ -14,6 +14,16 @@ interface EnrichedData {
   communityPosts?: any;
   contentAnalysis?: any;
   webPresence?: any;
+  // Contact information
+  email?: string;
+  businessEmail?: string;
+  emailSource?: string;
+}
+
+interface EmailExtraction {
+  email: string;
+  source: string;
+  isBusiness: boolean;
 }
 
 export class WebEnrichmentService {
@@ -62,6 +72,23 @@ export class WebEnrichmentService {
       // Scrape general web presence
       await this.enrichWebPresence(streamer, enrichedData);
 
+      // Extract email from collected text content
+      const textsToSearch = [
+        { text: enrichedData.profileDescription || '', source: 'profile_description' },
+        { text: enrichedData.aboutSection || '', source: 'about_section' },
+        ...enrichedData.panelTexts.map(t => ({ text: t, source: 'panel_text' }))
+      ];
+
+      const emailResult = this.extractEmailFromTexts(textsToSearch);
+      if (emailResult) {
+        enrichedData.email = emailResult.email;
+        enrichedData.emailSource = emailResult.source;
+        if (emailResult.isBusiness) {
+          enrichedData.businessEmail = emailResult.email;
+        }
+        logger.info(`Found email for ${streamer.username}: ${emailResult.email} (source: ${emailResult.source}, business: ${emailResult.isBusiness})`);
+      }
+
       // Use AI to analyze all collected data
       await this.analyzeContentWithAI(enrichedData);
 
@@ -79,6 +106,9 @@ export class WebEnrichmentService {
           communityPosts: enrichedData.communityPosts,
           contentAnalysis: enrichedData.contentAnalysis,
           webPresence: enrichedData.webPresence,
+          email: enrichedData.email,
+          businessEmail: enrichedData.businessEmail,
+          emailSource: enrichedData.emailSource,
           lastEnrichmentUpdate: new Date()
         }
       });
@@ -371,6 +401,75 @@ export class WebEnrichmentService {
   }
 
   /**
+   * Helper: Extract email addresses from text content
+   * Only extracts publicly posted emails for business contact
+   */
+  private extractEmailFromTexts(texts: Array<{ text: string; source: string }>): EmailExtraction | null {
+    // RFC 5322 simplified email regex
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+    // Keywords that suggest business/contact context
+    const businessKeywords = [
+      'business', 'inquir', 'contact', 'collab', 'sponsor',
+      'partner', 'booking', 'management', 'agent', 'manager',
+      'promo', 'deal', 'work with', 'email me', 'reach out'
+    ];
+
+    // Domains to filter out (false positives)
+    const invalidDomains = [
+      'example.com', 'email.com', 'test.com', 'domain.com',
+      'yourmail.com', 'mail.com', 'sample.com'
+    ];
+
+    // File extensions that look like emails but aren't
+    const invalidExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'];
+
+    for (const { text, source } of texts) {
+      if (!text) continue;
+
+      const matches = text.match(emailRegex);
+      if (!matches) continue;
+
+      // Filter out invalid emails
+      const validEmails = matches.filter(email => {
+        const lowerEmail = email.toLowerCase();
+
+        // Check for invalid domains
+        if (invalidDomains.some(domain => lowerEmail.includes(domain))) {
+          return false;
+        }
+
+        // Check for file extensions masquerading as emails
+        if (invalidExtensions.some(ext => lowerEmail.endsWith(ext))) {
+          return false;
+        }
+
+        // Must have at least 3 chars before @
+        const localPart = lowerEmail.split('@')[0];
+        if (localPart.length < 3) {
+          return false;
+        }
+
+        return true;
+      });
+
+      if (validEmails.length > 0) {
+        // Check if the surrounding text suggests business context
+        const lowerText = text.toLowerCase();
+        const isBusiness = businessKeywords.some(kw => lowerText.includes(kw));
+
+        return {
+          email: validEmails[0],
+          source,
+          isBusiness
+        };
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Batch enrich multiple streamers
    */
   async enrichStreamers(streamerIds: string[], concurrency: number = 5): Promise<void> {
@@ -425,6 +524,78 @@ export class WebEnrichmentService {
     }
 
     logger.info('Completed full database enrichment');
+  }
+
+  /**
+   * Backfill: Extract emails from existing enriched streamers
+   * Runs on streamers that have text data but no email extracted yet
+   */
+  async extractEmailsFromExisting(batchSize: number = 100): Promise<{ processed: number; found: number }> {
+    logger.info('Starting email extraction from existing data');
+
+    let processed = 0;
+    let found = 0;
+    let skip = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      const streamers = await db.streamer.findMany({
+        where: {
+          email: null,
+          OR: [
+            { profileDescription: { not: null } },
+            { panelTexts: { isEmpty: false } },
+            { aboutSection: { not: null } }
+          ]
+        },
+        select: {
+          id: true,
+          username: true,
+          profileDescription: true,
+          panelTexts: true,
+          aboutSection: true
+        },
+        take: batchSize,
+        skip
+      });
+
+      if (streamers.length === 0) {
+        hasMore = false;
+        break;
+      }
+
+      for (const streamer of streamers) {
+        const textsToSearch = [
+          { text: streamer.profileDescription || '', source: 'profile_description' },
+          { text: streamer.aboutSection || '', source: 'about_section' },
+          ...streamer.panelTexts.map(t => ({ text: t, source: 'panel_text' }))
+        ];
+
+        const emailResult = this.extractEmailFromTexts(textsToSearch);
+
+        if (emailResult) {
+          await db.streamer.update({
+            where: { id: streamer.id },
+            data: {
+              email: emailResult.email,
+              businessEmail: emailResult.isBusiness ? emailResult.email : null,
+              emailSource: emailResult.source
+            }
+          });
+
+          found++;
+          logger.info(`Extracted email for ${streamer.username}: ${emailResult.email}`);
+        }
+
+        processed++;
+      }
+
+      skip += batchSize;
+      logger.info(`Processed ${processed} streamers, found ${found} emails so far...`);
+    }
+
+    logger.info(`Email extraction complete. Processed: ${processed}, Found: ${found}`);
+    return { processed, found };
   }
 }
 

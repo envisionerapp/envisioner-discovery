@@ -33,6 +33,7 @@ class StreamerService {
     category?: string;  // Category filter (Gaming, iGaming, IRL, Music, etc.)
     favoritesOnly?: boolean;
     discardedOnly?: boolean;
+    hasEmail?: boolean;  // Only show creators with contact email
     userId?: string;
   }): Promise<{
     items: Array<{
@@ -66,6 +67,7 @@ class StreamerService {
     if (params?.category) query.append('categories', params.category);
     if (params?.favoritesOnly) query.append('favoritesOnly', 'true');
     if (params?.discardedOnly) query.append('discardedOnly', 'true');
+    if (params?.hasEmail) query.append('hasEmail', 'true');
     if (params?.userId) query.append('userId', params.userId);
     // Hide discarded by default unless showing discarded only
     if (!params?.discardedOnly && params?.userId) {

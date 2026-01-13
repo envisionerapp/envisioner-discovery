@@ -39,6 +39,9 @@ export class StreamerController {
       const discardedOnly = req.query.discardedOnly === 'true';
       const hideDiscarded = req.query.hideDiscarded !== 'false'; // Default to true
 
+      // Contact filter
+      const hasEmail = req.query.hasEmail === 'true';
+
       // Build where clause
       const where: any = {};
 
@@ -110,6 +113,11 @@ export class StreamerController {
           { lastScrapedAt: { gte: cutoffDate } },
           { isLive: true }, // Live creators are always "active"
         ];
+      }
+
+      // Has email filter (only show creators with contact info)
+      if (hasEmail) {
+        where.email = { not: null };
       }
 
       // Favorites only filter
@@ -229,6 +237,10 @@ export class StreamerController {
             inferredCategory: true,
             inferredCategorySource: true,
             unifiedTags: true,
+            // Contact information
+            email: true,
+            businessEmail: true,
+            emailSource: true,
           },
         }),
         db.streamer.count({ where }),

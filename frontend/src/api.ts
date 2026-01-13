@@ -126,6 +126,10 @@ export interface ApiCreator {
   lastScrapedAt: string | null;
   lastStreamed: string | null;
   lastSeenLive: string | null;
+  // Contact information
+  email: string | null;
+  businessEmail: string | null;
+  emailSource: string | null;
 }
 
 export interface ApiResponse<T> {
@@ -158,6 +162,7 @@ export interface FetchCreatorsParams {
   favoritesOnly?: boolean;
   discardedOnly?: boolean;
   hideDiscarded?: boolean;
+  hasEmail?: boolean;
   sort?: string;
   dir?: 'asc' | 'desc';
 }
@@ -198,6 +203,7 @@ export async function fetchCreators(params: FetchCreatorsParams = {}): Promise<A
       queryParams.set('userId', USER_ID);
     }
   }
+  if (params.hasEmail) queryParams.set('hasEmail', 'true');
   if (params.sort) queryParams.set('sort', params.sort);
   if (params.dir) queryParams.set('dir', params.dir);
 

@@ -75,6 +75,7 @@ const StreamersPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [discardedOnly, setDiscardedOnly] = useState(false);
+  const [hasEmailFilter, setHasEmailFilter] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch favorite, discarded IDs, and notes
@@ -196,9 +197,9 @@ const StreamersPage: React.FC = () => {
     }
   };
   const { data: listData, isLoading } = useQuery(
-    ['streamers', { page, limit, sort, dir, search: debouncedSearch, platform: platformFilter, region: regionFilter, category: categoryFilter, favoritesOnly, discardedOnly }],
+    ['streamers', { page, limit, sort, dir, search: debouncedSearch, platform: platformFilter, region: regionFilter, category: categoryFilter, favoritesOnly, discardedOnly, hasEmailFilter }],
     () => {
-      console.log('Fetching streamers with filters:', { page, limit, sort, dir, search: debouncedSearch, platform: platformFilter, region: regionFilter, category: categoryFilter, favoritesOnly, discardedOnly });
+      console.log('Fetching streamers with filters:', { page, limit, sort, dir, search: debouncedSearch, platform: platformFilter, region: regionFilter, category: categoryFilter, favoritesOnly, discardedOnly, hasEmailFilter });
       return streamerService.getStreamers({
         page,
         limit,
@@ -210,6 +211,7 @@ const StreamersPage: React.FC = () => {
         category: categoryFilter || undefined,
         favoritesOnly: favoritesOnly || undefined,
         discardedOnly: discardedOnly || undefined,
+        hasEmail: hasEmailFilter || undefined,
         userId: USER_ID,
       });
     },
@@ -414,6 +416,24 @@ const StreamersPage: React.FC = () => {
                 >
                   <TrashIcon className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">Discarded</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setHasEmailFilter(!hasEmailFilter);
+                    setPage(1);
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    hasEmailFilter
+                      ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                      : 'bg-gray-800/60 text-gray-400 border border-gray-700 hover:bg-gray-700/60'
+                  }`}
+                  title="Show only creators with email contact"
+                >
+                  <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
+                  <span className="hidden sm:inline">Has Email</span>
                 </button>
               </div>
             </div>

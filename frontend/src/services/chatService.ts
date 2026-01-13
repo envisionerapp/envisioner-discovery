@@ -28,6 +28,10 @@ export interface Streamer {
     tiktok?: string;
     facebook?: string;
   };
+  // Contact information
+  email?: string;
+  businessEmail?: string;
+  emailSource?: string;
   createdAt: string;
   updatedAt: string;
 }
