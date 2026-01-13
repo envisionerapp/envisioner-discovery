@@ -716,10 +716,12 @@ body::-webkit-scrollbar {
 }
 
 .card-actions-grid {
+  position: absolute;
+  top: 8px;
+  right: 8px;
   display: flex;
   flex-direction: column;
   gap: 3px;
-  margin-left: auto;
 }
 
 .card-actions-row {
@@ -731,6 +733,7 @@ body::-webkit-scrollbar {
 .action-btn-placeholder {
   width: 28px;
   height: 28px;
+  display: none;
 }
 
 .action-btn {
