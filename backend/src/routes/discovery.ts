@@ -10,10 +10,14 @@ import { runYouTubeDiscovery, runQuickYouTubeDiscovery } from '../jobs/youtubeDi
 import { scrapeCreatorsService } from '../services/scrapeCreatorsService';
 import multer from 'multer';
 import { parse } from 'csv-parse/sync';
+import { protect, requireSoftr, dataRateLimit, discoveryRateLimit } from '../middleware/auth';
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 const router = Router();
+
+// Apply rate limiting to all discovery routes
+router.use(dataRateLimit);
 
 /**
  * Discovery API - External Integration Endpoint
@@ -41,7 +45,7 @@ interface DiscoverySearchParams {
  * POST /api/discovery/search
  * Search for creators with filters
  */
-router.post('/search', asyncHandler(async (req: Request, res: Response) => {
+router.post('/search', requireSoftr, asyncHandler(async (req: Request, res: Response) => {
   const params: DiscoverySearchParams = req.body;
   const {
     platforms,
@@ -170,7 +174,7 @@ router.post('/search', asyncHandler(async (req: Request, res: Response) => {
  * GET /api/discovery/creator/:id
  * Get detailed creator info for assignment
  */
-router.get('/creator/:id', asyncHandler(async (req: Request, res: Response) => {
+router.get('/creator/:id', requireSoftr, asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
 
   const creator = await db.streamer.findUnique({
@@ -231,7 +235,7 @@ router.get('/creator/:id', asyncHandler(async (req: Request, res: Response) => {
  * GET /api/discovery/recommend
  * AI-powered recommendations based on criteria
  */
-router.post('/recommend', asyncHandler(async (req: Request, res: Response) => {
+router.post('/recommend', requireSoftr, asyncHandler(async (req: Request, res: Response) => {
   const { campaignType, budget, targetRegion, preferPlatform } = req.body;
 
   logger.info('Discovery recommendation request', { campaignType, budget, targetRegion });
@@ -308,7 +312,7 @@ router.post('/recommend', asyncHandler(async (req: Request, res: Response) => {
  * GET /api/discovery/live
  * Get currently live creators
  */
-router.get('/live', asyncHandler(async (req: Request, res: Response) => {
+router.get('/live', requireSoftr, asyncHandler(async (req: Request, res: Response) => {
   const { platform, region, limit = 20 } = req.query;
 
   const where: any = { isLive: true };
@@ -356,7 +360,7 @@ router.get('/live', asyncHandler(async (req: Request, res: Response) => {
  * GET /api/discovery/stats
  * Get discovery database statistics
  */
-router.get('/stats', asyncHandler(async (req: Request, res: Response) => {
+router.get('/stats', requireSoftr, asyncHandler(async (req: Request, res: Response) => {
   const [totalCreators, platformStats, regionStats, performanceStats] = await Promise.all([
     db.streamer.count(),
     db.streamer.groupBy({
@@ -481,7 +485,7 @@ function getRecommendationReasons(creator: any, campaignType?: string): string[]
  * Run multi-category discovery to populate new creators (Twitch + Kick)
  * Categories: Slots, Poker, Just Chatting, Sports, Gaming, etc.
  */
-router.post('/populate', asyncHandler(async (req: Request, res: Response) => {
+router.post('/populate', protect, discoveryRateLimit, asyncHandler(async (req: Request, res: Response) => {
   const { mode = 'quick', platforms, limitPerCategory = 100 } = req.body;
 
   logger.info('Discovery populate requested', { mode, platforms, limitPerCategory });
@@ -531,7 +535,7 @@ router.post('/populate', asyncHandler(async (req: Request, res: Response) => {
  * Note: YouTube NOT supported via ScrapeCreators (no search API).
  * Use youtubeDiscoveryJob.ts with YouTube Data API instead.
  */
-router.post('/social', asyncHandler(async (req: Request, res: Response) => {
+router.post('/social', protect, discoveryRateLimit, asyncHandler(async (req: Request, res: Response) => {
   const {
     mode = 'quick',
     platforms = ['tiktok', 'instagram', 'facebook', 'linkedin'],
@@ -600,7 +604,7 @@ router.post('/social', asyncHandler(async (req: Request, res: Response) => {
  * POST /api/discovery/run
  * Run discovery to find new streamers from APIs
  */
-router.post('/run', asyncHandler(async (req: Request, res: Response) => {
+router.post('/run', protect, discoveryRateLimit, asyncHandler(async (req: Request, res: Response) => {
   const { type = 'full', gameId, keyword, platform, limit = 100 } = req.body;
 
   logger.info('Discovery run requested', { type, gameId, keyword, platform, limit });
@@ -652,7 +656,7 @@ router.post('/run', asyncHandler(async (req: Request, res: Response) => {
  * POST /api/discovery/enhanced/twitch
  * Run enhanced Twitch discovery with pagination and 50+ categories
  */
-router.post('/enhanced/twitch', asyncHandler(async (req: Request, res: Response) => {
+router.post('/enhanced/twitch', protect, discoveryRateLimit, asyncHandler(async (req: Request, res: Response) => {
   const { mode = 'quick', targetNew = 100 } = req.body;
 
   logger.info('Enhanced Twitch discovery requested', { mode, targetNew });
@@ -679,7 +683,7 @@ router.post('/enhanced/twitch', asyncHandler(async (req: Request, res: Response)
  * POST /api/discovery/enhanced/youtube
  * Run YouTube discovery using YouTube Data API
  */
-router.post('/enhanced/youtube', asyncHandler(async (req: Request, res: Response) => {
+router.post('/enhanced/youtube', protect, discoveryRateLimit, asyncHandler(async (req: Request, res: Response) => {
   const { mode = 'quick', targetNew = 100, keywordsLimit = 10 } = req.body;
 
   logger.info('YouTube discovery requested', { mode, targetNew, keywordsLimit });
@@ -706,7 +710,7 @@ router.post('/enhanced/youtube', asyncHandler(async (req: Request, res: Response
  * POST /api/discovery/enhanced/all
  * Run all enhanced discovery jobs (Twitch + YouTube + Kick + Social)
  */
-router.post('/enhanced/all', asyncHandler(async (req: Request, res: Response) => {
+router.post('/enhanced/all', protect, discoveryRateLimit, asyncHandler(async (req: Request, res: Response) => {
   const { targetPerPlatform = 50 } = req.body;
 
   logger.info('Full enhanced discovery requested', { targetPerPlatform });
@@ -760,7 +764,7 @@ router.post('/enhanced/all', asyncHandler(async (req: Request, res: Response) =>
  * POST /api/discovery/backfill-followers
  * Backfill missing follower counts from Twitch API
  */
-router.post('/backfill-followers', asyncHandler(async (req: Request, res: Response) => {
+router.post('/backfill-followers', protect, asyncHandler(async (req: Request, res: Response) => {
   const { limit = 500 } = req.body;
 
   logger.info('Follower backfill requested', { limit });
@@ -779,7 +783,7 @@ router.post('/backfill-followers', asyncHandler(async (req: Request, res: Respon
  * POST /api/discovery/import/csv
  * Bulk import streamers from CSV file
  */
-router.post('/import/csv', upload.single('file'), asyncHandler(async (req: Request, res: Response) => {
+router.post('/import/csv', protect, upload.single('file'), asyncHandler(async (req: Request, res: Response) => {
   const file = (req as any).file;
   if (!file) {
     return res.status(400).json({ success: false, error: 'No file uploaded' });
@@ -885,7 +889,7 @@ router.post('/import/csv', upload.single('file'), asyncHandler(async (req: Reque
  * POST /api/discovery/import/json
  * Bulk import streamers from JSON array
  */
-router.post('/import/json', asyncHandler(async (req: Request, res: Response) => {
+router.post('/import/json', protect, asyncHandler(async (req: Request, res: Response) => {
   const { streamers } = req.body;
 
   if (!Array.isArray(streamers)) {
@@ -1026,7 +1030,7 @@ function toInt(val: string | number | null | undefined): number | null {
  * GET /api/discovery/instagram/related/:username
  * Discover new creators from a user's related profiles
  */
-router.get('/instagram/related/:username', asyncHandler(async (req: Request, res: Response) => {
+router.get('/instagram/related/:username', protect, asyncHandler(async (req: Request, res: Response) => {
   const { username } = req.params;
   const limit = Math.min(parseInt(req.query.limit as string) || 10, 20);
 
@@ -1133,7 +1137,7 @@ router.get('/instagram/related/:username', asyncHandler(async (req: Request, res
  * GET /api/discovery/debug/instagram/:username
  * Debug endpoint to test Instagram profile fetching
  */
-router.get('/debug/instagram/:username', asyncHandler(async (req: Request, res: Response) => {
+router.get('/debug/instagram/:username', protect, asyncHandler(async (req: Request, res: Response) => {
   const { username } = req.params;
 
   logger.info(`Debug: Testing Instagram profile fetch for @${username}`);

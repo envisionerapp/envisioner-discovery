@@ -1,22 +1,25 @@
 import express from 'express';
 import { ChatController } from '../controllers/chatController';
-import { protect } from '../middleware/auth';
+import { protect, requireSoftr, dataRateLimit } from '../middleware/auth';
 
 const router = express.Router();
 const chatController = new ChatController();
 
+// Apply rate limiting to all routes
+router.use(dataRateLimit);
+
 // Health check (no auth required)
 router.get('/health', chatController.healthCheck);
 
-// Dashboard endpoints (public for demo)
-router.get('/dashboard/stats', chatController.getDashboardStats);
-router.get('/dashboard/live', chatController.getLiveStreamers);
-router.get('/dashboard/top-streamers', chatController.getTopStreamers);
-router.get('/dashboard/top-categories', chatController.getTopCategories);
+// Dashboard endpoints - require Softr context for scrape protection
+router.get('/dashboard/stats', requireSoftr, chatController.getDashboardStats);
+router.get('/dashboard/live', requireSoftr, chatController.getLiveStreamers);
+router.get('/dashboard/top-streamers', requireSoftr, chatController.getTopStreamers);
+router.get('/dashboard/top-categories', requireSoftr, chatController.getTopCategories);
 
-// AI-powered streamer search endpoints (public for demo)
-router.post('/search', chatController.searchStreamers);
-router.get('/trending', chatController.getTrendingInsights);
+// AI-powered streamer search endpoints - require Softr context
+router.post('/search', requireSoftr, chatController.searchStreamers);
+router.get('/trending', requireSoftr, chatController.getTrendingInsights);
 
 // Protected routes require authentication
 router.use(protect);

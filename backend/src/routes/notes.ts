@@ -1,22 +1,20 @@
 import express from 'express';
 import { NotesController } from '../controllers/notesController';
+import { requireSoftrWithUser, validateUserOwnership, dataRateLimit } from '../middleware/auth';
 
 const router = express.Router();
 const notesController = new NotesController();
 
-// Get all notes for user
+// Apply rate limiting and Softr auth with userId validation to all routes
+router.use(dataRateLimit);
+router.use(requireSoftrWithUser);
+router.use(validateUserOwnership);
+
+// All routes now require valid Softr context + userId validation
 router.get('/', notesController.getNotes);
-
-// Get notes as map (streamerId -> content)
 router.get('/map', notesController.getNotesMap);
-
-// Get note for specific creator
 router.get('/:streamerId', notesController.getNote);
-
-// Save or update note
 router.post('/', notesController.saveNote);
-
-// Delete note
 router.delete('/', notesController.deleteNote);
 
 export { router as notesRoutes };

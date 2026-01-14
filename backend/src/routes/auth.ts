@@ -6,7 +6,7 @@ const router = express.Router();
 const authController = new AuthController();
 
 // Apply rate limiting to auth routes
-router.use(authRateLimit(15 * 60 * 1000, 5)); // 5 attempts per 15 minutes
+router.use(authRateLimit);
 
 router.post('/login', authController.login);
 router.post('/verify-mfa', authController.verifyMfa);

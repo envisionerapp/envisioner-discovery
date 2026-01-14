@@ -1,18 +1,21 @@
 import express from 'express';
 import { StreamerController } from '../controllers/streamerController';
-import { protect } from '../middleware/auth';
+import { protect, requireSoftr, dataRateLimit } from '../middleware/auth';
 import { StreamerService } from '../services/streamerService';
 import { db } from '../utils/database';
 
 const router = express.Router();
 const streamerController = new StreamerController();
 
-// Public routes (no auth required for frontend)
-router.get('/', streamerController.getStreamers);
-router.get('/stats', streamerController.getStats);
+// Apply rate limiting to all routes
+router.use(dataRateLimit);
 
-// Backfill avatars (public for easy testing)
-router.post('/backfill-avatars', async (req, res) => {
+// Public routes - require Softr context for scrape protection
+router.get('/', requireSoftr, streamerController.getStreamers);
+router.get('/stats', requireSoftr, streamerController.getStats);
+
+// Backfill avatars - protected admin route
+router.post('/backfill-avatars', protect, async (req, res) => {
   try {
     const limit = parseInt(req.query.limit as string) || 100;
     const platform = (req.query.platform as string)?.toUpperCase() || 'ALL';
@@ -59,8 +62,8 @@ router.post('/backfill-avatars', async (req, res) => {
   }
 });
 
-// Backfill YouTube handles
-router.post('/backfill-youtube-handles', async (req, res) => {
+// Backfill YouTube handles - protected admin route
+router.post('/backfill-youtube-handles', protect, async (req, res) => {
   try {
     const limit = parseInt(req.query.limit as string) || 100;
 
@@ -86,7 +89,7 @@ router.post('/backfill-youtube-handles', async (req, res) => {
   }
 });
 
-router.get('/:id', streamerController.getStreamerById);
+router.get('/:id', requireSoftr, streamerController.getStreamerById);
 
 // Protected routes (require authentication)
 router.get('/export', protect, streamerController.exportToCsv);

@@ -1,7 +1,11 @@
 import express from 'express';
 import { db } from '../utils/database';
+import { authRateLimit } from '../middleware/auth';
 
 const router = express.Router();
+
+// Apply strict rate limiting to access validation
+router.use(authRateLimit);
 
 // Validate user access - checks Softr context and auto-creates user if needed
 router.post('/validate', async (req, res) => {
@@ -19,10 +23,12 @@ router.post('/validate', async (req, res) => {
       softrHeader === 'true' ||
       softrContext === true;
 
-    // For development, also allow localhost
-    const isDevelopment = referer.includes('localhost') || referer.includes('127.0.0.1');
+    // Only allow localhost in explicit development mode
+    const isDevelopment = process.env.NODE_ENV === 'development' &&
+      (referer.includes('localhost') || referer.includes('127.0.0.1'));
 
     if (!isSoftrContext && !isDevelopment) {
+      console.log(`⛔ Access denied - invalid context: ${referer}`);
       return res.status(403).json({
         success: false,
         error: 'ACCESS_DENIED',
