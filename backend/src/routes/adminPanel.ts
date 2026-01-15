@@ -1658,4 +1658,100 @@ router.get('/', async (req, res) => {
   res.send(html);
 });
 
+// ==================== AUDIT LOG API ====================
+
+// GET audit logs with filtering
+router.get('/api/audit', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const skip = (page - 1) * limit;
+    const tableName = req.query.table as string;
+    const changedBy = req.query.actor as string;
+    const action = req.query.action as string;
+    const recordId = req.query.recordId as string;
+
+    const where: any = {};
+    if (tableName) where.tableName = tableName;
+    if (changedBy) where.changedBy = { contains: changedBy, mode: 'insensitive' };
+    if (action) where.action = action;
+    if (recordId) where.recordId = recordId;
+
+    const [logs, total] = await Promise.all([
+      db.auditLog.findMany({
+        where,
+        orderBy: { changedAt: 'desc' },
+        take: limit,
+        skip,
+      }),
+      db.auditLog.count({ where })
+    ]);
+
+    res.json({
+      logs,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET audit stats summary
+router.get('/api/audit/stats', async (req, res) => {
+  try {
+    const days = parseInt(req.query.days as string) || 7;
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const logs = await db.auditLog.findMany({
+      where: { changedAt: { gte: since } },
+      select: { changedBy: true, action: true, tableName: true }
+    });
+
+    const byActor: Record<string, number> = {};
+    const byAction: Record<string, number> = {};
+    const byTable: Record<string, number> = {};
+
+    for (const log of logs) {
+      const actor = log.changedBy || 'UNKNOWN';
+      byActor[actor] = (byActor[actor] || 0) + 1;
+      byAction[log.action] = (byAction[log.action] || 0) + 1;
+      byTable[log.tableName] = (byTable[log.tableName] || 0) + 1;
+    }
+
+    res.json({
+      totalChanges: logs.length,
+      days,
+      byActor,
+      byAction,
+      byTable
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET audit history for a specific creator
+router.get('/api/audit/creator/:id', async (req, res) => {
+  try {
+    const logs = await db.auditLog.findMany({
+      where: {
+        tableName: 'discovery_creators',
+        recordId: req.params.id
+      },
+      orderBy: { changedAt: 'desc' },
+      take: 100
+    });
+
+    res.json({ logs });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export const adminPanelRoutes = router;

@@ -718,6 +718,24 @@ model CampaignPerformance {
   @@map("discovery_campaign_performance")
 }
 
+// Audit Log - Track all changes: who did what, when
+model AuditLog {
+  id          String   @id @default(cuid())
+  tableName   String   @map("table_name")
+  recordId    String   @map("record_id")
+  action      String   // INSERT, UPDATE, DELETE
+  changedBy   String?  @map("changed_by") // user email, 'AI_HAIKU', 'SYSTEM', 'SCRAPER'
+  oldValues   Json?    @map("old_values")
+  newValues   Json?    @map("new_values")
+  changedAt   DateTime @default(now()) @map("changed_at")
+
+  @@index([tableName, recordId])
+  @@index([changedBy])
+  @@index([changedAt(sort: Desc)])
+  @@index([tableName, changedAt(sort: Desc)])
+  @@map("audit_log")
+}
+
 // API Usage Tracking - Credit monitoring across projects
 model ApiUsage {
   id          String   @id @default(cuid())
