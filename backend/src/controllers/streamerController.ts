@@ -42,6 +42,13 @@ export class StreamerController {
       // Contact filter
       const hasEmail = req.query.hasEmail === 'true';
 
+      // iGaming filters
+      const gamblingCompatible = req.query.gamblingCompatible === 'true' ? true :
+                                  req.query.gamblingCompatible === 'false' ? false : undefined;
+      const minIgamingScore = parseInt(req.query.minIgamingScore as string) || 0;
+      const maxIgamingScore = parseInt(req.query.maxIgamingScore as string) || undefined;
+      const performanceTier = (req.query.performanceTier as string | undefined)?.toUpperCase();
+
       // Build where clause
       const where: any = {};
 
@@ -120,6 +127,36 @@ export class StreamerController {
         where.email = { not: null };
       }
 
+      // iGaming compatibility filter
+      if (gamblingCompatible !== undefined) {
+        where.gamblingCompatibility = gamblingCompatible;
+      }
+
+      // iGaming score range filter
+      if (minIgamingScore > 0 || maxIgamingScore) {
+        where.igamingScore = {};
+        if (minIgamingScore > 0) where.igamingScore.gte = minIgamingScore;
+        if (maxIgamingScore) where.igamingScore.lte = maxIgamingScore;
+      }
+
+      // Performance tier filter (S=90+, A=75-89, B=60-74, C=<60)
+      if (performanceTier) {
+        const tierRanges: Record<string, { min: number; max?: number }> = {
+          'S': { min: 90 },
+          'A': { min: 75, max: 89 },
+          'B': { min: 60, max: 74 },
+          'C': { min: 0, max: 59 },
+        };
+        const range = tierRanges[performanceTier];
+        if (range) {
+          where.igamingScore = {
+            ...(where.igamingScore || {}),
+            gte: range.min,
+            ...(range.max !== undefined ? { lte: range.max } : {}),
+          };
+        }
+      }
+
       // Favorites only filter
       let favoriteIds: string[] = [];
       if (favoritesOnly && userId) {
@@ -192,6 +229,12 @@ export class StreamerController {
           break;
         case 'lastactive':
           orderBy.push({ lastSeenLive: { sort: dir, nulls: 'last' } });
+          break;
+        case 'igamingscore':
+          orderBy.push({ igamingScore: dir });
+          break;
+        case 'brandsafety':
+          orderBy.push({ brandSafetyScore: dir });
           break;
         default:
           orderBy.push({ followers: 'desc' });

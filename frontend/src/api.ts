@@ -165,6 +165,10 @@ export interface FetchCreatorsParams {
   hasEmail?: boolean;
   sort?: string;
   dir?: 'asc' | 'desc';
+  // iGaming filters
+  gamblingCompatible?: boolean;
+  performanceTier?: string;
+  minIgamingScore?: number;
 }
 
 // Fetch creators with filters
@@ -206,6 +210,11 @@ export async function fetchCreators(params: FetchCreatorsParams = {}): Promise<A
   if (params.hasEmail) queryParams.set('hasEmail', 'true');
   if (params.sort) queryParams.set('sort', params.sort);
   if (params.dir) queryParams.set('dir', params.dir);
+
+  // iGaming filters
+  if (params.gamblingCompatible !== undefined) queryParams.set('gamblingCompatible', params.gamblingCompatible.toString());
+  if (params.performanceTier) queryParams.set('performanceTier', params.performanceTier);
+  if (params.minIgamingScore) queryParams.set('minIgamingScore', params.minIgamingScore.toString());
 
   const response = await fetch(`${API_BASE_URL}/api/streamers?${queryParams.toString()}`);
   return response.json();

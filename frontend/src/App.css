@@ -202,8 +202,9 @@ body::-webkit-scrollbar {
   flex-direction: column;
   max-height: calc(100vh - 48px);
   overflow-y: auto;
-  position: sticky;
+  position: fixed;
   top: 24px;
+  right: calc(900px + 72px); /* 900px cards grid + 48px gap + 24px right padding */
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
@@ -930,6 +931,45 @@ body::-webkit-scrollbar {
   margin-left: auto;
 }
 
+/* iGaming Filter Section */
+.igaming-section {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.02));
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.igaming-section h4 {
+  color: #059669;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.igaming-section h4::before {
+  content: '🎰';
+  font-size: 14px;
+}
+
+.filter-sublabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.tier-chip {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tier-chip.selected {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
 /* Engagement Badge */
 .engagement-badge {
   display: flex;
@@ -1066,6 +1106,9 @@ body::-webkit-scrollbar {
   font-size: 12px;
   color: #666;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
 }
 
 @media (max-width: 1400px) {
@@ -1452,6 +1495,9 @@ body::-webkit-scrollbar {
   .filters {
     width: 100%;
     position: static;
+    max-height: none;
+    right: auto;
+    top: auto;
   }
 }
 
@@ -1682,7 +1728,7 @@ body::-webkit-scrollbar {
   background: #fff;
   border-radius: 12px;
   border: 1px solid #e9ecef;
-  width: 100%;
+  width: 900px;
 }
 
 .creator-table {
@@ -1717,6 +1763,14 @@ body::-webkit-scrollbar {
 .creator-table th:nth-child(6) { width: 11%; } /* Avg Viewers */
 .creator-table th:nth-child(7) { width: 10%; } /* Last Active */
 .creator-table th:nth-child(8) { width: 12%; } /* Actions */
+
+/* Region column - prevent wrapping */
+.creator-table td:nth-child(3) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
 
 /* Responsive table - medium screens */
 @media (max-width: 1200px) {
