@@ -8,6 +8,7 @@ import { runSocialDiscovery, runQuickSocialDiscovery, runFullSocialDiscovery, ru
 import { runEnhancedTwitchDiscovery, runQuickTwitchDiscovery } from '../jobs/enhancedTwitchDiscovery';
 import { runYouTubeDiscovery, runQuickYouTubeDiscovery } from '../jobs/youtubeDiscoveryJob';
 import { scrapeCreatorsService } from '../services/scrapeCreatorsService';
+import { autoRecommendationService } from '../services/autoRecommendationService';
 import multer from 'multer';
 import { parse } from 'csv-parse/sync';
 import { protect, requireSoftr, dataRateLimit, discoveryRateLimit } from '../middleware/auth';
@@ -305,6 +306,95 @@ router.post('/recommend', requireSoftr, asyncHandler(async (req: Request, res: R
       recommendations: recommendationsWithReasons,
       criteria: { campaignType, budget, targetRegion, preferPlatform }
     }
+  });
+}));
+
+/**
+ * POST /api/discovery/recommend/auto
+ * Auto-recommend creators with weighted scoring and diversity
+ *
+ * Scoring weights:
+ * - Vertical Fit (30%): iGaming score, tags, gambling compatibility
+ * - Historical Performance (25%): CPA, ROI, conversions
+ * - Brand Safety (20%): Safety score, TOS compliance
+ * - Budget Alignment (15%): Estimated rate vs campaign budget
+ * - User History Bonus (10%): Similarity to user's top performers
+ *
+ * Diversity targets:
+ * - 30% nano (1K-10K followers)
+ * - 35% micro (10K-50K)
+ * - 30% mid-tier (50K-500K)
+ * - 5% macro (500K+)
+ */
+router.post('/recommend/auto', requireSoftr, asyncHandler(async (req: Request, res: Response) => {
+  const {
+    vertical,
+    region,
+    budget,
+    minIgamingScore,
+    requireGamblingCompatible = false,
+    platforms,
+    count = 20,
+    userId,
+  } = req.body;
+
+  logger.info('Auto-recommendation request', { vertical, region, budget, count });
+
+  const recommendations = await autoRecommendationService.getRecommendations(
+    {
+      vertical,
+      region,
+      budget,
+      minIgamingScore,
+      requireGamblingCompatible,
+      platforms,
+      totalCount: count,
+    },
+    userId
+  );
+
+  res.json({
+    success: true,
+    data: {
+      recommendations,
+      count: recommendations.length,
+      criteria: {
+        vertical,
+        region,
+        budget,
+        minIgamingScore,
+        requireGamblingCompatible,
+        platforms,
+      },
+    },
+  });
+}));
+
+/**
+ * GET /api/discovery/recommend/quick
+ * Quick recommendations for a vertical (for AI assistant)
+ */
+router.get('/recommend/quick', requireSoftr, asyncHandler(async (req: Request, res: Response) => {
+  const vertical = (req.query.vertical as string) || 'igaming';
+  const region = req.query.region as string | undefined;
+  const count = parseInt(req.query.count as string) || 10;
+
+  logger.info('Quick recommendation request', { vertical, region, count });
+
+  const recommendations = await autoRecommendationService.getQuickRecommendations(
+    vertical,
+    region,
+    count
+  );
+
+  res.json({
+    success: true,
+    data: {
+      recommendations,
+      count: recommendations.length,
+      vertical,
+      region,
+    },
   });
 }));
 
