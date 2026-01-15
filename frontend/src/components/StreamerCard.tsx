@@ -404,12 +404,10 @@ const StreamerTableRow: React.FC<StreamerTableRowProps> = ({ streamer, index }) 
 
       {/* Region */}
       <td className="py-3 px-3">
-        {flagFor(streamer.region?.toLowerCase() || '') ? (
+        {flagFor(streamer.region?.toLowerCase() || '') && (
           <span className="text-sm">
             {flagFor(streamer.region.toLowerCase())} {regionLabel(streamer.region.toLowerCase())}
           </span>
-        ) : (
-          <span className="text-sm text-gray-500">-</span>
         )}
       </td>
 
