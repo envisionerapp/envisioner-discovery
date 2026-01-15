@@ -157,32 +157,27 @@ const getAvatarColor = (name: string): string => {
 // ===========================================
 const PLATFORMS = ['twitch', 'youtube', 'kick', 'facebook', 'tiktok', 'instagram', 'x', 'linkedin'] as const;
 const REGIONS = ['USA', 'MEXICO', 'SPAIN', 'COLOMBIA', 'BRAZIL', 'ARGENTINA', 'CANADA', 'CHILE', 'PERU', 'SWEDEN', 'UK', 'GERMANY', 'FRANCE', 'PORTUGAL', 'ITALY'] as const;
-const CATEGORIES = [
-  // Gaming & Streaming
-  'Gaming', 'Variety', 'Just Chatting', 'IRL', 'Esports', 'Vtuber',
-  // iGaming
-  'Casino', 'Slots', 'Poker',
-  // Entertainment
-  'Music', 'Entertainment', 'Comedy', 'Dance', 'Anime', 'Reality', 'Talk Show', 'Podcast', 'ASMR',
-  // Sports & Fitness
-  'Sports', 'Fitness',
-  // Lifestyle
-  'Beauty', 'Fashion', 'Lifestyle', 'Travel', 'Food', 'Cooking',
-  // Creative
-  'Creative', 'Art', 'DIY',
-  // Education & Tech
-  'Education', 'Technology', 'Science', 'News',
-  // Business
-  'Business', 'Finance', 'Crypto',
-  // Other
-  'Nature', 'Animals', 'Automotive', 'Politics', 'Religion', 'Children', 'Paranormal',
-  // Uncategorized (shows profiles with no category)
-  'Uncategorized'
-] as const;
+
+// Hierarchical category structure - 9 main categories with sub-categories
+const CATEGORY_GROUPS = {
+  'Gaming': ['Gaming', 'Variety', 'Just Chatting', 'IRL', 'Esports', 'Vtuber'],
+  'iGaming': ['Casino', 'Slots', 'Poker'],
+  'Entertainment': ['Music', 'Entertainment', 'Comedy', 'Dance', 'Anime', 'Reality', 'Talk Show', 'Podcast', 'ASMR'],
+  'Sports': ['Sports', 'Fitness'],
+  'Lifestyle': ['Beauty', 'Fashion', 'Lifestyle', 'Travel', 'Food', 'Cooking'],
+  'Creative': ['Creative', 'Art', 'DIY'],
+  'Education': ['Education', 'Technology', 'Science', 'News'],
+  'Business': ['Business', 'Finance', 'Crypto'],
+  'Other': ['Nature', 'Animals', 'Automotive', 'Politics', 'Religion', 'Children', 'Paranormal', 'Uncategorized']
+} as const;
+
+const MAIN_CATEGORIES = Object.keys(CATEGORY_GROUPS) as (keyof typeof CATEGORY_GROUPS)[];
+const ALL_CATEGORIES = Object.values(CATEGORY_GROUPS).flat();
 
 type Platform = typeof PLATFORMS[number];
 type Region = typeof REGIONS[number];
-type Category = typeof CATEGORIES[number];
+type MainCategory = keyof typeof CATEGORY_GROUPS;
+type Category = typeof ALL_CATEGORIES[number];
 
 // Platform-specific metrics interfaces
 interface YouTubeMetrics {
@@ -568,7 +563,8 @@ function App() {
   const [selectedRegions, setSelectedRegions] = useState<Region[]>([]);
   const [regionSearch, setRegionSearch] = useState('');
   const [regionDropdownOpen, setRegionDropdownOpen] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [expandedCategoryGroups, setExpandedCategoryGroups] = useState<MainCategory[]>([]);
   const [minFollowers, setMinFollowers] = useState<number>(0);
   const [maxFollowers, setMaxFollowers] = useState<number>(500000000);
   const [minEngagement, setMinEngagement] = useState<number>(0);
@@ -586,6 +582,8 @@ function App() {
   const [noteModalCreator, setNoteModalCreator] = useState<ApiCreator | null>(null);
   const [noteContent, setNoteContent] = useState('');
   const [noteSaving, setNoteSaving] = useState(false);
+  const [emailCopyId, setEmailCopyId] = useState<string | null>(null);
+  const isWindows = typeof navigator !== 'undefined' && navigator.userAgent.includes('Win');
   const [sortBy, setSortBy] = useState<string>('followers');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
@@ -797,8 +795,37 @@ function App() {
     setSelectedRegions(prev => prev.includes(r) ? prev.filter(x => x !== r) : [...prev, r]);
   };
 
-  const toggleCategory = (c: Category) => {
+  // Toggle a main category group - select/deselect all sub-categories
+  const toggleMainCategory = (group: MainCategory) => {
+    const subCategories = CATEGORY_GROUPS[group] as readonly string[];
+    const anySelected = subCategories.some(c => selectedCategories.includes(c));
+
+    if (anySelected) {
+      // Deselect all sub-categories in this group
+      setSelectedCategories(prev => prev.filter(c => !subCategories.includes(c)));
+      // Collapse this group's submenu
+      setExpandedCategoryGroups(prev => prev.filter(g => g !== group));
+    } else {
+      // Add ALL sub-categories from this group (keep existing selections from other groups)
+      setSelectedCategories(prev => [...prev, ...subCategories]);
+      // Expand to show sub-categories (add to expanded list if not already there)
+      setExpandedCategoryGroups(prev => prev.includes(group) ? prev : [...prev, group]);
+    }
+  };
+
+  // Toggle individual sub-category
+  const toggleSubCategory = (c: string) => {
     setSelectedCategories(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]);
+  };
+
+  // Check if any sub-category in a group is selected
+  const hasSelectedInGroup = (group: MainCategory) => {
+    return CATEGORY_GROUPS[group].some(c => selectedCategories.includes(c));
+  };
+
+  // Get count of selected sub-categories in a group
+  const getSelectedCountInGroup = (group: MainCategory) => {
+    return CATEGORY_GROUPS[group].filter(c => selectedCategories.includes(c)).length;
   };
 
   const clearFilters = () => {
@@ -807,6 +834,7 @@ function App() {
     setSelectedRegions([]);
     setRegionSearch('');
     setSelectedCategories([]);
+    setExpandedCategoryGroups([]);
     setMinFollowers(0);
     setMaxFollowers(500000000);
     setMinEngagement(0);
@@ -1004,20 +1032,42 @@ function App() {
             </div>
           </div>
 
-          {/* Categories */}
+          {/* Categories - Hierarchical */}
           <div className="filter-group">
             <h4>Category</h4>
+            {/* Main category chips */}
             <div className="filter-chips">
-              {CATEGORIES.map(c => (
+              {MAIN_CATEGORIES.map(group => (
                 <button
-                  key={c}
-                  className={`chip ${selectedCategories.includes(c) ? 'selected' : ''}`}
-                  onClick={() => toggleCategory(c)}
+                  key={group}
+                  className={`chip ${hasSelectedInGroup(group) ? 'selected' : ''} ${expandedCategoryGroups.includes(group) ? 'expanded' : ''}`}
+                  onClick={() => toggleMainCategory(group)}
                 >
-                  {c}
+                  {group}
+                  {getSelectedCountInGroup(group) > 0 && (
+                    <span className="chip-count">{getSelectedCountInGroup(group)}</span>
+                  )}
+                  <span className="chip-arrow">{expandedCategoryGroups.includes(group) ? '▲' : '▼'}</span>
                 </button>
               ))}
             </div>
+            {/* Sub-categories dropdowns - stacked vertically */}
+            {expandedCategoryGroups.map(group => (
+              <div key={group} className="subcategory-dropdown">
+                <div className="subcategory-header">{group}</div>
+                <div className="subcategory-chips">
+                  {CATEGORY_GROUPS[group].map(sub => (
+                    <button
+                      key={sub}
+                      className={`chip chip-small ${selectedCategories.includes(sub) ? 'selected' : ''}`}
+                      onClick={() => toggleSubCategory(sub)}
+                    >
+                      {sub}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Last Active - Max days */}
@@ -1262,13 +1312,40 @@ function App() {
                         <td>
                           <div className="table-actions">
                             {(creator.email || creator.businessEmail) && (
-                              <a
-                                href={`mailto:${creator.businessEmail || creator.email}`}
-                                className="action-btn-small email"
-                                title={`Email ${creator.businessEmail || creator.email}`}
-                              >
-                                {Icons.email}
-                              </a>
+                              isWindows ? (
+                                <div className="email-copy-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
+                                  <button
+                                    type="button"
+                                    className="action-btn-small email"
+                                    title={`Copy email: ${creator.businessEmail || creator.email}`}
+                                    onClick={() => setEmailCopyId(emailCopyId === creator.id ? null : creator.id)}
+                                  >
+                                    {Icons.email}
+                                  </button>
+                                  {emailCopyId === creator.id && (
+                                    <div className="email-copy-popout" onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', zIndex: 100, top: '100%', left: 0, background: '#1a1a2e', border: '1px solid #333', borderRadius: '8px', padding: '8px', minWidth: '200px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                                      <p style={{ fontSize: '10px', color: '#888', marginBottom: '4px' }}>Select & copy (Ctrl+C):</p>
+                                      <input
+                                        type="text"
+                                        readOnly
+                                        value={creator.businessEmail || creator.email || ''}
+                                        autoFocus
+                                        onFocus={(e) => e.target.select()}
+                                        style={{ width: '100%', padding: '4px 8px', fontSize: '12px', background: '#0d0d1a', border: '1px solid #444', borderRadius: '4px', color: '#fff' }}
+                                      />
+                                      <button type="button" onClick={() => setEmailCopyId(null)} style={{ marginTop: '4px', width: '100%', fontSize: '10px', color: '#888', background: 'transparent', border: 'none', cursor: 'pointer' }}>Close</button>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <a
+                                  href={`mailto:${creator.businessEmail || creator.email}`}
+                                  className="action-btn-small email"
+                                  title={`Email ${creator.businessEmail || creator.email}`}
+                                >
+                                  {Icons.email}
+                                </a>
+                              )
                             )}
                             <button
                               type="button"
@@ -1341,14 +1418,41 @@ function App() {
                       {/* Top row: Email, Note */}
                       <div className="card-actions-row">
                         {(creator.email || creator.businessEmail) ? (
-                          <a
-                            href={`mailto:${creator.businessEmail || creator.email}`}
-                            className="action-btn email"
-                            title={`Email ${creator.businessEmail || creator.email}`}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {Icons.email}
-                          </a>
+                          isWindows ? (
+                            <div className="email-copy-wrapper" style={{ position: 'relative' }}>
+                              <button
+                                type="button"
+                                className="action-btn email"
+                                title={`Copy email: ${creator.businessEmail || creator.email}`}
+                                onClick={(e) => { e.stopPropagation(); setEmailCopyId(emailCopyId === creator.id ? null : creator.id); }}
+                              >
+                                {Icons.email}
+                              </button>
+                              {emailCopyId === creator.id && (
+                                <div className="email-copy-popout" onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', zIndex: 100, top: '100%', left: 0, background: '#1a1a2e', border: '1px solid #333', borderRadius: '8px', padding: '8px', minWidth: '200px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                                  <p style={{ fontSize: '10px', color: '#888', marginBottom: '4px' }}>Select & copy (Ctrl+C):</p>
+                                  <input
+                                    type="text"
+                                    readOnly
+                                    value={creator.businessEmail || creator.email || ''}
+                                    autoFocus
+                                    onFocus={(e) => e.target.select()}
+                                    style={{ width: '100%', padding: '4px 8px', fontSize: '12px', background: '#0d0d1a', border: '1px solid #444', borderRadius: '4px', color: '#fff' }}
+                                  />
+                                  <button type="button" onClick={(e) => { e.stopPropagation(); setEmailCopyId(null); }} style={{ marginTop: '4px', width: '100%', fontSize: '10px', color: '#888', background: 'transparent', border: 'none', cursor: 'pointer' }}>Close</button>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <a
+                              href={`mailto:${creator.businessEmail || creator.email}`}
+                              className="action-btn email"
+                              title={`Email ${creator.businessEmail || creator.email}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {Icons.email}
+                            </a>
+                          )
                         ) : <span className="action-btn-placeholder" />}
                         <div className="note-wrapper">
                           <button
