@@ -14,7 +14,13 @@ export const RegionsOverview: React.FC<{ onRegionClick?: (region: string) => voi
   );
 
   const regionCounts = data?.regionCounts || {};
-  const entries = Object.entries(regionCounts).sort((a, b) => b[1] - a[1]);
+  // Filter out OTHER/WORLDWIDE regions - only show regions with valid flags
+  const entries = Object.entries(regionCounts)
+    .filter(([region]) => {
+      const key = region.toLowerCase();
+      return key !== 'other' && key !== 'worldwide' && flagFor(region);
+    })
+    .sort((a, b) => b[1] - a[1]);
 
   return (
     <div className="card">
