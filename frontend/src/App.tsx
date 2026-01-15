@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import './App.css';
 import { fetchCreators, fetchFavoriteIds, toggleFavorite as apiToggleFavorite, fetchDiscardedIds, toggleDiscarded as apiToggleDiscarded, fetchNotesMap, saveNote as apiSaveNote, formatLastActive, ApiCreator, validateAccess, AccessValidationResult } from './api';
 import { getStreamerAvatar, DEFAULT_AVATAR } from './utils/avatars';
+import { flagFor, regionLabel } from './utils/geo';
 
 // Handle image load errors by falling back to placeholder
 const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -1298,7 +1299,7 @@ function App() {
                             {platformKey.charAt(0).toUpperCase() + platformKey.slice(1)}
                           </span>
                         </td>
-                        <td>{FLAGS[regionKey] && creator.region?.toLowerCase() !== 'other' ? `${FLAGS[regionKey]} ${creator.region}` : ''}</td>
+                        <td>{flagFor(creator.region || '') ? `${flagFor(creator.region || '')} ${regionLabel(creator.region || '')}` : ''}</td>
                         <td>{category}</td>
                         <td>{formatNumber(creator.followers)}</td>
                         <td>{creator.avgViewers > 0 ? formatNumber(creator.avgViewers) : '-'}</td>
@@ -1380,8 +1381,8 @@ function App() {
                   </div>
 
                   <div className="creator-meta">
-                    {FLAGS[regionKey] && creator.region?.toLowerCase() !== 'other' && (
-                      <span className="meta-item">{FLAGS[regionKey]} {creator.region}</span>
+                    {flagFor(creator.region || '') && (
+                      <span className="meta-item">{flagFor(creator.region || '')} {regionLabel(creator.region || '')}</span>
                     )}
                     <span className="meta-item category">{category}</span>
                     <div className="card-actions-grid" onClick={(e) => e.stopPropagation()}>
@@ -1539,9 +1540,9 @@ function App() {
                   <h2>{modalDisplayName}</h2>
                   <p>@{selectedCreator.username}</p>
                   <div className="profile-meta">
-                    {FLAGS[modalRegionKey] && selectedCreator.region?.toLowerCase() !== 'other' && (
+                    {flagFor(selectedCreator.region || '') && (
                       <>
-                        <span>{FLAGS[modalRegionKey]} {selectedCreator.region}</span>
+                        <span>{flagFor(selectedCreator.region || '')} {regionLabel(selectedCreator.region || '')}</span>
                         <span>•</span>
                       </>
                     )}
