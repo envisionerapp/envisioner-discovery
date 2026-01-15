@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Streamer } from '../services/chatService';
 import { PlatformIcon } from './icons/PlatformIcon';
 import { flagFor, regionLabel } from '../utils/geo';
@@ -23,6 +23,23 @@ const handlePanelImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
 import { formatDistanceToNow } from 'date-fns';
 import { useLanguage } from '../contexts/LanguageContext';
 
+// Category color mapping
+const getCategoryColor = (category: string): string => {
+  const colors: Record<string, string> = {
+    'Gaming': 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
+    'iGaming': 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
+    'IRL': 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+    'Music': 'bg-pink-500/20 text-pink-300 border border-pink-500/30',
+    'Art': 'bg-rose-500/20 text-rose-300 border border-rose-500/30',
+    'Tech': 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
+    'Sports': 'bg-green-500/20 text-green-300 border border-green-500/30',
+    'Education': 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30',
+    'Entertainment': 'bg-orange-500/20 text-orange-300 border border-orange-500/30',
+    'Other': 'bg-gray-500/20 text-gray-300 border border-gray-500/30'
+  };
+  return colors[category] || colors['Other'];
+};
+
 interface StreamerCardProps {
   streamer: Streamer;
   index: number;
@@ -30,6 +47,8 @@ interface StreamerCardProps {
 
 export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) => {
   const { t } = useLanguage();
+  const [emailCopied, setEmailCopied] = useState(false);
+  const isWindows = typeof navigator !== 'undefined' && navigator.userAgent.includes('Win');
 
   const getStatusColor = () => {
     if (streamer.isLive) return 'text-[#FF6B35]';
@@ -87,14 +106,21 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
                   @{streamer.username}
                 </p>
               </div>
-              {flagFor(streamer.region?.toLowerCase() || '') && (
-                <div className="ml-2 flex-shrink-0">
+              <div className="ml-2 flex-shrink-0 flex items-center gap-1.5">
+                {/* Category badge */}
+                {(streamer.inferredCategory || streamer.primaryCategory) && (
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${getCategoryColor(streamer.inferredCategory || streamer.primaryCategory || '')}`}>
+                    {streamer.inferredCategory || streamer.primaryCategory}
+                  </span>
+                )}
+                {/* Region/Country badge */}
+                {flagFor(streamer.region?.toLowerCase() || '') && (
                   <span className="region-chip">
                     <span className="text-sm">{flagFor(streamer.region.toLowerCase())}</span>
                     <span>{regionLabel(streamer.region.toLowerCase())}</span>
                   </span>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Live status and current game */}
@@ -191,20 +217,28 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
         {/* Email Contact */}
         {(streamer.email || streamer.businessEmail) && (
           <div className="mb-3">
-            {typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? (
+            {isWindows ? (
               <button
                 onClick={() => {
                   const email = streamer.businessEmail || streamer.email;
-                  window.location.href = `mailto:${email}`;
+                  navigator.clipboard.writeText(email || '');
+                  setEmailCopied(true);
+                  setTimeout(() => setEmailCopied(false), 2000);
                 }}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs bg-[#EA4335] text-white hover:bg-[#D33426] transition-colors cursor-pointer"
-                title={`Contact via email (source: ${streamer.emailSource || 'profile'})`}
+                title={`Click to copy email (source: ${streamer.emailSource || 'profile'})`}
               >
-                <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                </svg>
-                <span>{streamer.businessEmail || streamer.email}</span>
+                {emailCopied ? (
+                  <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
+                )}
+                <span>{emailCopied ? 'Copied!' : (streamer.businessEmail || streamer.email)}</span>
               </button>
             ) : (
               <a
@@ -442,9 +476,16 @@ const StreamerTableRow: React.FC<StreamerTableRowProps> = ({ streamer, index }) 
 
       {/* Game/Category */}
       <td className="py-3 px-3">
-        <span className="text-xs text-gray-300 truncate block max-w-[150px]">
-          {streamer.currentGame && streamer.currentGame.toLowerCase() !== 'unknown' ? streamer.currentGame : ''}
-        </span>
+        <div className="flex flex-col gap-1">
+          {(streamer.inferredCategory || streamer.primaryCategory) && (
+            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium w-fit ${getCategoryColor(streamer.inferredCategory || streamer.primaryCategory || '')}`}>
+              {streamer.inferredCategory || streamer.primaryCategory}
+            </span>
+          )}
+          <span className="text-xs text-gray-400 truncate block max-w-[150px]">
+            {streamer.currentGame && streamer.currentGame.toLowerCase() !== 'unknown' ? streamer.currentGame : ''}
+          </span>
+        </div>
       </td>
 
       {/* Tags */}
