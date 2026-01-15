@@ -72,17 +72,38 @@ export class StreamerController {
 
       // Multi-category filter - uses inferredCategory which properly maps games to categories
       // e.g., "Gaming" includes all video games, "iGaming" includes slots/casino
+      // "Other" or "Uncategorized" includes profiles with no category
       if (categories && categories.length > 0) {
-        // Use AND with OR for category matching (doesn't conflict with other OR clauses)
-        where.AND = [
-          ...(where.AND || []),
-          {
-            OR: [
-              { inferredCategory: { in: categories, mode: 'insensitive' } },
-              { primaryCategory: { in: categories, mode: 'insensitive' } },
-            ]
-          }
-        ];
+        const hasOther = categories.some(c => c.toLowerCase() === 'other' || c.toLowerCase() === 'uncategorized');
+        const regularCategories = categories.filter(c => c.toLowerCase() !== 'other' && c.toLowerCase() !== 'uncategorized');
+
+        const categoryConditions: any[] = [];
+
+        // Add regular category matches
+        if (regularCategories.length > 0) {
+          categoryConditions.push(
+            { inferredCategory: { in: regularCategories, mode: 'insensitive' } },
+            { primaryCategory: { in: regularCategories, mode: 'insensitive' } }
+          );
+        }
+
+        // Add null/empty category matches for "Other"
+        if (hasOther) {
+          categoryConditions.push(
+            { AND: [{ inferredCategory: null }, { primaryCategory: null }] },
+            { AND: [{ inferredCategory: null }, { primaryCategory: '' }] },
+            { AND: [{ inferredCategory: '' }, { primaryCategory: null }] },
+            { AND: [{ inferredCategory: '' }, { primaryCategory: '' }] },
+            { primaryCategory: { contains: 'unknown', mode: 'insensitive' } }
+          );
+        }
+
+        if (categoryConditions.length > 0) {
+          where.AND = [
+            ...(where.AND || []),
+            { OR: categoryConditions }
+          ];
+        }
       }
 
       // Followers range

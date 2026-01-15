@@ -157,7 +157,28 @@ const getAvatarColor = (name: string): string => {
 // ===========================================
 const PLATFORMS = ['twitch', 'youtube', 'kick', 'facebook', 'tiktok', 'instagram', 'x', 'linkedin'] as const;
 const REGIONS = ['USA', 'MEXICO', 'SPAIN', 'COLOMBIA', 'BRAZIL', 'ARGENTINA', 'CANADA', 'CHILE', 'PERU', 'SWEDEN', 'UK', 'GERMANY', 'FRANCE', 'PORTUGAL', 'ITALY'] as const;
-const CATEGORIES = ['Gaming', 'iGaming', 'IRL'] as const;
+const CATEGORIES = [
+  // Gaming & Streaming
+  'Gaming', 'Variety', 'Just Chatting', 'IRL', 'Esports', 'Vtuber',
+  // iGaming
+  'Casino', 'Slots', 'Poker',
+  // Entertainment
+  'Music', 'Entertainment', 'Comedy', 'Dance', 'Anime', 'Reality', 'Talk Show', 'Podcast', 'ASMR',
+  // Sports & Fitness
+  'Sports', 'Fitness',
+  // Lifestyle
+  'Beauty', 'Fashion', 'Lifestyle', 'Travel', 'Food', 'Cooking',
+  // Creative
+  'Creative', 'Art', 'DIY',
+  // Education & Tech
+  'Education', 'Technology', 'Science', 'News',
+  // Business
+  'Business', 'Finance', 'Crypto',
+  // Other
+  'Nature', 'Animals', 'Automotive', 'Politics', 'Religion', 'Children', 'Paranormal',
+  // Uncategorized (shows profiles with no category)
+  'Uncategorized'
+] as const;
 
 type Platform = typeof PLATFORMS[number];
 type Region = typeof REGIONS[number];

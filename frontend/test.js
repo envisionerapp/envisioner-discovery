@@ -1,0 +1,1 @@
+const FLAG_MAP = { other: 'X', poland: 'P' }; const flagFor = (r) => { if (\!r) return ''; const k = r.toLowerCase(); if (k === 'other' || k === 'worldwide') return ''; return FLAG_MAP[k] || ''; }; console.log('OTHER result:', flagFor('OTHER')); console.log('Is empty:', flagFor('OTHER') === '');

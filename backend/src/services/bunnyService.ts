@@ -183,6 +183,24 @@ export async function uploadXAvatar(username: string, avatarUrl: string): Promis
 }
 
 /**
+ * Upload YouTube avatar to Bunny CDN
+ */
+export async function uploadYouTubeAvatar(username: string, avatarUrl: string): Promise<string> {
+  if (!avatarUrl || !isConfigured()) {
+    return avatarUrl;
+  }
+
+  if (avatarUrl.includes(BUNNY_CDN_HOSTNAME!)) {
+    return avatarUrl;
+  }
+
+  const path = `avatars/youtube/${username.toLowerCase()}.jpg`;
+  const cdnUrl = await uploadFromUrl(avatarUrl, path);
+
+  return cdnUrl || avatarUrl;
+}
+
+/**
  * Upload a panel image to Bunny CDN
  * @param platform - Platform name (twitch, kick, youtube)
  * @param username - Streamer username
@@ -255,6 +273,7 @@ export const bunnyService = {
   uploadLinkedInAvatar,
   uploadFacebookAvatar,
   uploadXAvatar,
+  uploadYouTubeAvatar,
   uploadPanelImage,
   uploadPanelImages,
 };

@@ -110,6 +110,10 @@ interface LinkedInProfile {
   followers?: number;
   connections_count?: number;
   location?: string;
+  city?: string;
+  country?: string;
+  country_code?: string;
+  geo_location?: string;
   name?: string;  // Full name from API
 }
 
@@ -138,7 +142,20 @@ interface YouTubeChannel {
   country?: string;
 }
 
-type SocialProfile = TikTokProfile | InstagramProfile | XProfile | FacebookProfile | LinkedInProfile;
+// Normalized YouTube profile from API
+interface YouTubeProfile {
+  username: string;
+  displayName: string;
+  bio: string;
+  followers: number;
+  avatarUrl?: string;
+  isVerified: boolean;
+  profileUrl: string;
+  location?: string;
+  socialLinks?: string[];
+}
+
+type SocialProfile = TikTokProfile | InstagramProfile | XProfile | FacebookProfile | LinkedInProfile | YouTubeProfile;
 
 interface SyncQueueItem {
   id: string;
@@ -943,9 +960,49 @@ export class ScrapeCreatorsService {
         return this.getFacebookProfile(username);
       case 'LINKEDIN':
         return this.getLinkedInProfile(username);
+      case 'YOUTUBE':
+        return this.getYouTubeProfile(username);
       default:
         return null;
     }
+  }
+
+  /**
+   * Fetch YouTube channel and convert to YouTubeProfile format
+   */
+  private async getYouTubeProfile(handle: string): Promise<YouTubeProfile | null> {
+    const channel = await this.getYouTubeChannel(handle);
+    if (!channel) return null;
+
+    // Get avatar URL from nested structure (prefer largest/first source)
+    let avatarUrl: string | undefined;
+    if (channel.avatar?.image?.sources && channel.avatar.image.sources.length > 0) {
+      // Sort by width descending to get largest
+      const sorted = [...channel.avatar.image.sources].sort((a, b) => b.width - a.width);
+      avatarUrl = sorted[0]?.url;
+    }
+
+    // Extract social links from API response
+    const socialLinks: string[] = [];
+    if (channel.twitter) socialLinks.push(`https://twitter.com/${channel.twitter}`);
+    if (channel.instagram) socialLinks.push(`https://instagram.com/${channel.instagram}`);
+    if (channel.tiktok) socialLinks.push(`https://tiktok.com/@${channel.tiktok}`);
+    if (channel.linkedin) socialLinks.push(`https://linkedin.com/in/${channel.linkedin}`);
+    if (channel.links && Array.isArray(channel.links)) {
+      socialLinks.push(...channel.links);
+    }
+
+    return {
+      username: channel.channel || handle,
+      displayName: channel.name || handle,
+      bio: channel.description || '',
+      followers: channel.subscriberCount || 0,
+      avatarUrl,
+      isVerified: false,
+      profileUrl: `https://www.youtube.com/@${channel.channel || handle}`,
+      location: channel.country || undefined,
+      socialLinks: socialLinks.length > 0 ? socialLinks : undefined,
+    };
   }
 
   private async upsertStreamer(platform: Platform, profile: SocialProfile, sourceStreamerId?: string): Promise<void> {
@@ -970,12 +1027,44 @@ export class ScrapeCreatorsService {
           data.avatarUrl = await bunnyService.uploadFacebookAvatar(data.username, data.avatarUrl);
         } else if (platform === 'X') {
           data.avatarUrl = await bunnyService.uploadXAvatar(data.username, data.avatarUrl);
+        } else if (platform === 'YOUTUBE') {
+          data.avatarUrl = await bunnyService.uploadYouTubeAvatar(data.username, data.avatarUrl);
         }
       } catch (error: any) {
         logger.warn(`Failed to upload avatar to Bunny CDN for ${platform}/${data.username}: ${error.message}`);
         // Continue with original URL if upload fails
       }
     }
+
+    // Extract social links from profile description/bio
+    const extractedHandles = this.extractHandlesFromContent(data.profileDescription || '');
+    const discoveredLinks: string[] = [];
+
+    if (extractedHandles.tiktok && platform !== 'TIKTOK') {
+      discoveredLinks.push(`https://tiktok.com/@${extractedHandles.tiktok}`);
+    }
+    if (extractedHandles.instagram && platform !== 'INSTAGRAM') {
+      discoveredLinks.push(`https://instagram.com/${extractedHandles.instagram}`);
+    }
+    if (extractedHandles.x && platform !== 'X') {
+      discoveredLinks.push(`https://x.com/${extractedHandles.x}`);
+    }
+    if (extractedHandles.facebook && platform !== 'FACEBOOK') {
+      discoveredLinks.push(`https://facebook.com/${extractedHandles.facebook}`);
+    }
+    if (extractedHandles.linkedin && platform !== 'LINKEDIN') {
+      discoveredLinks.push(`https://linkedin.com/in/${extractedHandles.linkedin}`);
+    }
+    if (extractedHandles.twitch && platform !== 'TWITCH') {
+      discoveredLinks.push(`https://twitch.tv/${extractedHandles.twitch}`);
+    }
+    if (extractedHandles.youtube && platform !== 'YOUTUBE') {
+      discoveredLinks.push(`https://youtube.com/@${extractedHandles.youtube}`);
+    }
+
+    // Merge socialLinks from API (e.g. YouTube) with discovered links from bio
+    const apiLinks = (data.socialLinks as string[]) || [];
+    const allLinks = [...new Set([...apiLinks, ...discoveredLinks])]; // dedupe
 
     await db.streamer.upsert({
       where: {
@@ -987,14 +1076,23 @@ export class ScrapeCreatorsService {
       create: {
         ...data,
         platform,
-        region: Region.WORLDWIDE, // Default, can be enriched later
+        region: data.region || Region.WORLDWIDE,
         lastScrapedAt: new Date(),
+        socialLinks: allLinks.length > 0 ? allLinks : undefined,
       },
       update: {
         ...data,
         lastScrapedAt: new Date(),
+        ...(allLinks.length > 0 && {
+          socialLinks: allLinks,
+        }),
       }
     });
+
+    // Log discovered links
+    if (allLinks.length > 0) {
+      logger.info(`🔗 [${platform}] ${allLinks.length} social links for @${data.username} (${apiLinks.length} from API, ${discoveredLinks.length} from bio)`);
+    }
 
     // Also update the influencers table if this username exists there
     await this.updateInfluencersTable(platform, data.username, data.followers || 0);
@@ -1079,6 +1177,8 @@ export class ScrapeCreatorsService {
         const avatarUrl = p.avatar?.image_url || p.legacy?.profile_image_url_https || p.profile_image_url;
         // Get higher resolution by replacing _normal with _400x400
         const highResAvatar = avatarUrl?.replace('_normal.', '_400x400.');
+        // Get location from API response (API returns nested: data.location.location or data.legacy.location)
+        const location = p.legacy?.location || (p.location as any)?.location || '';
         return {
           username: p.username || p.core?.screen_name || p.legacy?.screen_name || '',
           displayName: p.name || p.core?.name || p.legacy?.name || p.username || '',
@@ -1086,6 +1186,7 @@ export class ScrapeCreatorsService {
           avatarUrl: highResAvatar,
           followers: p.followers_count || p.legacy?.followers_count || 0,
           profileDescription: p.description || p.legacy?.description,
+          region: this.mapLocationToRegion(location),
         };
       }
       case 'FACEBOOK': {
@@ -1104,13 +1205,33 @@ export class ScrapeCreatorsService {
       }
       case 'LINKEDIN': {
         const p = profile as LinkedInProfile;
+        // Build description with location if available
+        const locationStr = p.city && p.country ? `${p.city}, ${p.country}` :
+                           p.location || p.geo_location || '';
+        const headline = p.headline || p.about || '';
+        const description = locationStr ? `${headline} | ${locationStr}` : headline;
+
         return {
           username: p.public_identifier,
           displayName: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
           profileUrl: `https://linkedin.com/in/${p.public_identifier}`,
           avatarUrl: p.image,
           followers: p.followers || p.follower_count || 0,
-          profileDescription: p.headline || p.about,
+          profileDescription: description,
+          region: this.mapLocationToRegion(p.location || p.geo_location, p.country, p.country_code),
+        };
+      }
+      case 'YOUTUBE': {
+        const p = profile as YouTubeProfile;
+        return {
+          username: p.username,
+          displayName: p.displayName,
+          profileUrl: p.profileUrl,
+          avatarUrl: p.avatarUrl,
+          followers: p.followers || 0,
+          profileDescription: p.bio,
+          region: this.mapLocationToRegion(p.location),
+          socialLinks: p.socialLinks,
         };
       }
       default:
@@ -1163,6 +1284,134 @@ export class ScrapeCreatorsService {
       LINKEDIN: '💼',
     };
     return emojis[platform] || '🌐';
+  }
+
+  /**
+   * Map LinkedIn location string to Region enum
+   */
+  private mapLocationToRegion(location?: string | object, country?: string | object, countryCode?: string | object): Region {
+    // Priority: country_code > country > location parsing
+    // Handle cases where values might be objects instead of strings
+    const toString = (val: unknown): string => {
+      if (!val) return '';
+      if (typeof val === 'string') return val;
+      if (typeof val === 'object') return JSON.stringify(val);
+      return String(val);
+    };
+    const code = toString(countryCode).toUpperCase();
+    const countryStr = toString(country || location).toLowerCase();
+
+    // Country code mapping
+    const codeMap: Record<string, Region> = {
+      'US': Region.USA, 'USA': Region.USA,
+      'CA': Region.CANADA, 'CAN': Region.CANADA,
+      'MX': Region.MEXICO, 'MEX': Region.MEXICO,
+      'GB': Region.UK, 'UK': Region.UK, 'GBR': Region.UK,
+      'ES': Region.SPAIN, 'ESP': Region.SPAIN,
+      'DE': Region.GERMANY, 'DEU': Region.GERMANY,
+      'FR': Region.FRANCE, 'FRA': Region.FRANCE,
+      'IT': Region.ITALY, 'ITA': Region.ITALY,
+      'PT': Region.PORTUGAL, 'PRT': Region.PORTUGAL,
+      'NL': Region.NETHERLANDS, 'NLD': Region.NETHERLANDS,
+      'SE': Region.SWEDEN, 'SWE': Region.SWEDEN,
+      'NO': Region.NORWAY, 'NOR': Region.NORWAY,
+      'DK': Region.DENMARK, 'DNK': Region.DENMARK,
+      'FI': Region.FINLAND, 'FIN': Region.FINLAND,
+      'PL': Region.POLAND, 'POL': Region.POLAND,
+      'RU': Region.RUSSIA, 'RUS': Region.RUSSIA,
+      'JP': Region.JAPAN, 'JPN': Region.JAPAN,
+      'KR': Region.KOREA, 'KOR': Region.KOREA,
+      'CN': Region.CHINA, 'CHN': Region.CHINA,
+      'IN': Region.INDIA, 'IND': Region.INDIA,
+      'ID': Region.INDONESIA, 'IDN': Region.INDONESIA,
+      'PH': Region.PHILIPPINES, 'PHL': Region.PHILIPPINES,
+      'TH': Region.THAILAND, 'THA': Region.THAILAND,
+      'VN': Region.VIETNAM, 'VNM': Region.VIETNAM,
+      'MY': Region.MALAYSIA, 'MYS': Region.MALAYSIA,
+      'SG': Region.SINGAPORE, 'SGP': Region.SINGAPORE,
+      'AU': Region.AUSTRALIA, 'AUS': Region.AUSTRALIA,
+      'NZ': Region.NEW_ZEALAND, 'NZL': Region.NEW_ZEALAND,
+      'BR': Region.BRAZIL, 'BRA': Region.BRAZIL,
+      'CO': Region.COLOMBIA, 'COL': Region.COLOMBIA,
+      'AR': Region.ARGENTINA, 'ARG': Region.ARGENTINA,
+      'CL': Region.CHILE, 'CHL': Region.CHILE,
+      'PE': Region.PERU, 'PER': Region.PERU,
+      'VE': Region.VENEZUELA, 'VEN': Region.VENEZUELA,
+      'EC': Region.ECUADOR, 'ECU': Region.ECUADOR,
+      'DO': Region.DOMINICAN_REPUBLIC, 'DOM': Region.DOMINICAN_REPUBLIC,
+      'PR': Region.PUERTO_RICO, 'PRI': Region.PUERTO_RICO,
+      'UY': Region.URUGUAY, 'URY': Region.URUGUAY,
+      'PA': Region.PANAMA, 'PAN': Region.PANAMA,
+      'CR': Region.COSTA_RICA, 'CRI': Region.COSTA_RICA,
+      'GT': Region.GUATEMALA, 'GTM': Region.GUATEMALA,
+      'SV': Region.EL_SALVADOR, 'SLV': Region.EL_SALVADOR,
+      'HN': Region.HONDURAS, 'HND': Region.HONDURAS,
+      'NI': Region.NICARAGUA, 'NIC': Region.NICARAGUA,
+      'BO': Region.BOLIVIA, 'BOL': Region.BOLIVIA,
+      'PY': Region.PARAGUAY, 'PRY': Region.PARAGUAY,
+    };
+
+    if (code && codeMap[code]) {
+      return codeMap[code];
+    }
+
+    // Country name mapping (partial match)
+    const nameMap: Array<[string[], Region]> = [
+      [['united states', 'usa', 'u.s.', 'u.s.a', 'california', 'new york', 'texas', 'florida', 'san francisco', 'los angeles', 'seattle', 'chicago', 'boston', 'austin', 'denver', 'atlanta', 'estados unidos'], Region.USA],
+      [['canada', 'toronto', 'vancouver', 'montreal', 'ottawa', 'calgary', 'edmonton', 'winnipeg', 'quebec', 'québec', 'ontario', 'alberta', 'british columbia', 'laval'], Region.CANADA],
+      [['united kingdom', 'uk', 'england', 'london', 'scotland', 'wales', 'reino unido', 'inglaterra', 'manchester', 'birmingham', 'liverpool', 'leeds'], Region.UK],
+      [['spain', 'españa', 'espanha', 'madrid', 'barcelona', 'valencia', 'sevilla', 'malaga', 'bilbao', 'santander', 'catalonia', 'catalunya', 'andalucia', 'comunidad de madrid', 'galicia'], Region.SPAIN],
+      [['germany', 'deutschland', 'berlin', 'berlim', 'munich', 'münchen', 'frankfurt', 'hamburg', 'alemanha', 'alemania'], Region.GERMANY],
+      [['france', 'francia', 'frança', 'paris', 'lyon', 'marseille', 'toulouse', 'nice'], Region.FRANCE],
+      [['italy', 'italia', 'rome', 'milan', 'milano'], Region.ITALY],
+      [['netherlands', 'holland', 'amsterdam'], Region.NETHERLANDS],
+      [['sweden', 'stockholm'], Region.SWEDEN],
+      [['norway', 'oslo'], Region.NORWAY],
+      [['denmark', 'copenhagen'], Region.DENMARK],
+      [['finland', 'helsinki'], Region.FINLAND],
+      [['poland', 'warsaw'], Region.POLAND],
+      [['russia', 'moscow'], Region.RUSSIA],
+      [['japan', 'tokyo', 'osaka'], Region.JAPAN],
+      [['korea', 'south korea', 'seoul'], Region.KOREA],
+      [['china', 'beijing', 'shanghai', 'shenzhen'], Region.CHINA],
+      [['india', 'mumbai', 'bangalore', 'delhi', 'hyderabad'], Region.INDIA],
+      [['indonesia', 'jakarta'], Region.INDONESIA],
+      [['philippines', 'manila'], Region.PHILIPPINES],
+      [['thailand', 'bangkok'], Region.THAILAND],
+      [['vietnam', 'ho chi minh', 'hanoi'], Region.VIETNAM],
+      [['malaysia', 'kuala lumpur'], Region.MALAYSIA],
+      [['singapore'], Region.SINGAPORE],
+      [['australia', 'sydney', 'melbourne', 'brisbane'], Region.AUSTRALIA],
+      [['new zealand', 'auckland', 'wellington'], Region.NEW_ZEALAND],
+      [['brazil', 'brasil', 'são paulo', 'rio de janeiro'], Region.BRAZIL],
+      [['mexico', 'méxico', 'mexico city'], Region.MEXICO],
+      [['colombia', 'bogota', 'bogotá', 'medellin', 'medellín'], Region.COLOMBIA],
+      [['argentina', 'buenos aires'], Region.ARGENTINA],
+      [['chile', 'santiago'], Region.CHILE],
+      [['peru', 'lima'], Region.PERU],
+      [['venezuela', 'caracas'], Region.VENEZUELA],
+      [['ecuador', 'quito', 'guayaquil'], Region.ECUADOR],
+      [['dominican republic', 'santo domingo', 'república dominicana', 'punta cana'], Region.DOMINICAN_REPUBLIC],
+      [['puerto rico', 'san juan'], Region.PUERTO_RICO],
+      [['uruguay', 'montevideo'], Region.URUGUAY],
+      [['panama', 'panamá'], Region.PANAMA],
+      [['costa rica', 'san josé'], Region.COSTA_RICA],
+      [['guatemala'], Region.GUATEMALA],
+      [['el salvador', 'san salvador'], Region.EL_SALVADOR],
+      [['honduras', 'tegucigalpa'], Region.HONDURAS],
+      [['nicaragua', 'managua'], Region.NICARAGUA],
+      [['bolivia', 'la paz'], Region.BOLIVIA],
+      [['paraguay', 'asunción', 'asuncion'], Region.PARAGUAY],
+      [['portugal', 'lisbon', 'porto'], Region.PORTUGAL],
+    ];
+
+    for (const [keywords, region] of nameMap) {
+      if (keywords.some(kw => countryStr.includes(kw))) {
+        return region;
+      }
+    }
+
+    return Region.WORLDWIDE;
   }
 
   // ==================== EXTRACT SOCIAL HANDLES FROM EXISTING STREAMERS ====================
@@ -1276,12 +1525,14 @@ export class ScrapeCreatorsService {
     x?: string;
     facebook?: string;
     linkedin?: string;
+    twitch?: string;
+    youtube?: string;
   } {
     const handles: any = {};
 
     // TikTok patterns
     const tiktokMatch = content.match(/tiktok\.com\/@?([a-zA-Z0-9_.]+)/i) ||
-                        content.match(/@([a-zA-Z0-9_.]+)\s*\(?tiktok\)?/i);
+                        content.match(/(?:tiktok)[:\s]*@?([a-zA-Z0-9_.]+)/i);
     if (tiktokMatch) handles.tiktok = tiktokMatch[1].replace('@', '');
 
     // Instagram patterns
@@ -1291,7 +1542,7 @@ export class ScrapeCreatorsService {
 
     // X/Twitter patterns
     const xMatch = content.match(/(?:twitter|x)\.com\/([a-zA-Z0-9_]+)/i) ||
-                   content.match(/(?:twitter|x)[:\s]*@?([a-zA-Z0-9_]+)/i);
+                   content.match(/(?:twitter)[:\s]*@?([a-zA-Z0-9_]+)/i);
     if (xMatch) handles.x = xMatch[1].replace('@', '');
 
     // Facebook patterns
@@ -1302,6 +1553,17 @@ export class ScrapeCreatorsService {
     // LinkedIn patterns
     const linkedinMatch = content.match(/linkedin\.com\/in\/([a-zA-Z0-9_-]+)/i);
     if (linkedinMatch) handles.linkedin = linkedinMatch[1];
+
+    // Twitch patterns
+    const twitchMatch = content.match(/twitch\.tv\/([a-zA-Z0-9_]+)/i) ||
+                        content.match(/(?:twitch)[:\s]*@?([a-zA-Z0-9_]+)/i);
+    if (twitchMatch) handles.twitch = twitchMatch[1].replace('@', '');
+
+    // YouTube patterns
+    const ytMatch = content.match(/youtube\.com\/@([a-zA-Z0-9_-]+)/i) ||
+                    content.match(/youtube\.com\/(?:c|channel|user)\/([a-zA-Z0-9_-]+)/i) ||
+                    content.match(/(?:youtube|yt)[:\s]*@?([a-zA-Z0-9_-]+)/i);
+    if (ytMatch) handles.youtube = ytMatch[1].replace('@', '');
 
     return handles;
   }

@@ -16,9 +16,9 @@ export const Layout: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="h-full flex flex-col bg-white overflow-hidden">
       {/* Tab navigation */}
-      <nav className="sticky top-0 z-10 border-b border-secondary/10 bg-white">
+      <nav className="flex-shrink-0 z-10 border-b border-secondary/10 bg-white">
         <div className="flex items-center justify-between py-2.5">
           {/* Tab items */}
           <div className="flex items-center gap-1">
@@ -80,7 +80,7 @@ export const Layout: React.FC = () => {
         </div>
       </nav>
 
-      <main className="w-full p-4 max-w-full overflow-x-hidden">
+      <main className="flex-1 w-full p-4 max-w-full overflow-hidden">
         <Outlet />
       </main>
     </div>
