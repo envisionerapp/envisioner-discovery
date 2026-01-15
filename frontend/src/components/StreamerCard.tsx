@@ -443,7 +443,7 @@ const StreamerTableRow: React.FC<StreamerTableRowProps> = ({ streamer, index }) 
       {/* Game/Category */}
       <td className="py-3 px-3">
         <span className="text-xs text-gray-300 truncate block max-w-[150px]">
-          {streamer.currentGame || '-'}
+          {streamer.currentGame && streamer.currentGame.toLowerCase() !== 'unknown' ? streamer.currentGame : ''}
         </span>
       </td>
 

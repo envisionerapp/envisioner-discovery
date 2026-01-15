@@ -569,11 +569,6 @@ function App() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
 
-  // iGaming filters
-  const [gamblingCompatible, setGamblingCompatible] = useState<boolean | null>(null);
-  const [performanceTier, setPerformanceTier] = useState<string | null>(null);
-  const [minIgamingScore, setMinIgamingScore] = useState<number>(0);
-
   // Pagination
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -610,11 +605,7 @@ function App() {
     hideDiscarded: !discardedOnly,
     sort: sortBy,
     dir: sortDir,
-    // iGaming filters
-    gamblingCompatible: gamblingCompatible !== null ? gamblingCompatible : undefined,
-    performanceTier: performanceTier || undefined,
-    minIgamingScore: minIgamingScore > 0 ? minIgamingScore : undefined,
-  }), [search, selectedPlatforms, selectedRegions, selectedCategories, minFollowers, maxFollowers, minViews, maxViews, minEngagement, minAvgViewers, maxAvgViewers, maxLastActive, favoritesOnly, discardedOnly, sortBy, sortDir, gamblingCompatible, performanceTier, minIgamingScore]);
+  }), [search, selectedPlatforms, selectedRegions, selectedCategories, minFollowers, maxFollowers, minViews, maxViews, minEngagement, minAvgViewers, maxAvgViewers, maxLastActive, favoritesOnly, discardedOnly, sortBy, sortDir]);
 
   // Fetch creators from API (initial load, page 1)
   const loadCreators = useCallback(async () => {
@@ -803,19 +794,13 @@ function App() {
     setMinViews(0);
     setMaxViews(50000000000);
     setFavoritesOnly(false);
-    // Clear iGaming filters
-    setGamblingCompatible(null);
-    setPerformanceTier(null);
-    setMinIgamingScore(0);
   };
 
   const activeFilterCount = selectedPlatforms.length + selectedRegions.length + selectedCategories.length +
     (minFollowers > 0 ? 1 : 0) + (maxFollowers < 500000000 ? 1 : 0) +
     (minEngagement > 0 ? 1 : 0) + (maxLastActive < 365 ? 1 : 0) +
     (minAvgViewers > 0 ? 1 : 0) + (maxAvgViewers < 10000000 ? 1 : 0) + (minViews > 0 ? 1 : 0) + (maxViews < 50000000000 ? 1 : 0) +
-    (favoritesOnly ? 1 : 0) +
-    // iGaming filter counts
-    (gamblingCompatible !== null ? 1 : 0) + (performanceTier !== null ? 1 : 0) + (minIgamingScore > 0 ? 1 : 0);
+    (favoritesOnly ? 1 : 0);
 
   // Access gate - show loading or error screens
   if (accessStatus === 'checking') {
@@ -914,8 +899,6 @@ function App() {
               <option value="followers-asc">Followers (Low to High)</option>
               <option value="avgviewers-desc">Avg Viewers (High to Low)</option>
               <option value="avgviewers-asc">Avg Viewers (Low to High)</option>
-              <option value="igamingscore-desc">iGaming Score (High to Low)</option>
-              <option value="igamingscore-asc">iGaming Score (Low to High)</option>
               <option value="name-asc">Name (A-Z)</option>
               <option value="name-desc">Name (Z-A)</option>
             </select>
@@ -1013,62 +996,6 @@ function App() {
                   {c}
                 </button>
               ))}
-            </div>
-          </div>
-
-          {/* iGaming Filters Section */}
-          <div className="filter-group igaming-section">
-            <h4>iGaming Filters</h4>
-
-            {/* Gambling Compatible Toggle */}
-            <label className="toggle-filter" onClick={() => setGamblingCompatible(gamblingCompatible === true ? null : true)}>
-              <div className={`toggle ${gamblingCompatible === true ? 'on' : ''}`} style={gamblingCompatible === true ? { backgroundColor: '#10b981' } : {}} />
-              <span>Gambling Compatible Only</span>
-            </label>
-
-            {/* Performance Tier */}
-            <div style={{ marginTop: '12px' }}>
-              <span className="filter-sublabel">Performance Tier</span>
-              <div className="filter-chips" style={{ marginTop: '6px' }}>
-                {[
-                  { tier: 'S', label: 'S-Tier', color: '#fbbf24', range: '90+' },
-                  { tier: 'A', label: 'A-Tier', color: '#a3a3a3', range: '75-89' },
-                  { tier: 'B', label: 'B-Tier', color: '#cd7f32', range: '60-74' },
-                  { tier: 'C', label: 'C-Tier', color: '#6b7280', range: '<60' },
-                ].map(({ tier, label, color, range }) => (
-                  <button
-                    key={tier}
-                    className={`chip tier-chip ${performanceTier === tier ? 'selected' : ''}`}
-                    onClick={() => setPerformanceTier(performanceTier === tier ? null : tier)}
-                    style={performanceTier === tier ? { backgroundColor: color, borderColor: color, color: tier === 'S' ? '#000' : '#fff' } : {}}
-                    title={`iGaming Score ${range}`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Min iGaming Score */}
-            <div style={{ marginTop: '12px' }}>
-              <span className="filter-sublabel">Min iGaming Score</span>
-              <div className="range-buttons" style={{ marginTop: '6px' }}>
-                {[
-                  { value: 0, label: 'Any' },
-                  { value: 40, label: '40+' },
-                  { value: 60, label: '60+' },
-                  { value: 75, label: '75+' },
-                  { value: 90, label: '90+' },
-                ].map(opt => (
-                  <button
-                    key={opt.value}
-                    className={`range-btn ${minIgamingScore === opt.value ? 'selected' : ''}`}
-                    onClick={() => setMinIgamingScore(opt.value)}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
 
@@ -1265,7 +1192,8 @@ function App() {
                   {!loading && filteredCreators.map(creator => {
                     const platformKey = getPlatformKey(creator.platform) as Platform;
                     const displayName = creator.displayName || creator.username;
-                    const category = creator.primaryCategory || creator.currentGame || '-';
+                    const category = creator.primaryCategory || creator.currentGame || '';
+                    const isValidCategory = category && category.toLowerCase() !== 'unknown';
                     const regionKey = creator.region as Region;
                     const lastActive = formatLastActive(creator.lastSeenLive, creator.isLive);
                     const channelUrl = creator.profileUrl || `https://${
@@ -1300,7 +1228,7 @@ function App() {
                           </span>
                         </td>
                         <td>{flagFor(creator.region || '') ? `${flagFor(creator.region || '')} ${regionLabel(creator.region || '')}` : ''}</td>
-                        <td>{category}</td>
+                        <td>{isValidCategory ? category : ''}</td>
                         <td>{formatNumber(creator.followers)}</td>
                         <td>{creator.avgViewers > 0 ? formatNumber(creator.avgViewers) : '-'}</td>
                         <td>
@@ -1362,7 +1290,8 @@ function App() {
                 platformKey + '.tv/'
               }${creator.username}`;
               const displayName = creator.displayName || creator.username;
-              const category = creator.primaryCategory || creator.currentGame || 'Unknown';
+              const category = creator.primaryCategory || creator.currentGame || '';
+              const isValidCategory = category && category.toLowerCase() !== 'unknown';
               const regionKey = creator.region as Region;
 
               return (
@@ -1380,11 +1309,13 @@ function App() {
                     </div>
                   </div>
 
-                  <div className="creator-meta">
+                  <div className="creator-meta" style={{ minHeight: '24px' }}>
                     {flagFor(creator.region || '') && (
                       <span className="meta-item">{flagFor(creator.region || '')} {regionLabel(creator.region || '')}</span>
                     )}
-                    <span className="meta-item category">{category}</span>
+                    {isValidCategory && (
+                      <span className="meta-item category">{category}</span>
+                    )}
                     <div className="card-actions-grid" onClick={(e) => e.stopPropagation()}>
                       {/* Top row: Email, Note */}
                       <div className="card-actions-row">
@@ -1511,7 +1442,8 @@ function App() {
       {selectedCreator && (() => {
         const modalPlatformKey = getPlatformKey(selectedCreator.platform) as Platform;
         const modalDisplayName = selectedCreator.displayName || selectedCreator.username;
-        const modalCategory = selectedCreator.primaryCategory || selectedCreator.currentGame || 'Unknown';
+        const modalCategory = selectedCreator.primaryCategory || selectedCreator.currentGame || '';
+        const isValidModalCategory = modalCategory && modalCategory.toLowerCase() !== 'unknown';
         const modalRegionKey = selectedCreator.region as Region;
         const modalChannelUrl = selectedCreator.profileUrl || `https://${
           modalPlatformKey === 'youtube' ? 'youtube.com/@' :
@@ -1546,8 +1478,12 @@ function App() {
                         <span>•</span>
                       </>
                     )}
-                    <span>{modalCategory}</span>
-                    <span>•</span>
+                    {isValidModalCategory && (
+                      <>
+                        <span>{modalCategory}</span>
+                        <span>•</span>
+                      </>
+                    )}
                     <span>{selectedCreator.language.toUpperCase()}</span>
                   </div>
                 </div>
