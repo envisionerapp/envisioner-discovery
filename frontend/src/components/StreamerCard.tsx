@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Streamer } from '../services/chatService';
 import { PlatformIcon } from './icons/PlatformIcon';
 import { flagFor, regionLabel } from '../utils/geo';
@@ -47,7 +47,6 @@ interface StreamerCardProps {
 
 export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) => {
   const { t } = useLanguage();
-  const [emailCopied, setEmailCopied] = useState(false);
   const isWindows = typeof navigator !== 'undefined' && navigator.userAgent.includes('Win');
 
   const getStatusColor = () => {
@@ -221,32 +220,17 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
               <button
                 onClick={() => {
                   const email = streamer.businessEmail || streamer.email || '';
-                  // Use textarea fallback for iframe compatibility
-                  const textarea = document.createElement('textarea');
-                  textarea.value = email;
-                  textarea.style.position = 'fixed';
-                  textarea.style.opacity = '0';
-                  document.body.appendChild(textarea);
-                  textarea.select();
-                  document.execCommand('copy');
-                  document.body.removeChild(textarea);
-                  setEmailCopied(true);
-                  setTimeout(() => setEmailCopied(false), 2000);
+                  // Use prompt as reliable iframe fallback - text is pre-selected for Ctrl+C
+                  window.prompt('Copy email (Ctrl+C):', email);
                 }}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs bg-[#EA4335] text-white hover:bg-[#D33426] transition-colors cursor-pointer"
                 title={`Click to copy email (source: ${streamer.emailSource || 'profile'})`}
               >
-                {emailCopied ? (
-                  <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                ) : (
-                  <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                  </svg>
-                )}
-                <span>{emailCopied ? 'Copied!' : (streamer.businessEmail || streamer.email)}</span>
+                <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                <span>{streamer.businessEmail || streamer.email}</span>
               </button>
             ) : (
               <a
