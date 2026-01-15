@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Streamer } from '../services/chatService';
 import { PlatformIcon } from './icons/PlatformIcon';
 import { flagFor, regionLabel } from '../utils/geo';
@@ -19,6 +19,24 @@ const handlePanelImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
   if (container) {
     container.style.display = 'none';
   }
+};
+
+// Proxy panel images that have CORS issues (TikTok, Instagram, etc.)
+const proxyPanelImage = (url: string): string => {
+  if (!url) return url;
+
+  // These domains have CORS issues in iframes
+  const needsProxy =
+    url.includes('tiktokcdn.') ||
+    url.includes('tiktok.com') ||
+    url.includes('instagram.') ||
+    url.includes('fbcdn.net');
+
+  if (needsProxy) {
+    return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=400&h=400&fit=cover&output=jpg`;
+  }
+
+  return url;
 };
 import { formatDistanceToNow } from 'date-fns';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -48,6 +66,15 @@ interface StreamerCardProps {
 export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) => {
   const { t } = useLanguage();
   const isWindows = typeof navigator !== 'undefined' && navigator.userAgent.includes('Win');
+  const [showEmailCopy, setShowEmailCopy] = useState(false);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-select email text when modal opens
+  useEffect(() => {
+    if (showEmailCopy && emailInputRef.current) {
+      emailInputRef.current.select();
+    }
+  }, [showEmailCopy]);
 
   const getStatusColor = () => {
     if (streamer.isLive) return 'text-[#FF6B35]';
@@ -196,7 +223,7 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
               {streamer.panelImages.slice(0, 4).map((panel, idx) => (
                 <div key={idx} className="relative group">
                   <img
-                    src={panel.url}
+                    src={proxyPanelImage(panel.url)}
                     alt={panel.alt || `Panel ${idx + 1}`}
                     className="w-full h-20 object-cover rounded-lg border border-gray-700/50 group-hover:border-primary-500/50 transition-colors"
                     loading="lazy"
@@ -215,23 +242,40 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
 
         {/* Email Contact */}
         {(streamer.email || streamer.businessEmail) && (
-          <div className="mb-3">
+          <div className="mb-3 relative">
             {isWindows ? (
-              <button
-                onClick={() => {
-                  const email = streamer.businessEmail || streamer.email || '';
-                  // Use prompt as reliable iframe fallback - text is pre-selected for Ctrl+C
-                  window.prompt('Copy email (Ctrl+C):', email);
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs bg-[#EA4335] text-white hover:bg-[#D33426] transition-colors cursor-pointer"
-                title={`Click to copy email (source: ${streamer.emailSource || 'profile'})`}
-              >
-                <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                </svg>
-                <span>{streamer.businessEmail || streamer.email}</span>
-              </button>
+              <>
+                <button
+                  onClick={() => setShowEmailCopy(!showEmailCopy)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs bg-[#EA4335] text-white hover:bg-[#D33426] transition-colors cursor-pointer"
+                  title={`Click to copy email (source: ${streamer.emailSource || 'profile'})`}
+                >
+                  <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
+                  <span>{streamer.businessEmail || streamer.email}</span>
+                </button>
+                {showEmailCopy && (
+                  <div className="absolute z-50 mt-1 left-0 right-0 bg-gray-800 border border-gray-600 rounded-lg p-2 shadow-xl">
+                    <p className="text-[10px] text-gray-400 mb-1">Select all & copy (Ctrl+C):</p>
+                    <input
+                      ref={emailInputRef}
+                      type="text"
+                      readOnly
+                      value={streamer.businessEmail || streamer.email || ''}
+                      className="w-full px-2 py-1 text-xs bg-gray-900 border border-gray-600 rounded text-white focus:outline-none focus:border-primary-500"
+                      onFocus={(e) => e.target.select()}
+                    />
+                    <button
+                      onClick={() => setShowEmailCopy(false)}
+                      className="mt-1 w-full text-[10px] text-gray-400 hover:text-white"
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
               <a
                 href={`mailto:${streamer.businessEmail || streamer.email}`}
