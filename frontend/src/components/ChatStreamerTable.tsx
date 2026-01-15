@@ -407,9 +407,11 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                       <div className="min-w-0 flex-1">
                         <div className="text-base font-semibold text-gray-100 truncate">{(s as any).displayName}</div>
                         <div className="text-xs text-gray-400 truncate">@{(s as any).username}</div>
-                        <div className="mt-1">
-                          <span className="region-chip text-xs"><span aria-hidden>{flagFor(region)}</span><span>{regionLabel(region)}</span></span>
-                        </div>
+                        {flagFor(region) && (
+                          <div className="mt-1">
+                            <span className="region-chip text-xs"><span aria-hidden>{flagFor(region)}</span><span>{regionLabel(region)}</span></span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -565,9 +567,11 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                     <div className="text-sm font-semibold text-gray-100 truncate" title={(s as any).displayName}>{(s as any).displayName}</div>
                     <div className="text-xs text-gray-400 truncate">@{(s as any).username}</div>
                   </div>
-                  <div className="flex-shrink-0">
-                    <span className="region-chip"><span className="text-sm" aria-hidden>{flagFor(region)}</span><span>{regionLabel(region)}</span></span>
-                  </div>
+                  {flagFor(region) && (
+                    <div className="flex-shrink-0">
+                      <span className="region-chip"><span className="text-sm" aria-hidden>{flagFor(region)}</span><span>{regionLabel(region)}</span></span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Stats Grid */}
@@ -805,7 +809,9 @@ export const ChatStreamerTable: React.FC<ChatStreamerTableProps> = ({ streamers,
                       </div>
                     </td>
                     <td className="align-middle">
-                      <span className="region-chip"><span className="text-sm" aria-hidden>{flagFor(region)}</span><span>{regionLabel(region)}</span></span>
+                      {flagFor(region) && (
+                        <span className="region-chip"><span className="text-sm" aria-hidden>{flagFor(region)}</span><span>{regionLabel(region)}</span></span>
+                      )}
                     </td>
                     <td className="text-left text-gray-300 align-middle">
                       {(() => {

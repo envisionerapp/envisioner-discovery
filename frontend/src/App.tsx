@@ -1298,7 +1298,7 @@ function App() {
                             {platformKey.charAt(0).toUpperCase() + platformKey.slice(1)}
                           </span>
                         </td>
-                        <td>{FLAGS[regionKey] || '🌍'} {creator.region}</td>
+                        <td>{FLAGS[regionKey] && creator.region?.toLowerCase() !== 'other' ? `${FLAGS[regionKey]} ${creator.region}` : ''}</td>
                         <td>{category}</td>
                         <td>{formatNumber(creator.followers)}</td>
                         <td>{creator.avgViewers > 0 ? formatNumber(creator.avgViewers) : '-'}</td>
@@ -1380,7 +1380,9 @@ function App() {
                   </div>
 
                   <div className="creator-meta">
-                    <span className="meta-item">{FLAGS[regionKey] || '🌍'} {creator.region}</span>
+                    {FLAGS[regionKey] && creator.region?.toLowerCase() !== 'other' && (
+                      <span className="meta-item">{FLAGS[regionKey]} {creator.region}</span>
+                    )}
                     <span className="meta-item category">{category}</span>
                     <div className="card-actions-grid" onClick={(e) => e.stopPropagation()}>
                       {/* Top row: Email, Note */}
@@ -1537,8 +1539,12 @@ function App() {
                   <h2>{modalDisplayName}</h2>
                   <p>@{selectedCreator.username}</p>
                   <div className="profile-meta">
-                    <span>{FLAGS[modalRegionKey] || '🌍'} {selectedCreator.region}</span>
-                    <span>•</span>
+                    {FLAGS[modalRegionKey] && selectedCreator.region?.toLowerCase() !== 'other' && (
+                      <>
+                        <span>{FLAGS[modalRegionKey]} {selectedCreator.region}</span>
+                        <span>•</span>
+                      </>
+                    )}
                     <span>{modalCategory}</span>
                     <span>•</span>
                     <span>{selectedCreator.language.toUpperCase()}</span>

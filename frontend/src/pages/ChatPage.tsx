@@ -119,8 +119,8 @@ const ChatPage: React.FC = () => {
 
   return (
     <>
-      <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 overflow-x-hidden">
-        <div className="mb-4 md:mb-6 hidden md:block">
+      <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 overflow-hidden h-full flex flex-col">
+        <div className="mb-4 md:mb-6 hidden md:block flex-shrink-0">
           <div className="flex items-center gap-2 md:gap-3 mb-2">
             <div className="p-1.5 md:p-2 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600">
               <SparklesIcon className="h-5 w-5 md:h-6 md:w-6 text-black" />
@@ -150,10 +150,10 @@ const ChatPage: React.FC = () => {
           )}
         </div>
 
-      <div className="grid grid-cols-1 2xl:grid-cols-4 gap-3 md:gap-4 2xl:gap-6 items-start w-full max-w-full">
+      <div className="flex flex-col lg:flex-row gap-3 md:gap-4 lg:gap-6 w-full max-w-full flex-1 min-h-0">
         {/* History sidebar */}
-        <aside className="2xl:col-span-1 w-full min-w-0 2xl:sticky 2xl:top-4 2xl:self-start">
-          <div className="flex items-center justify-between 2xl:hidden mb-2">
+        <aside className="w-full lg:w-72 xl:w-80 flex-shrink-0">
+          <div className="flex items-center justify-between lg:hidden mb-2">
             <p className="text-sm font-medium text-gray-400">Chat History</p>
             <button
               className="btn-outline dark:border-gray-700 dark:text-gray-300 text-xs px-3 py-1"
@@ -163,8 +163,8 @@ const ChatPage: React.FC = () => {
             </button>
           </div>
 
-          <div className={`${showHistoryMobile ? 'block' : 'hidden'} 2xl:block mb-3 2xl:mb-0`} style={{ width: '100%', minWidth: 0 }}>
-            <div className="card flex flex-col h-auto max-h-[400px] sm:max-h-[500px] md:max-h-[600px] 2xl:h-[calc(100vh-120px)] 2xl:max-h-none overflow-hidden" style={{ width: '100%', minWidth: 0 }}>
+          <div className={`${showHistoryMobile ? 'block' : 'hidden'} lg:block mb-3 lg:mb-0 h-full`} style={{ width: '100%', minWidth: 0 }}>
+            <div className="card flex flex-col h-auto max-h-[400px] sm:max-h-[500px] md:max-h-[600px] lg:h-full lg:max-h-none overflow-hidden" style={{ width: '100%', minWidth: 0 }}>
             <div className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 border-b border-gray-800/30 flex-shrink-0 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(255, 107, 53, 0.08) 0%, transparent 100%)' }}>
               <div className="flex items-center justify-between">
                 <p className="text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wide">Conversations</p>
@@ -175,7 +175,7 @@ const ChatPage: React.FC = () => {
                   style={{ minWidth: '32px', minHeight: '32px' }}
                 >
                   <TrashIcon className="h-3 w-3 md:h-4 md:w-4" />
-                  <span className="hidden 2xl:inline">Clear</span>
+                  <span className="hidden lg:inline">Clear</span>
                 </button>
               </div>
             </div>
@@ -237,8 +237,8 @@ const ChatPage: React.FC = () => {
         </aside>
 
         {/* Chat area */}
-        <section className="2xl:col-span-3 w-full min-w-0">
-          <div className="card flex flex-col w-full max-w-full" style={{ height: 'calc(100vh - 120px)' }}>
+        <section className="flex-1 w-full min-w-0 min-h-0">
+          <div className="card flex flex-col w-full max-w-full h-full">
             {/* Chat header */}
             <div className="px-3 py-2 md:px-4 md:py-3 border-b border-gray-800/30 flex items-center justify-between flex-shrink-0 rounded-t-xl" style={{ background: 'linear-gradient(90deg, rgba(255, 107, 53, 0.08) 0%, transparent 100%)' }}>
               <div>
@@ -489,7 +489,7 @@ const ChatPage: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <h3 className="text-xl font-bold text-gray-100 mb-1">{selected.displayName}</h3>
                   <div className="flex flex-wrap items-center gap-2 text-xs">
-                    {selected.region && (
+                    {flagFor(String(selected.region || '').toLowerCase()) && (
                       <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-800/60 text-gray-300 border border-gray-700">
                         <span className="text-sm">{flagFor(String(selected.region).toLowerCase())}</span>
                         <span>{regionLabel(String(selected.region))}</span>

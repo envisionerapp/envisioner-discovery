@@ -294,10 +294,14 @@ const DashboardPage: React.FC = () => {
                       <div className="min-w-0 flex-1">
                         <p className="text-xs sm:text-sm font-semibold text-gray-100 truncate group-hover:text-primary-400 transition-colors">{streamer.displayName}</p>
                         <div className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs text-gray-400">
-                          <span className="text-sm">{flagFor(streamer.region?.toLowerCase() || '')}</span>
-                          <span className="truncate hidden sm:inline">{regionLabel(streamer.region?.toLowerCase() || '')}</span>
-                          <span className="truncate sm:hidden">{regionLabel(streamer.region?.toLowerCase() || '').substring(0, 10)}</span>
-                          <span className="hidden sm:inline">•</span>
+                          {flagFor(streamer.region?.toLowerCase() || '') && (
+                            <>
+                              <span className="text-sm">{flagFor(streamer.region?.toLowerCase() || '')}</span>
+                              <span className="truncate hidden sm:inline">{regionLabel(streamer.region?.toLowerCase() || '')}</span>
+                              <span className="truncate sm:hidden">{regionLabel(streamer.region?.toLowerCase() || '').substring(0, 10)}</span>
+                              <span className="hidden sm:inline">•</span>
+                            </>
+                          )}
                           <div className="flex items-center gap-0.5 sm:gap-1">
                             <TrophyIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#FF6B35]" />
                             <span className="font-semibold text-[#FF6B35]">{(streamer.highestViewers / 1000).toFixed(1)}k</span>
@@ -899,7 +903,7 @@ const DashboardPage: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <h3 className="text-xl font-bold text-gray-100 mb-1">{selectedStreamer.displayName}</h3>
                   <div className="flex flex-wrap items-center gap-2 text-xs">
-                    {selectedStreamer.region && (
+                    {flagFor(String(selectedStreamer.region || '').toLowerCase()) && (
                       <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-800/60 text-gray-300 border border-gray-700">
                         <span className="text-sm">{flagFor(String(selectedStreamer.region).toLowerCase())}</span>
                         <span>{regionLabel(String(selectedStreamer.region))}</span>

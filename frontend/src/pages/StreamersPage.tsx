@@ -536,12 +536,15 @@ const StreamersPage: React.FC = () => {
 
                     {/* Email Contact Button */}
                     {((s as any).email || (s as any).businessEmail) && (
-                      <a
-                        href={`mailto:${(s as any).businessEmail || (s as any).email}`}
-                        className="block w-full mb-3"
-                      >
-                        <button className="w-full py-2.5 px-4 rounded-lg font-bold text-sm text-white transition-all duration-200 hover:shadow-lg hover:shadow-green-500/30 hover:scale-[1.01] active:scale-[0.99]"
-                          style={{ background: '#10B981' }}>
+                      typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? (
+                        <button
+                          onClick={() => {
+                            const email = (s as any).businessEmail || (s as any).email;
+                            window.location.href = `mailto:${email}`;
+                          }}
+                          className="block w-full mb-3 py-2.5 px-4 rounded-lg font-bold text-sm text-white transition-all duration-200 hover:shadow-lg hover:shadow-green-500/30 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                          style={{ background: '#10B981' }}
+                        >
                           <div className="flex items-center justify-center gap-2">
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                               <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
@@ -550,7 +553,23 @@ const StreamersPage: React.FC = () => {
                             <span className="truncate">{(s as any).businessEmail || (s as any).email}</span>
                           </div>
                         </button>
-                      </a>
+                      ) : (
+                        <a
+                          href={`mailto:${(s as any).businessEmail || (s as any).email}`}
+                          className="block w-full mb-3"
+                        >
+                          <button className="w-full py-2.5 px-4 rounded-lg font-bold text-sm text-white transition-all duration-200 hover:shadow-lg hover:shadow-green-500/30 hover:scale-[1.01] active:scale-[0.99]"
+                            style={{ background: '#10B981' }}>
+                            <div className="flex items-center justify-center gap-2">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                              </svg>
+                              <span className="truncate">{(s as any).businessEmail || (s as any).email}</span>
+                            </div>
+                          </button>
+                        </a>
+                      )
                     )}
 
                     {/* Stats Grid */}
@@ -728,14 +747,14 @@ const StreamersPage: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <h3 className="text-xl font-bold text-gray-100 mb-1">{selected.displayName}</h3>
                   <div className="flex flex-wrap items-center gap-2 text-xs">
-                    {(selected.inferredCountry || selected.region) && (() => {
+                    {(() => {
                       const countryDisplay = getCountryDisplay(selected as any);
-                      return (
+                      return countryDisplay.flag ? (
                         <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-800/60 text-gray-300 border border-gray-700">
                           <span className="text-sm">{countryDisplay.flag}</span>
                           <span>{countryDisplay.label}</span>
                         </span>
-                      );
+                      ) : null;
                     })()}
                     {selected.language && (
                       <span className="inline-flex items-center px-2 py-1 rounded-lg bg-gray-800/60 text-gray-300 border border-gray-700 uppercase">
@@ -849,17 +868,34 @@ const StreamersPage: React.FC = () => {
                     </svg>
                     <p className="text-xs sm:text-sm text-gray-400 uppercase tracking-wide">Contact Email</p>
                   </div>
-                  <a
-                    href={`mailto:${selected.businessEmail || selected.email}`}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white hover:opacity-90 transition-opacity"
-                    style={{ background: '#10B981' }}
-                  >
-                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                    </svg>
-                    {selected.businessEmail || selected.email}
-                  </a>
+                  {typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? (
+                    <button
+                      onClick={() => {
+                        const email = selected.businessEmail || selected.email;
+                        window.location.href = `mailto:${email}`;
+                      }}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white hover:opacity-90 transition-opacity cursor-pointer"
+                      style={{ background: '#10B981' }}
+                    >
+                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                      </svg>
+                      {selected.businessEmail || selected.email}
+                    </button>
+                  ) : (
+                    <a
+                      href={`mailto:${selected.businessEmail || selected.email}`}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+                      style={{ background: '#10B981' }}
+                    >
+                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                      </svg>
+                      {selected.businessEmail || selected.email}
+                    </a>
+                  )}
                   {selected.emailSource && (
                     <p className="text-[10px] text-gray-500 mt-2">Source: {selected.emailSource.replace('_', ' ')}</p>
                   )}
@@ -1462,19 +1498,38 @@ const StreamerTable: React.FC<{
                       <span>View</span>
                     </button>
                     {((s as any).email || (s as any).businessEmail) && (
-                      <a
-                        href={`mailto:${(s as any).businessEmail || (s as any).email}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1 rounded-lg text-[10px] font-bold align-middle"
-                        style={{ backgroundColor: '#10B981', color: '#ffffff', padding: '4px 8px', minHeight: '26px' }}
-                        title={(s as any).businessEmail || (s as any).email}
-                      >
-                        <svg className="h-2.5 w-2.5" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                        </svg>
-                        <span>Email</span>
-                      </a>
+                      typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const email = (s as any).businessEmail || (s as any).email;
+                            window.location.href = `mailto:${email}`;
+                          }}
+                          className="inline-flex items-center gap-1 rounded-lg text-[10px] font-bold align-middle cursor-pointer"
+                          style={{ backgroundColor: '#10B981', color: '#ffffff', padding: '4px 8px', minHeight: '26px' }}
+                          title={(s as any).businessEmail || (s as any).email}
+                        >
+                          <svg className="h-2.5 w-2.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                          </svg>
+                          <span>Email</span>
+                        </button>
+                      ) : (
+                        <a
+                          href={`mailto:${(s as any).businessEmail || (s as any).email}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 rounded-lg text-[10px] font-bold align-middle"
+                          style={{ backgroundColor: '#10B981', color: '#ffffff', padding: '4px 8px', minHeight: '26px' }}
+                          title={(s as any).businessEmail || (s as any).email}
+                        >
+                          <svg className="h-2.5 w-2.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                          </svg>
+                          <span>Email</span>
+                        </a>
+                      )
                     )}
                     {(() => {
                       const p = (s as any).profileUrl as string | undefined;
