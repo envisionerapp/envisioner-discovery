@@ -1,5 +1,4 @@
-import { db } from '../utils/database';
-import { logger } from '../utils/logger';
+import { db, logger } from '../utils/database';
 
 /**
  * AutoRecommendationService
