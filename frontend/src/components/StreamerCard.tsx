@@ -220,8 +220,16 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
             {isWindows ? (
               <button
                 onClick={() => {
-                  const email = streamer.businessEmail || streamer.email;
-                  navigator.clipboard.writeText(email || '');
+                  const email = streamer.businessEmail || streamer.email || '';
+                  // Use textarea fallback for iframe compatibility
+                  const textarea = document.createElement('textarea');
+                  textarea.value = email;
+                  textarea.style.position = 'fixed';
+                  textarea.style.opacity = '0';
+                  document.body.appendChild(textarea);
+                  textarea.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(textarea);
                   setEmailCopied(true);
                   setTimeout(() => setEmailCopied(false), 2000);
                 }}
