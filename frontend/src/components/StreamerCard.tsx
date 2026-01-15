@@ -87,12 +87,14 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
                   @{streamer.username}
                 </p>
               </div>
-              <div className="ml-2 flex-shrink-0">
-                <span className="region-chip">
-                  <span className="text-sm">{flagFor(streamer.region.toLowerCase())}</span>
-                  <span>{regionLabel(streamer.region.toLowerCase())}</span>
-                </span>
-              </div>
+              {flagFor(streamer.region?.toLowerCase() || '') && (
+                <div className="ml-2 flex-shrink-0">
+                  <span className="region-chip">
+                    <span className="text-sm">{flagFor(streamer.region.toLowerCase())}</span>
+                    <span>{regionLabel(streamer.region.toLowerCase())}</span>
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Live status and current game */}
@@ -189,17 +191,34 @@ export const StreamerCard: React.FC<StreamerCardProps> = ({ streamer, index }) =
         {/* Email Contact */}
         {(streamer.email || streamer.businessEmail) && (
           <div className="mb-3">
-            <a
-              href={`mailto:${streamer.businessEmail || streamer.email}`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs bg-[#EA4335] text-white hover:bg-[#D33426] transition-colors"
-              title={`Contact via email (source: ${streamer.emailSource || 'profile'})`}
-            >
-              <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-              </svg>
-              <span>{streamer.businessEmail || streamer.email}</span>
-            </a>
+            {typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? (
+              <button
+                onClick={() => {
+                  const email = streamer.businessEmail || streamer.email;
+                  window.location.href = `mailto:${email}`;
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs bg-[#EA4335] text-white hover:bg-[#D33426] transition-colors cursor-pointer"
+                title={`Contact via email (source: ${streamer.emailSource || 'profile'})`}
+              >
+                <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                <span>{streamer.businessEmail || streamer.email}</span>
+              </button>
+            ) : (
+              <a
+                href={`mailto:${streamer.businessEmail || streamer.email}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs bg-[#EA4335] text-white hover:bg-[#D33426] transition-colors"
+                title={`Contact via email (source: ${streamer.emailSource || 'profile'})`}
+              >
+                <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                <span>{streamer.businessEmail || streamer.email}</span>
+              </a>
+            )}
           </div>
         )}
 
@@ -385,9 +404,13 @@ const StreamerTableRow: React.FC<StreamerTableRowProps> = ({ streamer, index }) 
 
       {/* Region */}
       <td className="py-3 px-3">
-        <span className="text-sm">
-          {flagFor(streamer.region.toLowerCase())} {regionLabel(streamer.region.toLowerCase())}
-        </span>
+        {flagFor(streamer.region?.toLowerCase() || '') ? (
+          <span className="text-sm">
+            {flagFor(streamer.region.toLowerCase())} {regionLabel(streamer.region.toLowerCase())}
+          </span>
+        ) : (
+          <span className="text-sm text-gray-500">-</span>
+        )}
       </td>
 
       {/* Status */}
