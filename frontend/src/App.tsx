@@ -1414,22 +1414,22 @@ function App() {
                     {isValidCategory && (
                       <span className="meta-item category">{category}</span>
                     )}
-                    <div className="card-actions-grid" onClick={(e) => e.stopPropagation()}>
+                    <div className="card-actions-grid" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                       {/* Top row: Email, Note */}
                       <div className="card-actions-row">
                         {(creator.email || creator.businessEmail) ? (
                           isWindows ? (
-                            <div className="email-copy-wrapper" style={{ position: 'relative' }}>
+                            <div className="email-copy-wrapper" style={{ position: 'relative' }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                               <button
                                 type="button"
                                 className="action-btn email"
                                 title={`Copy email: ${creator.businessEmail || creator.email}`}
-                                onClick={(e) => { e.stopPropagation(); setEmailCopyId(emailCopyId === creator.id ? null : creator.id); }}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEmailCopyId(emailCopyId === creator.id ? null : creator.id); }}
                               >
                                 {Icons.email}
                               </button>
                               {emailCopyId === creator.id && (
-                                <div className="email-copy-popout" onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', zIndex: 100, top: '100%', left: 0, background: '#1a1a2e', border: '1px solid #333', borderRadius: '8px', padding: '8px', minWidth: '200px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                                <div className="email-copy-popout" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }} style={{ position: 'absolute', zIndex: 100, top: '100%', left: 0, background: '#1a1a2e', border: '1px solid #333', borderRadius: '8px', padding: '8px', minWidth: '200px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
                                   <p style={{ fontSize: '10px', color: '#888', marginBottom: '4px' }}>Select & copy (Ctrl+C):</p>
                                   <input
                                     type="text"
@@ -1437,9 +1437,11 @@ function App() {
                                     value={creator.businessEmail || creator.email || ''}
                                     autoFocus
                                     onFocus={(e) => e.target.select()}
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                                    onMouseDown={(e) => e.stopPropagation()}
                                     style={{ width: '100%', padding: '4px 8px', fontSize: '12px', background: '#0d0d1a', border: '1px solid #444', borderRadius: '4px', color: '#fff' }}
                                   />
-                                  <button type="button" onClick={(e) => { e.stopPropagation(); setEmailCopyId(null); }} style={{ marginTop: '4px', width: '100%', fontSize: '10px', color: '#888', background: 'transparent', border: 'none', cursor: 'pointer' }}>Close</button>
+                                  <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEmailCopyId(null); }} style={{ marginTop: '4px', width: '100%', fontSize: '10px', color: '#888', background: 'transparent', border: 'none', cursor: 'pointer' }}>Close</button>
                                 </div>
                               )}
                             </div>
