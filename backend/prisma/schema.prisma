@@ -128,6 +128,7 @@ model Streamer {
   favorites DiscoveryFavorite[]
   discarded DiscoveryDiscarded[]
   discoveryNotes DiscoveryNote[]
+  shortlists DiscoveryShortlist[]
   viewerPolls DiscoveryViewerPoll[]
 
   @@unique([platform, username])
@@ -339,6 +340,27 @@ model DiscoveryNote {
   @@index([userId])
   @@index([streamerId])
   @@map("discovery_notes")
+}
+
+// Named shortlists for organizing creators
+model DiscoveryShortlist {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  streamerId String   @map("streamer_id")
+  listName   String   @default("default") @map("list_name")
+  priority   Int      @default(0) // Higher = more important
+  notes      String?  @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  streamer Streamer @relation(fields: [streamerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, streamerId, listName])
+  @@index([userId, listName])
+  @@index([userId, listName, priority(sort: Desc)])
+  @@index([streamerId])
+  @@map("discovery_shortlists")
 }
 
 // Viewer polls for calculating avg_viewers
